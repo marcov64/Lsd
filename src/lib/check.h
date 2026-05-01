@@ -184,10 +184,10 @@ namespace lsd
 
 
 /*************************************************************
- _CYCLE_OBJ_ (*)
- Support function used in CYCLEx macros
+ _CYCLE_CTRL_ (*)
+ Support function to set LSDcontrol pointer in CYCLEx macros
  *************************************************************/
-	inline object *equation::_cycle_obj_( object *parent, const char *label, const char *command )
+	inline object *equation::_cycle_ctrl_( object *parent, object * & cyc_ptr, const char *label )
 	{
 		object *cur = parent->search_err( label, _sim_->no_search, _sim_->no_search_up, "cycling" );
 
@@ -203,7 +203,8 @@ namespace lsd
 								   label, parent->attr->label );
 		}
 
-		return cur;
+		cyc_ptr = cur;			// set user control pointer to 1st object
+		return BROTHER( cur );	// set LSD internal control pointer to next object
 	}
 
 

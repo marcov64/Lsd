@@ -54,7 +54,7 @@ Sum up total debt payment on all firm's loans. Amortizations are fixed for each 
 This variable also adjusts the total amount of each loan and delete loan objects if all debt is paid.
 */
 	v[0]=SUM("firm_loan_fixed_amortization");		 			//sum up all amortizations for current period
-		CYCLE_SAFE(cur, "FIRM_LOANS")							//CYCLE trough all firm's loans
+		CYCLE(cur, "FIRM_LOANS")								//CYCLE trough all firm's loans
 		{
 		v[4]=VS(cur, "firm_loan_total_amount");					//debt current amount 
 		v[5]=VS(cur, "firm_loan_fixed_amortization");			//debt fixed amortization

@@ -60,7 +60,9 @@ logVars <- c( "Creal", "GDPreal", "GDPnom", "G", "Gbail", "Tax", "Deb", "Def",
               "W1", "W2", "wReal", "BadDeb", "TC", "Loans", "CD", "CS", "Aee",
               "Aef", "Em", "EmE", "Em1", "Em2", "En", "iE", "iGE", "pEmavg",
               "wEmavg", "CDe", "CDge", "CDeC", "CDgeC", "CSe", "CSge",
-              "NPVgeAvg", "SNPVgeAvg" )
+              "NPVgeAvg", "SNPVgeAvg", "RD", "RD1", "RDe", "RSde", "RSge",
+              "Grd", "Grd1", "GrdE", "Gsi", "TaxCred", "Tax1cred", "TaxEcred",
+              "LCOEde", "LCOEge" )
 aggrVars <- append( logVars, c( "dGDP", "dCPI", "dA", "dw", "CPI", "Q2u",
                                 "Fe", "F1", "F2", "entryE", "entry1", "entry2",
                                 "entryEexit", "entry1exit", "entry2exit",
@@ -73,7 +75,9 @@ aggrVars <- append( logVars, c( "dGDP", "dCPI", "dA", "dw", "CPI", "Q2u",
                                 "AeMavg", "dDeMavg","uEmavg", "AtauDEavg",
                                 "ICtauGEavg", "ICtauGEeff", "IgeDEratio",
                                 "emTauDEavg", "fGE", "fKge", "fKpfinGE",
-                                "pfinGEexe" ) )
+                                "pfinGEexe", "age1avg", "age2avg", "ageEavg",
+                                "ageVint2avg", "nRDsub", "nRD1sub", "nRDeSub",
+                                "nSI2sub", "nStd1ban" ) )
 
 
 # ==== Process LSD result files ====

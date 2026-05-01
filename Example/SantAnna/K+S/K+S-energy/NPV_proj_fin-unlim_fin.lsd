@@ -220,6 +220,7 @@ Label Root
 					Param: __Kde
 					Param: __emDE
 					Param: __tDE
+					Func: __LCOEde
 					Var: __Df
 					Var: __EmDE
 					Var: __LdeD
@@ -248,6 +249,7 @@ Label Root
 					Param: __pfinGE
 					Param: __rGEdeb
 					Param: __tGE
+					Func: __LCOEge
 					Var: __DebGE
 					Var: __LgeD
 					Var: __Qge
@@ -287,6 +289,7 @@ Label Root
 				Var: _EIe
 				Var: _EIeD
 				Var: _EmE
+				Var: _GrdE
 				Var: _ICtauGE
 				Var: _IgeD
 				Var: _IgeDnom
@@ -318,6 +321,7 @@ Label Root
 				Var: _SIeD
 				Var: _SNPVge
 				Var: _TaxE
+				Var: _TaxEcred
 				Var: _We
 				Var: _allocE
 				Var: _amtGE
@@ -350,6 +354,7 @@ Label Root
 			Param: Phi6
 			Param: Tcon
 			Param: Tfin
+			Param: Tge
 			Param: Tplan
 			Param: alpha3
 			Param: beta3
@@ -365,6 +370,7 @@ Label Root
 			Param: etaE
 			Param: fEmin
 			Param: fGE0
+			Param: fGEmin
 			Param: iotaE
 			Param: kappaEmax
 			Param: kappaEmin
@@ -408,6 +414,7 @@ Label Root
 			Var: EmE
 			Var: EqE
 			Var: Fe
+			Var: GrdE
 			Var: IeNom
 			Var: JOe
 			Var: Ke
@@ -424,6 +431,7 @@ Label Root
 			Var: Qe
 			Var: QeO
 			Var: Qge
+			Var: RDe
 			Var: SIe
 			Var: SIeD
 			Var: Se
@@ -520,6 +528,7 @@ Label Root
 				Var: _Div1
 				Var: _Em1
 				Var: _En1
+				Var: _Grd1
 				Var: _HC
 				Var: _JO1
 				Var: _L1
@@ -532,9 +541,10 @@ Label Root
 				Var: _Pi1
 				Var: _Q1
 				Var: _Q1e
-				Var: _RD
+				Var: _RD1
 				Var: _S1
 				Var: _Tax1
+				Var: _Tax1cred
 				Var: _W1
 				Var: _c1
 				Var: _cTau
@@ -545,6 +555,7 @@ Label Root
 				Var: _inn
 				Var: _p1
 				Var: _qc1
+				Var: _std1ban
 
 			}
 
@@ -581,6 +592,7 @@ Label Root
 			Param: zeta2
 			Func: f1rescale
 			Var: A1
+			Var: Astd
 			Var: D1
 			Var: Deb1
 			Var: Div1
@@ -588,6 +600,7 @@ Label Root
 			Var: En1
 			Var: Eq1
 			Var: F1
+			Var: Grd1
 			Var: JO1
 			Var: L1
 			Var: L1d
@@ -599,6 +612,7 @@ Label Root
 			Var: Pi1
 			Var: Q1
 			Var: Q1e
+			Var: RD1
 			Var: S1
 			Var: Tax1
 			Var: W1
@@ -641,6 +655,7 @@ Label Root
 					Param: __toUseVint
 					Var: __EmVint
 					Var: __EnVint
+					Var: __Gsi
 					Var: __LdVint
 					Var: __Lvint
 					Var: __Qvint
@@ -675,6 +690,7 @@ Label Root
 				Var: _Em2
 				Var: _En2
 				Var: _EId
+				Var: _Gsi
 				Var: _Inom
 				Var: _JO2
 				Var: _K
@@ -723,8 +739,10 @@ Label Root
 			Param: NW20
 			Param: Phi1
 			Param: Phi2
+			Param: Tstd
 			Param: b
 			Param: chi
+			Param: deltaStd
 			Param: d2
 			Param: e0
 			Param: e1
@@ -737,6 +755,7 @@ Label Root
 			Param: e8
 			Param: eta
 			Param: f2min
+			Param: gammaSI
 			Param: iota
 			Param: kappaMax
 			Param: kappaMin
@@ -765,6 +784,7 @@ Label Root
 			Var: En2
 			Var: Eq2
 			Var: F2
+			Var: Gsi
 			Var: Id
 			Var: Inom
 			Var: Ireal
@@ -825,11 +845,14 @@ Label Root
 				Var: GDI
 				Var: HHb
 				Var: HPb
+				Var: RD
 				Var: TC
 				Var: TCge
 				Var: TaxCO2
+				Var: TaxCred
 				Var: dA
 				Var: dEm
+				Var: nRDsub
 				Var: shockAavg
 
 			}
@@ -852,12 +875,14 @@ Label Root
 				Var: ICtauGEavg
 				Var: ICtauGEeff
 				Var: IgeDEratio
+				Var: LCOEde
+				Var: LCOEge
 				Var: NPVgeAvg
-				Var: RDe
 				Var: RSde
 				Var: RSge
 				Var: RSe
 				Var: SNPVgeAvg
+				Var: TaxEcred
 				Var: ageEavg
 				Var: cE
 				Var: dEmE
@@ -870,6 +895,7 @@ Label Root
 				Var: innDE
 				Var: innGE
 				Var: muEavg
+				Var: nRDeSub
 				Var: pfinGEexe
 
 			}
@@ -899,16 +925,20 @@ Label Root
 				Var: HP1
 				Var: HP2
 				Var: NCavg
-				Var: RD
 				Var: RS2
 				Var: SId
+				Var: Tax1cred
 				Var: age1avg
 				Var: age2avg
+				Var: ageVint2avg
 				Var: dN
 				Var: exit1fail
 				Var: exit2fail
 				Var: mu2avg
 				Var: nBrochAvg
+				Var: nRD1sub
+				Var: nSI2sub
+				Var: nStd1ban
 
 			}
 
@@ -971,14 +1001,19 @@ Label Root
 		Param: flagExpect
 		Param: flagFiscalRule
 		Param: flagGovExp
+		Param: flagIndPolicy
+		Param: flagIndPolicyChg
 		Param: flagProjFinGE
 		Param: flagTax
 		Param: Crec
+		Param: TregChg
 		Param: dGDP0
+		Param: gammaRD
 		Param: gG
 		Param: mLim
 		Param: mPer
 		Param: omicron
+		Param: phiRD
 		Param: stick
 		Param: tr
 		Param: trCO2
@@ -998,6 +1033,8 @@ Label Root
 		Var: En
 		Var: Eq
 		Var: G
+		Var: Gc
+		Var: Grd
 		Var: GDPnom
 		Var: GDPreal
 		Var: Sav
@@ -1010,6 +1047,7 @@ Label Root
 		Var: dGDP
 		Var: entryExit
 		Var: initCountry
+		Var: regChg
 		Var: timeStep
 
 	}
@@ -1036,14 +1074,19 @@ Param: flagEnRDshare 0 n + n n	1
 Param: flagExpect 0 n + n n	0
 Param: flagFiscalRule 0 n + n n	0
 Param: flagGovExp 0 n + n n	2
+Param: flagIndPolicy 0 n + n n	0
+Param: flagIndPolicyChg 0 n + n n	0
 Param: flagProjFinGE 0 n + n n	1
 Param: flagTax 0 n + n n	0
 Param: Crec 0 n + n n	0.2
+Param: TregChg 0 n + n n	0
 Param: dGDP0 0 n + n n	0
+Param: gammaRD 0 n + n n	0.005
 Param: gG 0 n + n n	0.005
 Param: mLim 0 n + n n	1
 Param: mPer 0 n + n n	1
 Param: omicron 0 n + n n	0.5
+Param: phiRD 0 n + n n	0.2
 Param: stick 0 n + n n	1
 Param: tr 0 n + n n	0.1
 Param: trCO2 0 n + n n	0
@@ -1062,7 +1105,9 @@ Var: Div 1 s + n n	0
 Var: Em 3 s + n n	0	0	0
 Var: En 1 s + n n	0
 Var: Eq 1 s + n n	0
-Var: G 1 s + n n	0
+Var: G 0 s + n n
+Var: Gc 1 s + n n	0
+Var: Grd 0 s + n n
 Var: GDPnom 1 s + n n	0
 Var: GDPreal 1 s + n n	0
 Var: Sav 1 s + n n	0
@@ -1075,6 +1120,7 @@ Var: dAb 1 s + n n	0
 Var: dGDP 1 s + n n	0
 Var: entryExit 0 n + n n
 Var: initCountry 0 n + n n
+Var: regChg 0 n + n n
 Var: timeStep 0 n + n n
 
 Object: Financial C	1
@@ -1270,6 +1316,7 @@ Param: Phi5 0 n + n n	0.1
 Param: Phi6 0 n + n n	0.9
 Param: Tcon 0 n + n n	4
 Param: Tfin 0 n + n n	40
+Param: Tge 0 n + n n	300
 Param: Tplan 0 n + n n	4
 Param: alpha3 0 n + n n	2
 Param: beta3 0 n + n n	4
@@ -1285,6 +1332,7 @@ Param: emDE0 0 n + n n	20
 Param: etaE 0 n + n n	50
 Param: fEmin 0 n + n n	1e-05
 Param: fGE0 0 n + n n	0.1
+Param: fGEmin 0 n + n n	0.8
 Param: iotaE 0 n + n n	0.1
 Param: kappaEmax 0 n + n n	0.1
 Param: kappaEmin 0 n + n n	0.05
@@ -1292,7 +1340,7 @@ Param: lastIDe 0 n + n n	0
 Param: mDE 0 n + n n	0.0006
 Param: mGE 0 n + n n	0.001
 Param: mEmin 0 n + n n	0.2
-Param: muE0 0 n + n n	0.0007
+Param: muE0 0 n + n n	0.003
 Param: muEmax 0 n + n n	2
 Param: nE 0 n + n n	4
 Param: nuE 0 n + n n	0.04
@@ -1328,6 +1376,7 @@ Var: EIeD 0 s + n n
 Var: EmE 1 s + n n	0
 Var: EqE 1 s + n n	0
 Var: Fe 0 s + n n
+Var: GrdE 0 s + n n
 Var: IeNom 0 s + n n
 Var: JOe 0 s + n n
 Var: Ke 1 s + n n	0
@@ -1344,6 +1393,7 @@ Var: PiE 0 s + n n
 Var: Qe 0 s + n n
 Var: QeO 0 s + n n
 Var: Qge 0 s + n n
+Var: RDe 0 s + n n
 Var: SIe 0 s + n n
 Var: SIeD 0 s + n n
 Var: Se 0 s + n n
@@ -1393,6 +1443,7 @@ Var: _DivE 1 n + n n	0
 Var: _EIe 0 n + n n
 Var: _EIeD 0 n + n n
 Var: _EmE 1 n + n n	0
+Var: _GrdE 1 n + n n	0
 Var: _ICtauGE 1 n + n n	0
 Var: _IgeD 0 n + n n
 Var: _IgeDnom 0 n + n n
@@ -1424,6 +1475,7 @@ Var: _SIe 0 n + n n
 Var: _SIeD 0 n + n n
 Var: _SNPVge 0 n + n n
 Var: _TaxE 0 n + n n
+Var: _TaxEcred 0 n + n n
 Var: _We 0 n + n n
 Var: _allocE 0 n + n n
 Var: _amtGE 0 n + n n
@@ -1446,6 +1498,7 @@ Param: __Ade 0 n + n n	0
 Param: __Kde 0 n + n n	0
 Param: __emDE 0 n + n n	0
 Param: __tDE 0 n + n n	0
+Func: __LCOEde 0 n + n n
 Var: __Df 0 n + n n
 Var: __EmDE 0 n + n n
 Var: __LdeD 0 n + n n
@@ -1466,6 +1519,7 @@ Param: __mGE 0 n + n n	0
 Param: __pfinGE 0 n + n n	0
 Param: __rGEdeb 0 n + n n	0
 Param: __tGE 0 n + n n	0
+Func: __LCOEge 0 n + n n
 Var: __DebGE 1 n + n n	0
 Var: __LgeD 0 n + n n
 Var: __Qge 0 n + d n
@@ -1528,6 +1582,7 @@ Param: zeta1 0 n + n n	0.3
 Param: zeta2 0 n + n n	0.3
 Func: f1rescale 0 n + n n
 Var: A1 1 s + n n	0
+Var: Astd 0 n + n n
 Var: D1 0 s + n n
 Var: Deb1 1 s + n n	0
 Var: Div1 1 n + n n	0
@@ -1535,6 +1590,7 @@ Var: Em1 0 s + n n
 Var: En1 0 s + n n
 Var: Eq1 1 s + n n	0
 Var: F1 1 s + n n	0
+Var: Grd1 0 s + n n
 Var: JO1 0 n + n n
 Var: L1 1 s + n n	0
 Var: L1d 0 s + n n
@@ -1546,6 +1602,7 @@ Var: PPI 1 s + n n	0
 Var: Pi1 0 s + n n
 Var: Q1 0 s + n n
 Var: Q1e 0 s + n n
+Var: RD1 0 s + n n
 Var: S1 0 s + n n
 Var: Tax1 0 n + n n
 Var: W1 0 s + n n
@@ -1584,6 +1641,7 @@ Var: _Deb1max 0 n + n n
 Var: _Div1 1 n + n n	0
 Var: _Em1 0 n + n n
 Var: _En1 0 n + n n
+Var: _Grd1 0 n + n n
 Var: _HC 0 n + n n
 Var: _JO1 0 n + n n
 Var: _L1 1 n + n n	0
@@ -1596,9 +1654,10 @@ Var: _NW1p 0 n + n n
 Var: _Pi1 0 n + n n
 Var: _Q1 0 n + n n
 Var: _Q1e 0 s + n N
-Var: _RD 1 n + n n	0
+Var: _RD1 0 n + n n
 Var: _S1 1 n + n n	0
 Var: _Tax1 0 n + n n
+Var: _Tax1cred 0 n + n n
 Var: _W1 1 n + n n	0
 Var: _c1 0 n + n n
 Var: _cTau 1 n + n n	0
@@ -1609,6 +1668,7 @@ Var: _imi 0 n + n n
 Var: _inn 0 n + n n
 Var: _p1 1 n + n n	0
 Var: _qc1 1 n + n n	0
+Var: _std1ban 0 n + n n
 
 Object: CliEn N	1
 Param: __IDcE 0 n + n n	0
@@ -1632,8 +1692,10 @@ Param: F2min 0 n + n n	1
 Param: NW20 0 n + n n	1000
 Param: Phi1 0 n + n n	0.1
 Param: Phi2 0 n + n n	0.9
+Param: Tstd 0 n + n n	300
 Param: b 0 n + n n	3
 Param: chi 0 n + n n	1
+Param: deltaStd 0 n + n n	0
 Param: d2 0 n + n n	0
 Param: e0 0 n + n n	0.25
 Param: e1 0 n + n n	1
@@ -1646,6 +1708,7 @@ Param: e7 0 n + n n	0.3
 Param: e8 0 n + n n	0.3
 Param: eta 0 n + n n	20
 Param: f2min 0 n + n n	1e-05
+Param: gammaSI 0 n + n n	0.005
 Param: iota 0 n + n n	0.1
 Param: kappaMax 0 n + n n	0.5
 Param: kappaMin 0 n + n n	0
@@ -1674,6 +1737,7 @@ Var: Em2 0 s + n n
 Var: En2 0 s + n n
 Var: Eq2 1 s + n n	0
 Var: F2 1 s + n n	0
+Var: Gsi 0 s + n n
 Var: Id 0 s + n n
 Var: Inom 0 s + n n
 Var: Ireal 0 s + n n
@@ -1739,6 +1803,7 @@ Var: _EI 0 n + n n
 Var: _Em2 0 n + n n
 Var: _En2 0 n + n n
 Var: _EId 0 n + n n
+Var: _Gsi 0 n + n n
 Var: _Inom 0 n + n n
 Var: _JO2 0 n + n n
 Var: _K 1 n + n n	0
@@ -1792,6 +1857,7 @@ Param: __tVint 0 n + n n	0
 Param: __toUseVint 0 n + n n	0
 Var: __EmVint 0 n + n n
 Var: __EnVint 0 n + n n
+Var: __Gsi 0 n + n n
 Var: __LdVint 0 n + n n
 Var: __Lvint 0 n + n n
 Var: __Qvint 0 n + n n
@@ -1853,11 +1919,14 @@ Var: EmGDP 0 s + n n
 Var: GDI 0 s + n n
 Var: HHb 0 s + n n
 Var: HPb 0 s + n n
+Var: RD 0 s + n n
 Var: TC 0 s + n n
 Var: TCge 0 s + n n
 Var: TaxCO2 0 s + n n
+Var: TaxCred 0 s + n n
 Var: dA 0 s + n n
 Var: dEm 0 s + n n
+Var: nRDsub 0 s + n n
 Var: shockAavg 0 s + n p
 
 Object: Ene C	1
@@ -1876,12 +1945,14 @@ Var: HPe 0 s + n n
 Var: ICtauGEavg 0 s + n n
 Var: ICtauGEeff 0 s + n n
 Var: IgeDEratio 0 s + n n
+Var: LCOEde 0 s + n n
+Var: LCOEge 0 s + n n
 Var: NPVgeAvg 0 s + n n
-Var: RDe 0 s + n n
 Var: RSde 0 s + n n
 Var: RSge 0 s + n n
 Var: RSe 0 s + n n
 Var: SNPVgeAvg 0 s + n n
+Var: TaxEcred 0 s + n n
 Var: ageEavg 0 s + n n
 Var: cE 0 s + n n
 Var: dEmE 0 s + n n
@@ -1894,6 +1965,7 @@ Var: fKpfinGE 0 s + n n
 Var: innDE 0 s + n n
 Var: innGE 0 s + n n
 Var: muEavg 0 s + n n
+Var: nRDeSub 0 s + n n
 Var: pfinGEexe 0 s + n n
 
 Object: Sec C	1
@@ -1919,16 +1991,20 @@ Var: HH2 0 s + n n
 Var: HP1 0 s + n n
 Var: HP2 0 s + n n
 Var: NCavg 0 s + n n
-Var: RD 0 s + n n
 Var: RS2 0 s + n n
 Var: SId 0 s + n n
+Var: Tax1cred 0 s + n n
 Var: age1avg 0 s + n n
 Var: age2avg 0 s + n n
+Var: ageVint2avg 0 s + n n
 Var: dN 0 s + n n
 Var: exit1fail 0 s + n n
 Var: exit2fail 0 s + n n
 Var: mu2avg 0 s + n p
 Var: nBrochAvg 0 s + n n
+Var: nRD1sub 0 s + n n
+Var: nSI2sub 0 s + n n
+Var: nStd1ban 0 s + n n
 
 Object: Lab C	1
 Var: L2larg 0 s + n n
@@ -2049,6 +2125,26 @@ _INIT_
 All 1 instances equal to 2.
 END_DESCRIPTION
 
+Parameter_flagIndPolicy
+Government industrial policies
+0 = no industrial policy applied
++1 = cap new dirty power plants after certain time
++2 = ban new inefficient/unfriendly machines below minimum standards
++4 = Machine-replacement government subsidy to the consumption-good sector
++8 = R&D government subsidy to the energy sector sector
++16 = R&D government subsidy to the capital-good sector
++32 = R&D tax credit to the energy sector
++64 = R&D tax credit to the capital-good sector
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
+Parameter_flagIndPolicyChg
+Government industrial policies after regulatory change
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
 Parameter_flagProjFinGE
 Project-finance rule
 0 = no project finance (regular credit rules still apply)
@@ -2077,11 +2173,27 @@ _INIT_
 All 1 instances equal to 0.2.
 END_DESCRIPTION
 
+Parameter_TregChg
+Regulatory change period (new policies introduction)
+If set to zero, there is no regime change
+(>=0)
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
 Parameter_dGDP0
 Steady-state initial GDP growth rate
 (>0)
 _INIT_
 All 1 instances equal to 0
+END_DESCRIPTION
+
+Parameter_gammaRD
+Share of GDP for subsidy to R&D policies
+Activated by flagIndPolicies
+[0,1]
+_INIT_
+All 1 instances equal to 0.005
 END_DESCRIPTION
 
 Parameter_gG
@@ -2110,6 +2222,14 @@ Sensitivity of entry to market conditions
 ([0,1])
 _INIT_
 All 1 instances equal to 0.5.
+END_DESCRIPTION
+
+Parameter_phiRD
+Share of the firm R&D which can be subsidized by policy
+Activated by flagIndPolicies
+[0,1]
+_INIT_
+All 1 instances equal to 0.2
 END_DESCRIPTION
 
 Parameter_stick
@@ -2216,8 +2336,16 @@ END_DESCRIPTION
 
 Variable_G
 Government expenditure (exogenous demand)
+END_DESCRIPTION
+
+Variable_Gc
+Government consumption expenditure (exogenous demand)
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to 0
+END_DESCRIPTION
+
+Variable_Grd
+Government R&D subsidy expenditure
 END_DESCRIPTION
 
 Variable_GDPnom
@@ -2288,6 +2416,11 @@ END_DESCRIPTION
 
 Variable_initCountry
 Country initialization (run only once)
+END_DESCRIPTION
+
+Variable_regChg
+Produces a regulatory regime change at the time step defined in TregChg
+If TregChg is zero, there is no regime change
 END_DESCRIPTION
 
 Variable_timeStep
@@ -3390,6 +3523,14 @@ _INIT_
 All 1 instances equal to 40
 END_DESCRIPTION
 
+Parameter_Tge
+Policy time to cap installation of dirty power plants
+Activated by flagIndPolicies
+>0
+_INIT_
+All 1 instances equal to 300
+END_DESCRIPTION
+
 Parameter_Tplan
 Backward planning horizon for greeen energy project finance (>0)
 _INIT_
@@ -3494,6 +3635,14 @@ _INIT_
 All 1 instances equal to 0.1.
 END_DESCRIPTION
 
+Parameter_fGEmin
+Minimum share og green power plants when dirty plant cap policy is active
+Activated by flagIndPolicies
+[0,1]
+_INIT_
+All 1 instances equal to 0.8
+END_DESCRIPTION
+
 Parameter_iotaE
 Reserve capacity on poewer plant capacity in energy sector (>=0)
 _INIT_
@@ -3545,7 +3694,7 @@ Parameter_muE0
 Initial mark-up of energy producer as share of real wage
 (>0)
 _INIT_
-All 1 instances equal to 0.0007
+All 1 instances equal to 0.003
 END_DESCRIPTION
 
 Parameter_muEmax
@@ -3750,6 +3899,10 @@ Variable_Fe
 Number of firms in energy sector
 END_DESCRIPTION
 
+Variable_GrdE
+Government R&D subsidy to energy firms
+END_DESCRIPTION
+
 Variable_IeNom
 Total investment (nominal/currency terms) of energy sector
 END_DESCRIPTION
@@ -3818,6 +3971,10 @@ END_DESCRIPTION
 
 Variable_Qge
 Total green energy generation of energy sector
+END_DESCRIPTION
+
+Variable_RDe
+R&D expenditure of energy sector
 END_DESCRIPTION
 
 Variable_SIe
@@ -4059,6 +4216,12 @@ _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
+Variable__GrdE
+R&D subsidy received from government
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
 Variable__ICtauGE
 Installation cost per unit of capacity of green energy power plant
 _INIT_
@@ -4211,6 +4374,10 @@ Variable__TaxE
 Taxes paid by energy producer
 END_DESCRIPTION
 
+Variable__TaxEcred
+Tax credit/deduction received from government policies
+END_DESCRIPTION
+
 Variable__We
 Wages paid by energy producer
 END_DESCRIPTION
@@ -4315,6 +4482,10 @@ _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
+Function___LCOEde
+Compute the levelized cost of energy for the dirty power plant
+END_DESCRIPTION
+
 Variable___Df
 Demand (physical units) of fuel by dirty power plant
 END_DESCRIPTION
@@ -4415,6 +4586,10 @@ Parameter___tGE
 Time the green power plant was build
 _INIT_
 All 1 instances equal to 0.
+END_DESCRIPTION
+
+Function___LCOEge
+Compute the levelized cost of energy for the green power plant
 END_DESCRIPTION
 
 Variable___DebGE
@@ -4795,6 +4970,10 @@ _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
+Variable_Astd
+Minimum standard for machine energy efficiency/friendliness for ban policy
+END_DESCRIPTION
+
 Variable_D1
 Total demand (orders) received by capital-good sector
 END_DESCRIPTION
@@ -4829,6 +5008,10 @@ Variable_F1
 Number of firms in capital-good sector
 _INIT_
 All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_Grd1
+Government R&D subsidy to capital-good firms
 END_DESCRIPTION
 
 Variable_JO1
@@ -4881,6 +5064,10 @@ END_DESCRIPTION
 
 Variable_Q1e
 Total effective (real) output of capital-good sector
+END_DESCRIPTION
+
+Variable_RD1
+R&D expenditure of capital-good sector
 END_DESCRIPTION
 
 Variable_S1
@@ -5070,6 +5257,10 @@ Variable__En1
 Effective energy demanded by capital-good firm
 END_DESCRIPTION
 
+Variable__Grd1
+R&D subsidy received from government
+END_DESCRIPTION
+
 Variable__HC
 Number of historical clients of capital-good firm
 END_DESCRIPTION
@@ -5122,10 +5313,8 @@ Variable__Q1e
 Effective (real) output of capital-good firm
 END_DESCRIPTION
 
-Variable__RD
+Variable__RD1
 R&D expenditure of capital-good firm
-_INIT_
-All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable__S1
@@ -5136,6 +5325,10 @@ END_DESCRIPTION
 
 Variable__Tax1
 Tax paid by capital-good firm
+END_DESCRIPTION
+
+Variable__Tax1cred
+Tax credit/deduction received from government policies
 END_DESCRIPTION
 
 Variable__W1
@@ -5184,6 +5377,10 @@ Variable__qc1
 Credit class of capital-good firm (1,2,3,4)
 _INIT_
 All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__std1ban
+Indicate if current machine is banned for being below minimum policy standards
 END_DESCRIPTION
 
 Object_CliEn
@@ -5311,6 +5508,14 @@ _INIT_
 All 1 instances equal to 0.9.
 END_DESCRIPTION
 
+Parameter_Tstd
+Policy time to restrict installation of machines below minimum standards
+Activated by flagIndPolicies
+>0
+_INIT_
+All 1 instances equal to 400
+END_DESCRIPTION
+
 Parameter_b
 Number of pay-back periods before machine scrapping
 (>1)
@@ -5323,6 +5528,14 @@ Replicator dynamics selectivity coefficient in consumption-good sector
 (>0)
 _INIT_
 All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_deltaStd
+Mean increase for defining policy minimum standard level of new machines
+Activated by flagIndPolicies
+[0,1]
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Parameter_d2
@@ -5407,6 +5620,14 @@ Minimum market share to stay in consumption-good sector
 ([0,1[)
 _INIT_
 All 1 instances equal to 1e-05.
+END_DESCRIPTION
+
+Parameter_gammaSI
+Share of GDP for subsidy to machine-replacement policy
+Activated by flagIndPolicies
+[0,1]
+_INIT_
+All 1 instances equal to 0.005
 END_DESCRIPTION
 
 Parameter_iota
@@ -5567,6 +5788,10 @@ Variable_F2
 Number of firms in consumption-good sector
 _INIT_
 All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_Gsi
+Machine-replacement subsidy (monetary terms) received from government
 END_DESCRIPTION
 
 Variable_Id
@@ -5876,6 +6101,10 @@ Variable__EId
 Desired expansion investment of consumption-good firm
 END_DESCRIPTION
 
+Variable__Gsi
+Machine-replacement subsidy (monetary terms) received from government
+END_DESCRIPTION
+
 Variable__Inom
 investment (nominal/currency terms)
 END_DESCRIPTION
@@ -6129,6 +6358,10 @@ END_DESCRIPTION
 
 Variable___EnVint
 Effective energy demanded by vintage
+END_DESCRIPTION
+
+Variable___Gsi
+Employed machine-replacement subsidy received from government
 END_DESCRIPTION
 
 Variable___LdVint
@@ -6454,6 +6687,10 @@ Variable_HPb
 Hymer-Pashigian index (sum of market share changes) in financial sector
 END_DESCRIPTION
 
+Variable_RD
+Total R&D expenditure
+END_DESCRIPTION
+
 Variable_TC
 Total credit supply provided by financial sector
 END_DESCRIPTION
@@ -6466,12 +6703,20 @@ Variable_TaxCO2
 Government CO2 (carbon) tax income
 END_DESCRIPTION
 
+Variable_TaxCred
+Tax credit/deduction from government policies
+END_DESCRIPTION
+
 Variable_dA
 Overall labor productivity growth rate
 END_DESCRIPTION
 
 Variable_dEm
 Overall CO2 emissions growth rate
+END_DESCRIPTION
+
+Variable_nRDsub
+Number of firms benefited by R&D subsidy policy
 END_DESCRIPTION
 
 Variable_shockAavg
@@ -6542,12 +6787,16 @@ Variable_IgeDEratio
 Average ICtauGE over ( bE * pF / AtauDE ) for investment decision
 END_DESCRIPTION
 
-Variable_NPVgeAvg
-Average net present value of green energy project finance
+Variable_LCOEde
+Weighted average levelized cost of energy of dirty plants deployed in period
 END_DESCRIPTION
 
-Variable_RDe
-R&D expenditure of energy sector
+Variable_LCOEge
+Weighted average levelized cost of energy of green plants deployed in period
+END_DESCRIPTION
+
+Variable_NPVgeAvg
+Average net present value of green energy project finance
 END_DESCRIPTION
 
 Variable_RSde
@@ -6564,6 +6813,10 @@ END_DESCRIPTION
 
 Variable_SNPVgeAvg
 Average strategic net present value of green energy project finance
+END_DESCRIPTION
+
+Variable_TaxEcred
+Tax credit/deduction received from government policies by energy sector
 END_DESCRIPTION
 
 Variable_ageEavg
@@ -6612,6 +6865,10 @@ END_DESCRIPTION
 
 Variable_muEavg
 Weighted average markup in energy sector
+END_DESCRIPTION
+
+Variable_nRDeSub
+Number of energy producers benefited by R&D subsidy policy
 END_DESCRIPTION
 
 Variable_pfinGEexe
@@ -6710,10 +6967,6 @@ Variable_NCavg
 Number of new clients of capital-good firms
 END_DESCRIPTION
 
-Variable_RD
-R&D expenditure of capital-good sector
-END_DESCRIPTION
-
 Variable_RS2
 Machine (desired) scrapping rate in consumption-good sector
 END_DESCRIPTION
@@ -6722,12 +6975,20 @@ Variable_SId
 Total desired substitution investment in consumption-good sector
 END_DESCRIPTION
 
+Variable_Tax1cred
+Tax credit/deduction received from government policies by capital-good sector
+END_DESCRIPTION
+
 Variable_age1avg
 Average age of firm in capital-good sector
 END_DESCRIPTION
 
 Variable_age2avg
 Average age of firm in consumption-good sector
+END_DESCRIPTION
+
+Variable_ageVint2avg
+Weighted-average age of capital vintages in consumption-good sector
 END_DESCRIPTION
 
 Variable_dN
@@ -6748,6 +7009,18 @@ END_DESCRIPTION
 
 Variable_nBrochAvg
 Average number of machine brochures available to consumption-good sector
+END_DESCRIPTION
+
+Variable_nRD1sub
+Number of capital-good firms benefited by R&D subsidy policy
+END_DESCRIPTION
+
+Variable_nSI2sub
+Number of firms benefited by machine-substitution subsidy policy
+END_DESCRIPTION
+
+Variable_nStd1ban
+Number of capital-good firms banned by minimum-standard policy
 END_DESCRIPTION
 
 Object_Lab
@@ -6949,7 +7222,7 @@ NEW_VS( v[18], CONSECL0, "p2avg" );				// average goods prices
 
 // government decides expenditure and workers set all income to buying goods,
 // demand is matched to supply of goods, producing inventories or forced savings
-NEW_VS( v[19], THIS, "G" );						// public total expenditures
+NEW_VS( v[19], THIS, "Gc" );					// public total consumption
 NEW_VS( v[20], CONSECL0, "D2d" );				// desired goods demand
 NEW_VS( v[21], CONSECL0, "D2" );				// fulfilled demand for goods
 NEW_VS( v[22], CONSECL0, "N" );					// accumulated inventories

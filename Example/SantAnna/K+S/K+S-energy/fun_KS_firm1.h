@@ -287,7 +287,7 @@ v[2] = V( "_CS1a" );							// available credit supply
 v[3] = VL( "_NW1", 1 );							// net worth (cash available)
 v[4] = V( "_c1" );								// unit cost
 v[5] = V( "_p1" );								// machine price
-v[6] = V( "_RD" );								// R&D costs still to pay
+v[6] = V( "_RD1" );								// R&D costs still to pay
 
 v[7] = v[1] * ( v[4] - v[5] ) + v[6];			// cash to fulfill orders & R&D
 
@@ -362,7 +362,7 @@ WRITE( "_NW1p", v[3] - v[8] + v[9] );			// provision for production
 RESULT( v[0] )
 
 
-EQUATION( "_RD" )
+EQUATION( "_RD1" )
 /*
 R&D expenditure of firm in capital-good sector
 */
@@ -382,13 +382,21 @@ RESULT( v[0] )
 EQUATION( "_Tax1" )
 /*
 Total tax paid by firm in capital-good sector
-Also updates '_NW1', '_Deb1', '_CD1', '_CD1c', '_CS1'
+Also updates '_Tax1cred', '_NW1', '_Deb1', '_CD1', '_CD1c', '_CS1'
 */
 
 v[1] = V( "_Pi1" );								// firm profit in period
 
 if ( v[1] > 0 )									// profits?
-	v[0] = v[1] * VS( GRANDPARENT, "tr" );		// tax to government
+{
+	v[0] = v[1] * VS( GRANDPARENT, "tr" );		// original tax due
+	if ( TAXC_CAP_RD( VS( GRANDPARENT, "flagIndPolicy" ) ) )// credit policy?
+	{
+		v[2] = max( v[0] - VS( GRANDPARENT, "phiRD" ) * V( "_RD1" ), 0 );
+		WRITE( "_Tax1cred", v[0] - v[2] );		// effective tax credit
+		v[0] = v[2];
+	}
+}
 else
 	v[0] = 0;									// no tax on losses
 
@@ -456,7 +464,7 @@ Also removes old, non-buying clients.
 */
 
 i = 0;											// client counter
-CYCLE_SAFE( cur, "Cli" )						// remove old sector 2 clients
+CYCLE( cur, "Cli" )								// remove old sector 2 clients
 {
 	if ( VS( cur, "__tSel" ) < T - 1 )			// last selection is old?
 	{
@@ -467,7 +475,7 @@ CYCLE_SAFE( cur, "Cli" )						// remove old sector 2 clients
 		++i;
 }
 
-CYCLE_SAFE( cur, "CliEn" )						// remove old en. sector clients
+CYCLE( cur, "CliEn" )							// remove old en. sector clients
 {
 	if ( VS( cur, "__tSelE" ) < T - 1 )			// last selection is old?
 	{
@@ -519,7 +527,8 @@ EQUATION( "_L1dRD" )
 /*
 R&D labor demand of firm in capital-good sector
 */
-RESULT( V( "_RD" ) / VS( LABSUPL2, "w" ) )
+VS( GRANDPARENT, "Grd" );						// ensure R&D subsidy is paid
+RESULT( ( V( "_RD1" ) + V( "_Grd1" ) ) / VS( LABSUPL2, "w" ) )
 
 
 EQUATION( "_L1rd" )
@@ -534,7 +543,7 @@ EQUATION( "_Pi1" )
 /*
 Profit (before taxes) of firm in capital-good sector
 */
-RESULT( V( "_S1" ) + V( "_iD1" ) - V( "_C1" ) - V( "_i1" ) )
+RESULT( V( "_S1" ) + V( "_iD1" ) - V( "_C1" ) - V( "_i1" ) + V( "_Grd1" ) )
 
 
 EQUATION( "_Q1e" )
@@ -633,6 +642,13 @@ Interest received from deposits by firm in capital-good sector
 RESULT( max( VL( "_NW1", 1 ) * VLS( FINSECL2, "rD", 1 ), 0 ) )
 
 
+EQUATION( "_std1ban" )
+/*
+Indicate if current machine is banned for being below minimum policy standards
+*/
+RESULT( V( "_AtauEE" ) * V( "_AtauEF" ) < VS( PARENT, "Astd" ) )
+
+
 /*========================== SUPPORT LSD FUNCTIONS ===========================*/
 
 EQUATION( "_CS1a" )
@@ -726,6 +742,18 @@ EQUATION_DUMMY( "_NW1p", "_Q1" )
 /*
 Provision for production of firm in capital-good sector
 Updated in '_Q1'
+*/
+
+EQUATION_DUMMY( "_Grd1", "Grd1" )
+/*
+R&D subsidy received from government
+Updated in 'Grd1'
+*/
+
+EQUATION_DUMMY( "_Tax1cred", "_Tax1" )
+/*
+Tax credit/deduction received from government policies
+Updated in '_Tax1'
 */
 
 EQUATION_DUMMY( "_imi", "" )

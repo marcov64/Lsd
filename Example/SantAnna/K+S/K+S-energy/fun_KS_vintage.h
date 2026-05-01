@@ -34,16 +34,22 @@ if ( V( "__tVint" ) < T - VS( GRANDPARENT, "eta" ) )// out of technical life?
 
 VS( PARENT, "_supplier" );						// ensure supplier is selected
 cur = PARENTS( SHOOKS( HOOKS( PARENT, SUPPL ) ) );// pointer to supplier
-
-v[1] = V( "__cVint" ) - VS( cur, "_cTau" );		// cost advantage of new machine
+v[0] = V( "__nVint" );							// number of machines in vintage
+v[1] = VS( cur, "_p1" );						// machine price
+v[2] = VS( PARENT, "_Gsi" );					// available subsidy pool
+v[3] = V( "__cVint" ) - VS( cur, "_cTau" );		// cost advantage of new machine
 
 // if new machine cost is not better in absolute terms or
 // payback period of replacing current vintage is over b
-if ( v[1] <= 0 ||
-	 VS( cur, "_p1" ) / VS( GRANDPARENT, "m2" ) / v[1] > VS( GRANDPARENT, "b" ) )
+if ( v[3] <= 0 || ( v[1] - v[2] / v[0] ) / VS( GRANDPARENT, "m2" ) / v[3] >
+	 VS( GRANDPARENT, "b" ) )
 	END_EQUATION( 0 );							// nothing to scrap
 
-RESULT( V( "__nVint" ) )						// scrap if can be replaced
+v[4] = min( v[0] * v[1], v[2] );				// subsidy effectively used
+WRITE( "__Gsi", v[4] );							// register subsidy use
+INCRS( PARENT, "_Gsi", - v[4] );				// reduce subsidy pool
+
+RESULT( v[0] )									// scrap if can be replaced
 
 
 /*============================ SUPPORT EQUATIONS =============================*/
@@ -60,6 +66,14 @@ EQUATION( "__EnVint" )
 Energy consumed by vintage
 */
 RESULT( V( "__Qvint" ) / V( "__AeeVint" ) )
+
+
+EQUATION( "__Gsi" )
+/*
+Employed machine-replacement subsidy received from government
+Updated in '__RSvint'
+*/
+RESULT( 0 )										// subsidy not used so far
 
 
 EQUATION( "__Qvint" )

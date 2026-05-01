@@ -105,7 +105,7 @@ CYCLE( cur, "Firm1" )
 
 // quit candidate firms exit, except the best one if all going to quit
 v[6] = i = j = 0;								// firm counters
-CYCLE_SAFE( cur, "Firm1" )
+CYCLE( cur, "Firm1" )
 {
 	if ( quit[ i ] )
 	{
@@ -202,7 +202,7 @@ CFUN( order_workers, ( int ) VS( PARENT, "flagFireOrder1" ), OBJ_WRK1 );
 
 // then check firing worker by worker in sector 1 pool
 i = 0;
-CYCLE_SAFE( cur, "Wrk1" )
+CYCLE( cur, "Wrk1" )
 	if ( i < j )
 	{
 		cur1 = SHOOKS( cur );					// pointer to Worker object
@@ -510,7 +510,7 @@ if ( VS( PARENT, "flagGovExp" ) < 2 )			// unemployment benefit exists?
 v[1] = VS( LABSUPL1, "wU" );					// unemployment benefit in t
 
 i = 0;
-CYCLE_SAFE( cur, "Wrk1" )
+CYCLE( cur, "Wrk1" )
 	if ( VS( SHOOKS( cur ), "_w" ) <= v[1] )	// wage under unemp. benefit?
 	{
 		CFUNS( SHOOKS( cur ), fire_worker );	// register quit
@@ -529,7 +529,7 @@ if ( VS( LABSUPL1, "Tr" ) == 0 )				// retirement disabled?
 	END_EQUATION( 0 )
 
 i = 0;
-CYCLE_SAFE( cur, "Wrk1" )
+CYCLE( cur, "Wrk1" )
 	if ( VS( SHOOKS( cur ), "_age" ) == 1 )		// is a "reborn"?
 	{
 		CFUNS( SHOOKS( cur ), fire_worker );	// register retirement

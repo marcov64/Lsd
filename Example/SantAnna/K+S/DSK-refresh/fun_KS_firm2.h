@@ -624,7 +624,7 @@ v[7] = floor( v[2] / v[1] );					// machines to substitute in K
 
 j = T + 1;										// oldest vintage so far
 h = 0;											// oldest vintage ID
-CYCLE_SAFE( cur, "Vint" )						// search from older vintages
+CYCLE( cur, "Vint" )							// search from older vintages
 {
 	v[8] = VS( cur, "__RSvint" );				// number of machines to scrap
 

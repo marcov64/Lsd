@@ -73,8 +73,15 @@ Gross domestic income (nominal terms)
 RESULT( VS( LABSUPL2, "W" ) + VS( ENESECL2, "PiE" ) +
 		VS( CAPSECL2, "Pi1" ) + VS( CONSECL2, "Pi2" ) +
 		VS( FINSECL2, "PiB" ) + VS( GRANDPARENT, "Div" ) +
-		VS( GRANDPARENT, "G" ) - VS( GRANDPARENT, "Tax" ) +
+		VS( GRANDPARENT, "Gc" ) - VS( GRANDPARENT, "Tax" ) +
 		VS( CAPSECL2, "PPI" ) * VS( CONSECL2, "SI" ) / VS( CONSECL2, "m2" ) )
+
+
+EQUATION( "RD" )
+/*
+Total R&D expenditure
+*/
+RESULT( VS( CAPSECL2, "RD1" ) + VS( ENESECL2, "RDe" ) )
 
 
 EQUATION( "TaxCO2" )
@@ -86,12 +93,26 @@ RESULT( ( VS( CAPSECL2, "Em1" ) + VS( CONSECL2, "Em2" ) ) *
 		VS( ENESECL2, "EmE" ) * VS( ENESECL2, "trCO2e" ) )
 
 
+EQUATION( "TaxCred" )
+/*
+Tax credit/deduction from government policies
+*/
+RESULT( VS( SECSTAL2, "Tax1cred" ) + VS( ENESTAL2, "TaxEcred" ) )
+
+
 EQUATION( "dA" )
 /*
 Overall labor productivity growth rate
 */
 v[1] = VLS( GRANDPARENT, "A", 1 );
 RESULT( v[1] > 0 ? VS( GRANDPARENT, "A" ) / v[1] - 1 : 0 )
+
+
+EQUATION( "nRDsub" )
+/*
+Number of firms benefited by R&D subsidy policy
+*/
+RESULT( VS( SECSTAL2, "nRD1sub" ) + VS( ENESTAL2, "nRDeSub" ) )
 
 
 /*============================== CLIMATE STATS ===============================*/
@@ -329,19 +350,46 @@ RESULT( V( "ICtauGEavg" ) /
 			( VS( ENESECL2, "mDE" ) - VS( ENESECL2, "mGE" ) ) ) )
 
 
+EQUATION( "LCOEde" )
+/*
+Weighted average levelized cost of energy of dirty plants deployed in period
+*/
+
+v[1] = v[2] = 0;								// accumulators
+CYCLES( ENESECL2, cur, "FirmE" )
+	CYCLES( cur, cur1, "Dirty" )
+		if ( VS( cur1, "__tDE" ) == T )			// deployed this period?
+		{
+			v[2] += v[3] = VS( cur1, "__Kde" );	// plant nominal capacity
+			v[1] += VS( cur1, "__LCOEde" ) * v[3];// plant weighted LCOE
+		}
+
+RESULT( v[2] > 0 ? v[1] / v[2] : 0 )
+
+
+EQUATION( "LCOEge" )
+/*
+Weighted average levelized cost of energy of green plants deployed in period
+*/
+
+v[1] = v[2] = 0;								// accumulators
+CYCLES( ENESECL2, cur, "FirmE" )
+	CYCLES( cur, cur1, "Green" )
+		if ( VS( cur1, "__tGE" ) == T )			// deployed this period?
+		{
+			v[2] += v[3] = VS( cur1, "__Kge" );	// plant nominal capacity
+			v[1] += VS( cur1, "__LCOEge" ) * v[3];// plant weighted LCOE
+		}
+
+RESULT( v[2] > 0 ? v[1] / v[2] : 0 )
+
+
 EQUATION( "NPVgeAvg" )
 /*
 Average net present value of green energy project finance
 */
 v[1] = SUMS( ENESECL2, "_IgeD" );
 RESULT( v[1] > 0 ? WHTAVES( ENESECL2, "_NPVge", "_IgeD" ) / v[1] : 0 )
-
-
-EQUATION( "RDe" )
-/*
-R&D expenditure of energy sector
-*/
-RESULT( SUMS( ENESECL2, "_RDe" )  )
 
 
 EQUATION( "RSde" )
@@ -375,6 +423,13 @@ Average strategic net present value of green energy project finance
 */
 v[1] = SUMS( ENESECL2, "_IgeD" );
 RESULT( v[1] > 0 ? WHTAVES( ENESECL2, "_SNPVge", "_IgeD" ) / v[1] : 0 )
+
+
+EQUATION( "TaxEcred" )
+/*
+Tax credit/deduction received from government policies by energy sector
+*/
+RESULT( SUMS( ENESECL2, "_TaxEcred" ) )
 
 
 EQUATION( "ageEavg" )
@@ -466,6 +521,13 @@ CYCLES( ENESECL2, cur, "FirmE" )
 }
 
 RESULT( v[1] + v[2] > 0 ? v[1] / ( v[1] + v[2] ) : 0 )
+
+
+EQUATION( "nRDeSub" )
+/*
+Number of energy producers benefited by R&D subsidy policy
+*/
+RESULT( COUNT_CNDS( ENESECL2, "FirmE", "_GrdE", ">", 0 ) )
 
 
 EQUATION( "pfinGEexe" )
@@ -577,11 +639,11 @@ Number of new clients of capital-good firms
 RESULT( AVES( CAPSECL2, "_NC" ) )
 
 
-EQUATION( "RD" )
+EQUATION( "Tax1cred" )
 /*
-R&D expenditure of capital-good sector
+Tax credit/deduction received from government policies by capital-good sector
 */
-RESULT( SUMS( CAPSECL2, "_RD" ) )
+RESULT( SUMS( CAPSECL2, "_Tax1cred" ) )
 
 
 EQUATION( "age1avg" )
@@ -589,6 +651,20 @@ EQUATION( "age1avg" )
 Average age of firms in capital-good sector
 */
 RESULT( T - AVES( CAPSECL2, "_t1ent" ) )
+
+
+EQUATION( "nRD1sub" )
+/*
+Number of capital-good firms benefited by R&D subsidy policy
+*/
+RESULT( COUNT_CNDS( CAPSECL2, "Firm1", "_Grd1", ">", 0 ) )
+
+
+EQUATION( "nStd1ban" )
+/*
+Number of capital-good firms banned by minimum-standard policy
+*/
+RESULT( COUNT_CNDS( CAPSECL2, "Firm1", "_std1ban", "==", 1 ) )
 
 
 /*======================= CONSUMER-GOOD SECTOR STATS =========================*/
@@ -720,6 +796,21 @@ Average age of firms in consumption-good sector
 RESULT( T - AVES( CONSECL2, "_t2ent" ) )
 
 
+EQUATION( "ageVint2avg" )
+/*
+Weighted-average age of capital vintages in consumption-good sector
+*/
+
+v[0] = v[1] = 0;
+CYCLES( CONSECL2, cur, "Firm2" )
+{
+	v[0] += WHTAVES( cur, "__tVint", "__nVint" );
+	v[1] += SUMS( cur, "__nVint" );
+}
+
+RESULT( T - v[0] / v[1] )
+
+
 EQUATION( "dN" )
 /*
 Change in total inventories (real terms)
@@ -744,6 +835,16 @@ CYCLES( CONSECL2, cur, "Firm2" )
 	v[0] += COUNTS( cur, "Broch");
 
 RESULT( v[0] / VS( CONSECL2, "F2" ) )
+
+
+EQUATION( "nSI2sub" )
+/*
+Number of firms benefited by machine-substitution subsidy policy
+*/
+RESULT( COUNT_CNDS( CONSECL2, "Firm2", "_Gsi", ">", 0 ) )
+
+
+
 
 
 /*============================= LABOR STATS ==================================*/

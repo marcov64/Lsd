@@ -154,6 +154,16 @@ struct countryE
 #define LEN_ARR( A ) ( ( int ) ( sizeof A / sizeof A[0] ) )
 #define END_ARR( A ) ( A + LEN_ARR( A ) )
 
+// macros to check if policy is enabled
+#define CAP_DIRTY_PLANT( flag ) ( ( bool ) ( ( unsigned ) flag & 1 ) )
+#define BAN_SUBSTD_MACH( flag ) ( ( bool ) ( ( unsigned ) flag & 2 ) )
+#define SUBS_MACH_REPL( flag ) ( ( bool ) ( ( unsigned ) flag & 4 ) )
+#define SUBS_ENE_RD( flag ) ( ( bool ) ( ( unsigned ) flag & 8 ) )
+#define SUBS_CAP_RD( flag ) ( ( bool ) ( ( unsigned ) flag & 16 ) )
+#define TAXC_ENE_RD( flag ) ( ( bool ) ( ( unsigned ) flag & 32 ) )
+#define TAXC_CAP_RD( flag ) ( ( bool ) ( ( unsigned ) flag & 64 ) )
+
+
 /*=================== FORWARD DECLARATION OF C++ FUNCTIONS ===================*/
 
 #define EQ_USER_CFUNS \
@@ -163,9 +173,10 @@ struct countryE
 	CFUN_DBL( entry_firmE, int n, bool newInd ); \
 	CFUN_DBL( exit_firm ); \
 	CFUN_DBL( init_cond, const char *var ); \
-	CFUN_DBL( invest, double desired ); \
+	CFUN_DBL( invest, double desired, bool subst ); \
 	CFUN_DBL( mov_avg_bound, const char *var, double lim, double per, int lag ); \
 	CFUN_DBL( scrap_vintage ); \
+	CFUN_DBL( select_supplier ); \
 	CFUN_DBL( update_debt, double desired, double loan, lsd::object *plant ); \
 	CFUN_DBL( update_depo, double depo, bool incr ); \
 	CFUN_OBJ( add_plant, int type, double capacity, double nMach, bool newInd ); \
@@ -175,4 +186,5 @@ struct countryE
 	CFUN_VOID( add_vintage, double nMach, bool newInd ); \
 	CFUN_VOID( check_error, bool cond, const char* errMsg, int errCount, \
 			   int *errCounter ); \
-	CFUN_VOID( send_order, double nMach );
+	CFUN_VOID( send_order, double nMach ); \
+	double v0( lsd::object *p, const char *var );

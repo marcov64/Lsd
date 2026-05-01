@@ -443,7 +443,7 @@ Also removes old, non-buying clients.
 */
 
 i = 0;											// client counter
-CYCLE_SAFE( cur, "Cli" )						// remove old sector 2 clients
+CYCLE( cur, "Cli" )								// remove old sector 2 clients
 {
 	if ( VS( cur, "__tSel" ) < T - 1 )			// last selection is old?
 	{

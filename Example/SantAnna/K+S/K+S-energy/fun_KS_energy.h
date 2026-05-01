@@ -70,6 +70,48 @@ else											// excess supply, auction req'd
 RESULT( v[0] )
 
 
+EQUATION( "GrdE" )
+/*
+Government R&D subsidy to energy firms
+*/
+
+std::multimap < double, object * > candidates;	// ordered set of candidate firms
+std::multimap < double, object * >::reverse_iterator rit;
+
+i = V( "flagIndPolicy" );						// industrial policies in place
+j = V( "flagEnClim" );							// energy sector active?
+
+if ( SUBS_CAP_RD( i ) && SUBS_ENE_RD( i ) && j == 1 )// split budget?
+{
+	v[1] = V( "RDe" );
+	v[2] = v[1] / ( VS( CAPSECL1, "RD1" ) + v[1] );// share to energy firms
+}
+else
+	if ( SUBS_ENE_RD( i ) && j == 1 )
+		v[2] = 1;								// all to energy firms
+	else
+		END_EQUATION( 0 );						// policy inactive
+
+v[3] = v[4] = V( "gammaRD" ) * VL( "GDPnom", 1 ) * v[2];// planned policy budget
+v[5] = V( "phiRD" );							// share of R&D to subsidize
+
+if ( v[3] > 0 )									// allocate subsidies energy
+{
+	CYCLE( cur, "FirmE" )						// create ordered set
+		candidates.emplace( std::make_pair( 1 / VS( cur, "_ICtauGE" ), cur ) );
+
+	for ( rit = candidates.rbegin( ); rit != candidates.rend( ) && v[4] > 0;
+		  ++rit )
+	{
+		v[6] = min( v[5] * VS( rit->second, "_RDe" ), v[4] );// possible subsidy
+		v[4] -= v[6];
+		WRITES( rit->second, "_GrdE", v[6] );	// account subsidy
+	}
+}
+
+RESULT( v[3] - v[4] )							// budget less unallocated
+
+
 EQUATION( "Le" )
 /*
 Total labor employed in sector energy sector
@@ -168,7 +210,7 @@ CYCLE( cur, "FirmE" )
 
 // quit candidate firms exit, except the best one if all going to quit
 v[6] = i = j = 0;								// firm counters
-CYCLE_SAFE( cur, "FirmE" )
+CYCLE( cur, "FirmE" )
 {
 	if ( quit[ i ] )
 	{
@@ -464,6 +506,13 @@ EQUATION( "QeO" )
 Total generation offered by energy sector
 */
 RESULT( SUM( "_QeO" ) )
+
+
+EQUATION( "RDe" )
+/*
+R&D expenditure of energy sector
+*/
+RESULT( SUM( "_RDe" )  )
 
 
 EQUATION( "SIe" )

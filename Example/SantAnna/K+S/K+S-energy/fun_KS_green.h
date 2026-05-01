@@ -156,6 +156,23 @@ Interest paid on project finance of green power plant
 RESULT( VL( "__DebGE", 1 ) * V( "__rGEdeb" ) )
 
 
+/*========================== SUPPORT LSD FUNCTIONS ===========================*/
+
+EQUATION( "__LCOEge" )
+/*
+Compute the levelized cost of energy for the green power plant
+*/
+
+v[1] = VS( PARENT, "_rEdeb" );					// current discount rate
+v[2] = VS( GRANDPARENT, "etaE" );				// lifetime of power plant
+
+v[3] = pow( 1 + v[1], v[2] );					// last period discount rate
+v[4] = ( v[3] - 1 ) / ( v[1] * v[3] );			// present value of one unit
+
+RESULT( V( "__Kge" ) * ( V( "__ICge" ) + V( "__cGE" ) * v[4] ) /
+		( ( 1 / ( 1 + VS( GRANDPARENT, "iotaE" ) ) ) * v[4] ) )
+
+
 /*============================= DUMMY EQUATIONS ==============================*/
 
 EQUATION_DUMMY( "__Qge", "" )

@@ -797,7 +797,7 @@ v[7] = floor( v[2] / v[1] );					// machines to substitute in K
 
 j = T + 1;										// oldest vintage so far
 h = 0;											// oldest vintage ID
-CYCLE_SAFE( cur, "Vint" )						// search from older vintages
+CYCLE( cur, "Vint" )							// search from older vintages
 {
 	v[8] = VS( cur, "__RSvint" );				// number of machines to scrap
 
@@ -1209,7 +1209,7 @@ V( "_retires2" );								// ensure retiring is done
 v[1] = VS( LABSUPL2, "wU" );					// unemployment benefit in t
 
 h = 0;
-CYCLE_SAFE( cur, "Wrk2" )
+CYCLE( cur, "Wrk2" )
 	if ( VS( SHOOKS( cur ), "_w" ) <= v[1] ||	// under unemp. benefit?
 		 VS( SHOOKS( cur ), "_emig" ) )			// or emigrating?
 	{
@@ -1229,7 +1229,7 @@ if ( VS( LABSUPL2, "Tr" ) == 0 )				// retirement disabled?
 	END_EQUATION( 0 )
 
 h = 0;
-CYCLE_SAFE( cur, "Wrk2" )
+CYCLE( cur, "Wrk2" )
 	if ( VS( SHOOKS( cur ), "_age" ) == 1 )		// is a "reborn"?
 	{
 		CFUNS( SHOOKS( cur ), fire_worker );

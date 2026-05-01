@@ -282,17 +282,74 @@ CFUN_OBJ( send_brochure, object *client )
 }
 
 
+// selected machine supplier by firm in equations '_supplier', '_supplierE'
+
+const char *bVar[ ] = { "", "b", "bE" };
+
+CFUN_DBL( select_supplier )
+{
+	double b, bestCost, m2, cost;
+	int _ID1, sec = strcmp( NAME, "Firm2" ) == 0 ? 1 : 2;
+	object *bestBroch, *broch, *cli, *suppl,
+		   *cap = V_EXTS( GRANDPARENT, countryE, capSec );
+
+	VS( cap, "inn" );							// ensure innovation is done and
+												// brochures distributed
+	b = VS( PARENT, bVar[ sec ] );				// required payback period
+	m2 = ( sec == 1 ) ? VS( PARENT, "m2" ) : 1;	// machine modularity
+
+	bestCost = DBL_MAX;							// best supplier total cost
+	bestBroch = NULL;
+	CYCLE( broch, CliBrochObj[ sec ] )			// use brochures to find supplier
+	{
+		suppl = PARENTS( SHOOKS( broch ) );		// pointer to supplier object
+
+		// total machine unit cost (acquisition + operation for payback period)
+		cost = VS( suppl, "_p1" ) / m2 + VS( suppl, "_cTau" ) * b;
+		if ( cost < bestCost && ! VS( suppl, "_std1ban" ) )// best (non-banned)?
+		{
+			bestCost = cost;					// save current best supplier
+			bestBroch = broch;					// best supplier brochure
+			cli = SHOOKS( broch );				// own entry on supplier list
+			_ID1 = VS( suppl, "_ID1" );			// supplier ID
+		}
+	}
+
+	// if supplier is found, simply update it, if not, draw a random one
+	if ( bestBroch != NULL )
+	{
+		WRITES( cli, __tSelPar[ sec ], T );		// update selection time
+		WRITE_HOOK( SUPPL, bestBroch );			// pointer to current brochure
+	}
+	else										// no brochure received
+	{
+		suppl = CFUN( set_supplier );			// draw new supplier
+		_ID1 = VS( suppl, "_ID1" );
+	}
+
+	return _ID1;
+}
+
+
 // set initial supplier for entrant in equations 'entry2exit', 'entryEexit'
 
 CFUN_OBJ( set_supplier )
 {
+	bool stdBan = BAN_SUBSTD_MACH( VS( GRANDPARENT, "flagIndPolicy" ) ) &&
+				  T >= VS( PARENT, "Tstd" );	// minimum-standard policy active?
+	int sec = strcmp( NAME, "Firm2" ) == 0 ? 1 : 2;
 	object *broch, *suppl,
 		   *cap = V_EXTS( GRANDPARENT, countryE, capSec );
 
-	suppl = RNDDRAWS( cap, "Firm1", "_AtauLP" );// draw capital supplier
+	do
+		suppl = RNDDRAWS( cap, "Firm1", "_AtauLP" );// draw capital supplier
+	while ( stdBan && VS( suppl, "_std1ban" ) );
+
 	broch = CFUNS( suppl, send_brochure, THIS );// get supplier brochure
 	WRITE_HOOK( SUPPL, broch );					// pointer to current supplier
-	INCRS( suppl, "_NC", 1 );					// update supplier's clients #
+
+	if ( sec == 1 )								// if consumption firm
+		INCRS( suppl, "_NC", 1 );				// update supplier's clients #
 
 	return suppl;
 }
@@ -324,9 +381,9 @@ CFUN_VOID( send_order, double nMach )
 
 // perform investment according to available funding in equations '_EI', '_SI'
 
-CFUN_DBL( invest, double desired )
+CFUN_DBL( invest, double desired, bool subst )
 {
-	double invest, invCost, loan, loanDes;
+	double invest, invCost, loan, loanDes, subsidy;
 
 	if ( desired <= 0 )
 		return 0;
@@ -336,43 +393,42 @@ CFUN_DBL( invest, double desired )
 	double _NW2 = V( "_NW2" );					// net worth (cash available)
 	double _p1 = VS( PARENTS( SHOOKS( HOOK( SUPPL ) ) ), "_p1" );
 
-	invCost = _p1 * desired / m2;				// desired investment cost
+	subsidy = subst ? V( "_Gsi" ) : 0;			// committed substitution subsidy
+	invCost = _p1 * desired / m2;				// desired investment expenditure
 
-	if ( invCost <= _NW2 )						// can invest with own funds?
+	if ( invCost <= _NW2 + subsidy )			// can invest with own funds?
 	{
 		invest = desired;						// invest as planned
 		_NW2 -= invCost;						// remove machines cost from cash
 	}
 	else
 	{
-		if ( invCost <= _NW2 + _CS2a )			// possible to finance all?
+		if ( invCost <= _NW2 + subsidy + _CS2a )// possible to finance all?
 		{
 			invest = desired;					// invest as planned
-			loan = loanDes = invCost - _NW2;	// finance the difference
-			_NW2 = 0;							// no cash
+			loan = loanDes = invCost - _NW2 - subsidy;// finance the difference
+			_NW2 = - subsidy;					// no cash & subsidy to enter
 		}
 		else									// credit constrained firm
 		{
 			// invest as much as the available finance allows, rounded # machines
-			invest = max( floor( ( _NW2 + _CS2a ) / _p1 ) * m2, 0 );
-			loanDes = invCost - _NW2;			// desired credit
+			invest = max( floor( ( _NW2 + subsidy + _CS2a ) / _p1 ) * m2, 0 );
+			loanDes = invCost - _NW2 - subsidy;	// desired credit
+			invCost = _p1 * invest / m2;		// adjusted investment expenditure
 
 			if ( invest == 0 )
 				loan = 0;						// no finance
 			else
-			{
-				invCost = _p1 * invest / m2;	// reduced investment cost
-				if ( invCost <= _NW2 )			// just own funds?
+				if ( invCost <= _NW2 + subsidy )// just own funds?
 				{
 					loan = 0;
 					_NW2 -= invCost;			// remove machines cost from cash
 				}
 				else
 				{
-					loan = invCost - _NW2;		// finance the difference
-					_NW2 = 0;					// no cash
+					loan = invCost - _NW2 - subsidy;// finance the difference
+					_NW2 =  - subsidy;			// no cash & subsidy to enter
 				}
-			}
 		}
 
 		CFUN( update_debt, loanDes, loan );		// update debt (desired/granted)
@@ -383,6 +439,9 @@ CFUN_DBL( invest, double desired )
 		CFUN( update_depo, _NW2, false );		// update the firm net worth
 		CFUN( send_order, round( invest / m2 ) );// order to machine supplier
 	}
+
+	if ( invCost < subsidy )
+		INCR( "_Gsi", invCost - subsidy );		// adjust unspent subsidy
 
 	return invest;
 }
@@ -507,11 +566,12 @@ CFUN_DBL( scrap_vintage )
 
 // add new power plant to energy firm in equation 'EIe' and 'initCountry'
 
-const char *plantObj[ ] = { "Dirty", "Green" };
-const char *__lifeEcycle[ ] = { "__lifeDEcycle", "__lifeGEcycle" };
-const char *__tE[ ] = { "__tDE", "__tGE" };
-const char *__QeU[ ] = { "__QdeU", "__QgeU" };
-const char *__Ke[ ] = { "__Kde", "__Kge" };
+const char *plantObj[ ] = { "Dirty", "Green" },
+		   *__QeU[ ] = { "__QdeU", "__QgeU" },
+		   *__Ke[ ] = { "__Kde", "__Kge" },
+		   *__cE[ ] = { "__cDE", "__cGE" },
+		   *__lifeEcycle[ ] = { "__lifeDEcycle", "__lifeGEcycle" },
+		   *__tE[ ] = { "__tDE", "__tGE" };
 
 CFUN_OBJ( add_plant, int type, double cap, double nMach, bool newInd )
 {
@@ -578,6 +638,7 @@ CFUN_OBJ( add_plant, int type, double cap, double nMach, bool newInd )
 			{
 				plant = ADDOBJ( plantObj[ type ] );// just recalculate in next t
 				RECALCS( plant, __lifeEcycle[ type ] );// recalculate status
+				RECALCS( plant, __cE[ type ] );	// recalculate unit cost (LCOE)
 				WRITES( plant, __QeU[ type ], __uPlant );
 			}
 
@@ -614,7 +675,7 @@ CFUN_OBJ( add_plant, int type, double cap, double nMach, bool newInd )
 CFUN_DBL( entry_firm1, int n, bool newInd )
 {
 	double _AtauEE, _AtauEF, _AtauLP, _BtauEE, _BtauEF, _BtauLP, _D10, _Deb1,
-		   _Eq1, _L1rd, _NW1, _NW10, _RD0, _c1, _cTau, _f1, _p1, AtauLPmax,
+		   _Eq1, _L1rd, _NW1, _NW10, _RD10, _c1, _cTau, _f1, _p1, AtauLPmax,
 		   BtauLPmax, Deb1, Eq1, NW1, mult;
 	int _ID1, _t1ent;
 	object *firm, *bank,
@@ -698,8 +759,8 @@ CFUN_DBL( entry_firm1, int n, bool newInd )
 		_c1 = ( w / _BtauLP + ( pE + trCO2 * _BtauEF ) / _BtauEE ) / m1;// unit cost
 		_cTau = w / _AtauLP + ( pE + trCO2 * _AtauEF ) / _AtauEE;// u. cost clients
 		_p1 = ( 1 + mu1 ) * _c1;				// unit price
-		_RD0 = nu * _D10 * _p1;					// R&D expense
-		_L1rd = _RD0 / w;						// workers in R&D
+		_RD10 = nu * _D10 * _p1;				// R&D expense
+		_L1rd = _RD10 / w;						// workers in R&D
 
 		// accumulate capital costs
 		NW1 += _NW1 = mult * _NW10;
@@ -724,7 +785,6 @@ CFUN_DBL( entry_firm1, int n, bool newInd )
 			WRITELLS( firm, "_Deb1", _Deb1, _t1ent, 1 );
 			WRITELLS( firm, "_L1rd", _L1rd, _t1ent, 1 );
 			WRITELLS( firm, "_NW1", _NW1, _t1ent, 1 );
-			WRITELLS( firm, "_RD", _RD0, _t1ent, 1 );
 			WRITELLS( firm, "_cTau", w / _cTau, _t1ent, 1 );
 		}
 		else
@@ -738,7 +798,7 @@ CFUN_DBL( entry_firm1, int n, bool newInd )
 			WRITES( firm, "_Deb1", _Deb1 );
 			WRITES( firm, "_L1rd", _L1rd );
 			WRITES( firm, "_NW1", _NW1 );
-			WRITES( firm, "_RD", _RD0 );
+			WRITES( firm, "_RD1", _RD10 );
 			WRITES( firm, "_c1", _c1 );
 			WRITES( firm, "_cTau", _cTau );
 			WRITES( firm, "_p1", _p1 );
@@ -1290,11 +1350,14 @@ CFUN_DBL( init_cond, const char *var )
 		if ( flagEnClim )
 		{
 			v[ "cE0" ] = fGE0 * mGE * v[ "w0" ] + ( 1 - fGE0 ) *
-												  ( pF0 / Ade0 + mDE * v[ "w0" ] );
+												  ( pF0 / Ade0 +
+													mDE * v[ "w0" ] +
+													trCO2 * emDE0 );
 			if ( fGE0 == 1 )
 				v[ "pE0" ] = ( mGE + muE0 ) * v[ "w0" ];
 			else
-				v[ "pE0" ] = pF0 / Ade0 + ( mDE + muE0 ) * v[ "w0" ];
+				v[ "pE0" ] = pF0 / Ade0 + ( mDE + muE0 ) * v[ "w0" ] +
+							 trCO2 * emDE0;
 		}
 		else
 			v[ "cE0" ] = v[ "pE0" ] = 0;
@@ -1394,12 +1457,33 @@ CFUN_DBL( init_cond, const char *var )
 		// productivity and competitiveness
 		v[ "A0" ] = v[ "GDPnom0" ] / ( v[ "L10" ] + v[ "L20" ] );
 		v[ "Ae0" ] = v[ "Le0" ] > 0 ? v[ "De0" ] / v[ "Le0" ] :
-									  fGE0 / mDE + ( 1 - fGE0 ) / mGE;
+									  mDE > 0 && mGE > 0 ?
+									  fGE0 / mDE + ( 1 - fGE0 ) / mGE : 0;
 		v[ "E0" ] = - omega1 - omega2;
+
+		// stability conditions
+		v[ "minMu1" ] = ( v[ "rDeb0" ] * v[ "Deb10" ] - v[ "rD0" ] * v[ "NW10" ] ) /
+						 ( v[ "c10" ] * v[ "Q10" ] );
+		v[ "minMu20" ] = ( v[ "rDeb0" ] * v[ "Deb20" ] - v[ "rD0" ] * v[ "NW20" ] ) /
+						 ( v[ "c20" ] * v[ "Q20" ] ) +
+						 v[ "p10" ] / ( v[ "c20" ] * m2 * eta );
+		v[ "minMuE0" ] = v[ "Qe0" ] > 0 ? ( v[ "rDeb0" ] * v[ "DebE0" ] -
+											v[ "rD0" ] * v[ "NWe0" ] ) /
+										  ( v[ "w0" ] * v[ "Qe0" ] ) +
+										  fGE0 * v[ "ICge0" ] /
+										  ( v[ "w0" ] * etaE ) : 0;
 	}
 
 	if ( var != NULL && v.find( var ) != v.end( ) )
 		return v[ var ];
 	else
 		return NAN;
+}
+
+
+// helper function for debugging (1st country default)
+
+double lsd::equation::v0( object *p, const char *var )
+{
+	return init_cond( p == NULL ? SEARCHS( ROOT, "Country" ) : p, NULL, NULL, var );
 }

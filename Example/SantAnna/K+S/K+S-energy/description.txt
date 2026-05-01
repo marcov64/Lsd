@@ -1,4 +1,4 @@
-Energy-augmented K+S Model (version 0.5.3)
+Energy-augmented K+S Model (version 0.5.4)
 ==========================================
 
 This version copyright by Marcelo C. Pereira.
@@ -24,6 +24,7 @@ v0.5.1 (01/01/2022) - consolidate energy producer cash-flow to government for SF
                       improve tests
 v0.5.2 (25/09/2023) - implement real options analysis of green energy projects
 v0.5.3 (16/11/2025) - improve steady-state initial conditions
+v0.5.4 (09/04/2026) - implement industrial policies to spur energy transition
 
 
 Relevant references
@@ -106,6 +107,21 @@ There is a set of preconfigured test configurations (.lsd extension files in the
 The R scripts require the following R packages (and dependencies) to be installed from the standard repositories: LSDsensitivity, tseries, normalp, nortest, mFilter, np, matrixStats, gplots, corrplot, rmutil, plotrix, textplot, extrafont. 12GB or more of available memory is required to run some of the reports. Use 'install-lsd-examples-packages.R' script in R subdirectory to install the required packages automatically.
 
 
+Model regime control
+====================
+
+The model allows for a single regulatory change (shock) at the specified time, represented by the change of several control flags and parameters (see below).
+
+Change time (parameter TregChg)
+-----------
+0 = no regulatory change during simulation
+t = regime change in time t
+		  
+Global changes (see affected flags and parameters below)
+--------------
+flagIndPolicy		-> flagIndPolicyChg
+
+
 Model control flags
 ===================
 
@@ -142,6 +158,17 @@ Government fiscal rule (parameter flagFiscalRule)
 2 = soft balanced budget rule with maximum deficit on GDP (only if GDP growing)
 3 = balanced budget rule with maximum debt and deficit on GDP
 4 = soft balanced budget rule with maximum debt and deficit on GDP (only if GDP growing)
+
+Government industrial policies (parameter flagIndPolicy)
+------------------------------
+0   = no industrial policy applied
++1  = cap new dirty power plants after certain time
++2  = ban new inefficient/unfriendly machines below minimum standards
++4  = Machine-replacement government subsidy to the consumption-good sector
++8  = R&D government subsidy to the energy sector sector
++16 = R&D government subsidy to the capital-good sector
++32 = R&D tax credit to the energy sector
++64 = R&D tax credit to the capital-good sector
 
 Green Energy project-finance rule (parameter flagProjFinGE)
 ---------------------------------
@@ -193,10 +220,13 @@ Country-level parameters (object Country)
 ------------------------
 Crec = unfilled past consumption recover limit as fraction of current consumption (>0)
 dGDP0 = steady-state initial GDP growth rate (>0)
+gammaRD = share of GDP for subsidy to R&D policies ([0,1])
+gammaRep = share of GDP for subsidy to machine-replacement policies ([0,1])
 gG = growth rate of fixed public expenditure (>=0)
 mLim = absolute cap on moving-average growth calculation (>=0, 0=no limit)
 mPer = number of periods on moving-average growth calculation (>=1)
 omicron = sensitivity of entry to market conditions (liquid assets vs. debt ratio) ([0,1])
+phiRD = share of the firm R&D which can be benefited by policies ([0,1])
 stick = stickiness of the number of firms (return to average) (>=0)
 tr = tax rate on profits and income (>=0)
 trCO2 = tax rate on CO2 (carbon) emissions of non-energy firms (>=0)
@@ -272,6 +302,7 @@ LeShortMax = maximum labor shortage allowed in energy sector ([0,1])
 NWe0 = initial net worth of energy producer (>=0)
 Phi5/Phi6 = lower/upper support for entrant net worth share in energy sector (0<Phi5<Phi6<=1)
 Tcon = construction time of green energy plant (>0)
+Tge = policy time to cap installation of dirty power plants (>0)
 Tfin = principal amortization time of green energy plant (>0)
 Tplan = backward planning horizon for greeen energy project finance (>0)
 alphaE/betaE = Beta distribution parameter for energy generation innovation drawing (>0)
@@ -285,6 +316,7 @@ emDE0 = initial dirty energy plant emissions (>0)
 etaE = technical life time of power plants (>1)
 fEmin = minimum market share to stay in energy sector ([0,1[)
 fGE0 = initial share of green power plants and floor to dynamic R&D allocation ([0,1])
+fGEmin = minimum share og green power plants when dirty plant cap policy is active ([0,1)
 iotaE = reserve capacity on power plant capacity in energy sector (>=0)
 kappaEmax = firm power plant capacity maximum growth per period (>0, 0=no limit)
 kappaEmin = firm power plant capacity minimum investment size (0<=kappaEmin<kappaEmax)
@@ -337,8 +369,10 @@ F20 = initial number of firms in consumption-good sector (1<=F2min<=F20<=F2max)
 F2max/F2min = maximum/minimum number of firms in consumption-good sector (1<=F1min<=F10<=F1max)
 NW20 = average initial net worth in consumption-good sector (>=0)
 Phi1/Phi2 = lower/upper support for consumption-good entrant net worth share (0<Phi1<Phi2<=1)
+Tstd = policy time to restrict installation of machines below minimum standards (>0)
 b = number of pay-back periods before machine scrapping (>1)
 chi = replicator dynamics selectivity coefficient (>0)
+deltaEf = mean increase for defining policy minimum standard level of new machines ([0,1])
 d2 = dividend rate in consumption-good sector ([0,1])
 e0 = weight of potential demand on expectations (animal spirits) ([0,1])
 e1/e2/e3/e4 = weight of t-1/t-2/t-3/t-4 demand on myopic expectations ([0,1])

@@ -110,6 +110,17 @@ RESULT( VS( GRANDPARENT, "pF" ) / V( "__Ade" ) +
 		VS( GRANDPARENT, "mDE" ) * VS( LABSUPL3, "w" ) )
 
 
+/*========================== SUPPORT LSD FUNCTIONS ===========================*/
+
+EQUATION( "__LCOEde" )
+/*
+Compute the levelized cost of energy for the dirty power plant
+*/
+RESULT( V( "__Kde" ) * ( 1 + VS( GRANDPARENT, "iotaE" ) ) *
+		(  V( "__cDE" ) + V( "__emDE" ) / V( "__Ade" ) *
+		   VS( GRANDPARENTS( PARENT ), "trCO2" ) ) )
+
+
 /*============================= DUMMY EQUATIONS ==============================*/
 
 EQUATION_DUMMY( "__Qde", "" )

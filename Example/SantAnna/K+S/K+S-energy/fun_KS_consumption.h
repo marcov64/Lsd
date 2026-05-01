@@ -161,7 +161,7 @@ CYCLE( cur, "Firm2" )
 
 // quit candidate firms exit, except the best one if all going to quit
 v[6] = i = j = 0;								// firm counters
-CYCLE_SAFE( cur, "Firm2" )
+CYCLE( cur, "Firm2" )
 {
 	if ( quit[ i ] )
 	{
@@ -323,6 +323,14 @@ EQUATION( "F2" )
 Number of firms in consumption-good sector
 */
 RESULT( COUNT( "Firm2" ) )
+
+
+EQUATION( "Gsi" )
+/*
+Machine-replacement subsidy (monetary terms) received from government
+*/
+V( "SI" );										// ensure subsidies are used
+RESULT( SUM( "_Gsi" ) )
 
 
 EQUATION( "Id" )

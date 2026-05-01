@@ -15,6 +15,49 @@
 
 /*============================== KEY EQUATIONS ===============================*/
 
+EQUATION( "Grd1" )
+/*
+Government R&D subsidy to capital-good firms
+*/
+
+std::multimap < double, object * > candidates;	// ordered set of candidate firms
+std::multimap < double, object * >::reverse_iterator rit;
+
+i = V( "flagIndPolicy" );						// industrial policies in place
+j = V( "flagEnClim" );							// energy sector active?
+
+if ( SUBS_CAP_RD( i ) && SUBS_ENE_RD( i ) && j == 1 )// split budget?
+{
+	v[1] = V( "RD1" );
+	v[2] = v[1] / ( v[1] + VS( ENESECL1, "RDe" ) );// share to capital firms
+}
+else
+	if ( SUBS_CAP_RD( i ) )
+		v[2] = 1;								// all to capital-good firms
+	else
+		END_EQUATION( 0 );						// policy inactive
+
+v[3] = v[4] = V( "gammaRD" ) * VL( "GDPnom", 1 ) * v[2];// planned policy budget
+v[5] = V( "phiRD" );							// share of R&D to subsidize
+
+if ( v[3] > 0 )									// allocate subsidies capital-g.
+{
+	CYCLE( cur, "Firm1" )						// create ordered set
+		candidates.emplace( std::make_pair( VS( cur, "_AtauEE" ) *
+											VS( cur, "_AtauEF" ), cur ) );
+
+	for ( rit = candidates.rbegin( ); rit != candidates.rend( ) && v[4] > 0;
+		  ++rit )
+	{
+		v[6] = min( v[5] * VS( rit->second, "_RD1" ), v[4] );// possible subsidy
+		v[4] -= v[6];
+		WRITES( rit->second, "_Grd1", v[6] );	// account subsidy
+	}
+}
+
+RESULT( v[3] - v[4] )							// budget less unallocated
+
+
 EQUATION( "L1" )
 /*
 Work force (labor) size employed by capital-good sector
@@ -110,7 +153,7 @@ CYCLE( cur, "Firm1" )
 
 // quit candidate firms exit, except the best one if all going to quit
 v[6] = i = j = 0;								// firm counters
-CYCLE_SAFE( cur, "Firm1" )
+CYCLE( cur, "Firm1" )
 {
 	if ( quit[ i ] )
 	{
@@ -179,6 +222,16 @@ Labor productivity of capital-good sector
 */
 V( "PPI" );										// ensure m.s. are updated
 RESULT( WHTAVE( "_BtauLP", "_f1" ) )
+
+
+EQUATION( "Astd" )
+/*
+Minimum standard for machine energy efficiency/friendliness for ban policy
+*/
+RESULT( BAN_SUBSTD_MACH( VS( GRANDPARENT, "flagIndPolicy" ) ) &&
+		T >= VS( PARENT, "Tstd" ) ? ( 1 + V( "deltaStd" ) ) *
+									WHTAVE( "_AtauEE", "_AtauEF" ) /
+									COUNT( "Firm1" ) : 0 )
 
 
 EQUATION( "D1" )
@@ -295,6 +348,13 @@ EQUATION( "Q1e" )
 Total effective real output (orders) of capital-good sector
 */
 RESULT( SUM( "_Q1e" ) )
+
+
+EQUATION( "RD1" )
+/*
+R&D expenditure of capital-good sector
+*/
+RESULT( SUM( "_RD1" ) )
 
 
 EQUATION( "S1" )

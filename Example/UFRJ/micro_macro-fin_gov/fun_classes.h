@@ -127,7 +127,7 @@ This variable also adjusts the total amount of each loan and delete loan objects
 */
 	v[0]=SUM("class_loan_fixed_amortization");		 			//sum up all amortizations for current period
 
-		CYCLE_SAFE(cur, "CLASS_LOANS")							//CYCLE trough all class' loans
+		CYCLE(cur, "CLASS_LOANS")								//CYCLE trough all class' loans
 		{
 		v[4]=VS(cur, "class_loan_total_amount");				//debt current amount
 		v[5]=VS(cur, "class_loan_fixed_amortization");			//debt fixed amortization

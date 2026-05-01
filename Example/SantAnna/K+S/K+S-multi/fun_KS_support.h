@@ -809,7 +809,7 @@ CFUN_DBL( fire_workers, int mode, double xsCap, double *redCap )
 	CFUN( order_workers, fOrder, OBJ_WRK2 );	// sort bridge objects
 
 	// check firing worker by worker: firm desired adjustments
-	CYCLE_SAFE( wrk, "Wrk2" )
+	CYCLE( wrk, "Wrk2" )
 	{
 		fire = false;
 		worker = SHOOKS( wrk );
@@ -1365,7 +1365,7 @@ CFUN_DBL( exit_firm1, double *cEntry, double *cExit, double *nFail, bool all )
 
 	// quit candidate firms exit, except the best one if all going to exit
 	*nFail = exits = i = 0;
-	CYCLE_SAFE( firm1, "Firm1" )
+	CYCLE( firm1, "Firm1" )
 	{
 		if ( quit[ i ] )
 		{
@@ -1468,7 +1468,7 @@ CFUN_DBL( exit_firm2, double *cEntry, double *cExit, double *nFail, bool all )
 
 	// quit candidate firms exit, except the best one if all going to exit
 	*nFail = exits = firesAcc = i = 0;
-	CYCLE_SAFE( firm2, "Firm2" )
+	CYCLE( firm2, "Firm2" )
 	{
 		if ( quit[ i ] )
 		{
@@ -1741,7 +1741,7 @@ CFUN_DBL( exit_consumption, double *firmExits )
 	// delete under-performing industries, saving exits proceeds
 	cEntry = cExit = nFail = 0;
 	toExitCbas = toExitClux = false;
-	CYCLE_SAFE( ind, "Consumption" )			// check industries to exit
+	CYCLE( ind, "Consumption" )					// check industries to exit
 	{
 		f2max = max( VS( ind, "f2" ), VS( ind, "f2e" ) );
 		type2 = VS( ind, "type2" );				// industry type (0=basic)

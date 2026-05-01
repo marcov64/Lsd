@@ -60,7 +60,7 @@
 
 	#define INIT_POINTERS \
 		h = i = j = k = 0; \
-		cur = cur1 = cur2 = cur3 = cur4 = cur5 = cur6 = cur7 = cur8 = cur9 = cyccur = cyccur2 = cyccur3 = NULL; \
+		cur = cur1 = cur2 = cur3 = cur4 = cur5 = cur6 = cur7 = cur8 = cur9 = NULL; \
 		curl = curl1 = curl2 = curl3 = curl4 = curl5 = curl6 = curl7 = curl8 = curl9 = NULL; \
 		f = NULL;
 	#define CHK_LNK_DBL( O ) O == NULL ? _nul_lnk_dbl_( __FILE__, __LINE__ ) :
@@ -146,7 +146,7 @@
 			object *_p_ = _v_->up; \
 			int h, i, j, k; \
 			double v[ USER_D_VARS ]; \
-			object *cur, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9, *cyccur, *cyccur2, *cyccur3; \
+			object *cur, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9; \
 			netlink *curl, *curl1, *curl2, *curl3, *curl4, *curl5, *curl6, *curl7, *curl8, *curl9; \
 			FILE *f; \
 			INIT_POINTERS \
@@ -288,7 +288,7 @@
 #define RND_SETSEED( X ) ( _p_->set_rnd_seed( ( u_long32T ) X ) )
 #define RND_SETSEEDS( O, X ) ( CHK_PTR_DBL( O ) O->set_rnd_seed( ( u_long32T ) X ) )
 #define RND_GENERATOR( X ) ( _p_->set_rnd_gen( ( int ) X ) )
-#define RND_GENERATORS( O, X ) ( CHK_PTR_DBL( O ) O->set_rnd_gen( ( int ) X ) )
+#define RND_GENERATORS( O, X ) ( CHK_PTR_OBJ( O ) O->set_rnd_gen( ( int ) X ) )
 
 #define V( X ) ( _p_->cal( _p_, X, 0 ) )
 #define VL( X, L ) ( _p_->cal( _p_, X, L ) )
@@ -540,11 +540,11 @@
 #define INIT_NETS( O, ... ) ( CHK_PTR_DBL( O ) O->init_stub_net( __VA_ARGS__ ) )
 
 #define LOAD_NET( X, Y ) ( _p_->read_file_net( X, "", Y, RND_SEED, "net" ) )
-#define LOAD_NETS( O, X, Y ) ( CHK_PTR_DBL( O ) O->read_file_net( X, "", Y, RND_SEED, "net" ) )
+#define LOAD_NETS( O, X, Y ) ( CHK_PTR_DBL( O ) O->read_file_net( X, "", Y, RND_SEEDS( O ), "net" ) )
 #define SAVE_NET( X, Y ) ( _p_->write_file_net( X, "", Y, RND_SEED, false ) )
-#define SAVE_NETS( O, X, Y ) ( CHK_PTR_DBL( O ) O->write_file_net( X, "", Y , RND_SEED, false ) )
+#define SAVE_NETS( O, X, Y ) ( CHK_PTR_DBL( O ) O->write_file_net( X, "", Y , RND_SEEDS( O ), false ) )
 #define SNAP_NET( X, Y ) ( _p_->write_file_net( X, "", Y, RND_SEED, true ) )
-#define SNAP_NETS( O, X, Y ) ( CHK_PTR_DBL( O ) O->write_file_net( X, "", Y, RND_SEED, true ) )
+#define SNAP_NETS( O, X, Y ) ( CHK_PTR_DBL( O ) O->write_file_net( X, "", Y, RND_SEEDS( O ), true ) )
 
 #define ADDNODE( X, Y ) ( _p_->add_node_net( X, Y, false ) )
 #define ADDNODES( O, X, Y ) ( CHK_PTR_OBJ( O ) O->add_node_net( X, Y, false ) )
@@ -607,27 +607,12 @@
 #define WRITE_ARG_EXT( C, X, Y, ... ) ( P_EXT( C ) -> X( __VA_ARGS__ ) = Y )
 #define WRITE_ARG_EXTS( O, C, X, Y, ... ) ( P_EXTS( O, C ) -> X( __VA_ARGS__ ) = Y )
 
-#define CYCLE( X, Y ) for ( X = _cycle_obj_( _p_, Y, "CYCLE" ); X != NULL; X = BROTHER( X ) )
-#define CYCLE_SAFE( X, Y ) for ( X = _cycle_obj_( _p_, Y, "CYCLE_SAFE" ), \
-								 cyccur = BROTHER( X ); X != NULL; X = cyccur, \
-								 cyccur != NULL ? cyccur = BROTHER( cyccur ) : cyccur = cyccur )
-#define CYCLE2_SAFE( X, Y ) for ( X = _cycle_obj_( _p_, Y, "CYCLE_SAFE" ), \
-								  cyccur2 = BROTHER( X ); X != NULL; X = cyccur2, \
-								  cyccur2 != NULL ? cyccur2 = BROTHER( cyccur2 ) : cyccur2 = cyccur2 )
-#define CYCLE3_SAFE( X, Y ) for ( X = _cycle_obj_( _p_, Y, "CYCLE_SAFE" ), \
-								  cyccur3 = BROTHER( X ); X != NULL; X = cyccur3, \
-								  cyccur3 != NULL ? cyccur3 = BROTHER( cyccur3 ) : cyccur3 = cyccur3 )
-
-#define CYCLES( O, X, Y ) for ( X = _cycle_obj_( O, Y, "CYCLES" ); X != NULL; X = BROTHER( X ) )
-#define CYCLE_SAFES( O, X, Y ) for ( X = _cycle_obj_( O, Y, "CYCLE_SAFES" ), \
-									 cyccur = BROTHER( X ); X != NULL; X = cyccur, \
-									 cyccur != NULL ? cyccur = BROTHER( cyccur ) : cyccur = cyccur )
-#define CYCLE2_SAFES( O, X, Y ) for ( X = _cycle_obj_( O, Y, "CYCLE_SAFES" ), \
-									  cyccur2 = BROTHER( X ); X != NULL; X = cyccur2, \
-									  cyccur2 != NULL ? cyccur2 = BROTHER( cyccur2 ) : cyccur2 = cyccur2 )
-#define CYCLE3_SAFES( O, X, Y ) for ( X = _cycle_obj_( O, Y, "CYCLE_SAFES" ), \
-									  cyccur3 = BROTHER( X ); X != NULL; X = cyccur3, \
-									  cyccur3 != NULL ? cyccur3 = BROTHER( cyccur3 ) : cyccur3 = cyccur3 )
+#define CYCLE( X, Y ) for ( auto _cyc_ = _cycle_ctrl_( _p_, X, Y ); \
+							X != NULL; X = _cyc_, _cyc_ != NULL ? \
+							_cyc_ = BROTHER( _cyc_ ) : _cyc_ = _cyc_ )
+#define CYCLES( O, X, Y ) for ( auto _cyc_ = _cycle_ctrl_( O, X, Y ); \
+								X != NULL; X = _cyc_, _cyc_ != NULL ? \
+								_cyc_ = BROTHER( _cyc_ ) : _cyc_ = _cyc_ )
 
 #define CYCLE_EXT( X, Y, Z ) for ( X = EXEC_EXT( Y, Z, begin ); X != EXEC_EXT( Y, Z, end ); ++X )
 #define CYCLE_EXTS( O, X, Y, Z ) for ( X = EXEC_EXTS( O, Y, Z, begin ); X != EXEC_EXTS( O, Y, Z, end ); ++X )
@@ -689,30 +674,13 @@
 #define alaplS( O, X, Y, Z ) ( CHK_PTR_DBL( O ) O->rnd_alaplace( X, Y, Z ) )
 
 // DEPRECATED MACRO COMPATIBILITY DEFINITIONS
-// enabled only when directly including fun_head.h (and not lsd_head.h)
-#ifdef SEMI_LEGACY_CODE
-	namespace lsd
-	{
-		void equation::_close_sim_( void ) { }
-	}
-
-	#define c CALLER
-	#define p THIS
-	#define t T
-	#define root ROOT
-	#define seed RND_SEED
-	#define plog PLOG
-	#define quit _sim_->quit
-	#define object lsd::object
-#endif
-
+// enabled only when directly including fun_head.h (not fun_head_fast.h/lsd_head.h)
 #ifdef LEGACY_CODE
 	namespace lsd
 	{
 		extern simp_vecT sims;				// vector holding existing simulations
 		char msg[ MAX_BUFF_SIZE ];			// legacy auxiliary buffer
 		const char *get_str( const char *tcl_var );
-		void equation::_close_sim_( void ) { }
 	}
 
 	inline int deb( lsd::object *r, lsd::object *c, const char *lab, double *res, bool interact = false, const char *hl_var = "" ) { if ( lsd::sims[ 0 ]->liblnk != NULL ) return ( r->*lsd::sims[ 0 ]->liblnk->dlliblinkage::debugger ) ( c, lab, res, interact, hl_var ); else return -1; }
@@ -726,17 +694,8 @@
 	#define Tcl_GetVar( X, Y, Z ) lsd::get_str( Y )
 	#define inter NULL
 
-	#define SIM ( lsd::sims[ 0 ] )			// pointer to first simulation
 	#define var _v_
-	#define c CALLER
-	#define caller CALLER
-	#define p THIS
-	#define t T
-	#define root ROOT
-	#define seed RND_SEED
-	#define quit _sim_->quit
-	#define object lsd::object
-	#define path ( SIM->conf_path )
+	#define path ( lsd::sims[ 0 ]->conf_path )
 	#define poidev( ... ) ( poisson( __VA_ARGS__ ) )
 	#define go_brother( O ) BROTHER( O )
 	#define FUNCTION( X ) EQUATION( X )
@@ -771,9 +730,9 @@
 	#define NETWORK_INI( X, Y, Z, ... ) INIT_NET( X, Y, Z, __VA_ARGS__ )
 	#define NETWORKS_INI( O, X, Y, Z, ... ) INIT_NETS( O, X, Y, Z, __VA_ARGS__ )
 	#define NETWORK_LOAD( X, Y, Z ) ( _p_->read_file_net( X, Y, Z, RND_SEED, "net" ) )
-	#define NETWORKS_LOAD( O, X, Y, Z ) ( O == NULL ? 0. : O->read_file_net( X, Y, Z, RND_SEED, "net" ) )
+	#define NETWORKS_LOAD( O, X, Y, Z ) ( O == NULL ? 0. : O->read_file_net( X, Y, Z, RND_SEEDS( O ), "net" ) )
 	#define NETWORK_SAVE( X, Y, Z ) ( _p_->write_file_net( X, Y, Z, RND_SEED, false ) )
-	#define NETWORKS_SAVE( O, X, Y, Z ) ( O == NULL ? 0. : O->write_file_net( X, Y, Z , RND_SEED, false ) )
+	#define NETWORKS_SAVE( O, X, Y, Z ) ( O == NULL ? 0. : O->write_file_net( X, Y, Z , RND_SEEDS( O ), false ) )
 	#define STATS_NET( O, X ) STAT_NETS( O, X )
 	#define SHUFFLE( X ) SHUFFLE_NET( X )
 	#define SHUFFLES( O, X ) SHUFFLE_NETS( O, X )
@@ -808,4 +767,28 @@
 		};
 	#define CYCLES_EXT( O, ITER, CLASS, OBJ ) CYCLE_EXTS( O, ITER, CLASS, OBJ )
 	#define CYCLES_LINK( C, O ) CYCLE_LINKS( C, O )
+#endif
+
+// enabled only when directly including fun_head.h/fun_head_fast.h (not lsd_head.h)
+#if defined SEMI_LEGACY_CODE || defined LEGACY_CODE
+	namespace lsd
+	{
+		void equation::_close_sim_( void ) { }
+	}
+
+	#define c CALLER
+	#define p THIS
+	#define t ( int ) T
+	#define root ROOT
+	#define seed RND_SEED
+	#define plog PLOG
+	#define quit _sim_->quit
+	#define object lsd::object
+
+	#define CYCLE_SAFE( X, Y ) CYCLE( X, Y )
+	#define CYCLE2_SAFE( X, Y ) CYCLE( X, Y )
+	#define CYCLE3_SAFE( X, Y ) CYCLE( X, Y )
+	#define CYCLE_SAFES( O, X, Y ) CYCLES( O, X, Y )
+	#define CYCLE2_SAFES( O, X, Y ) CYCLES( O, X, Y )
+	#define CYCLE3_SAFES( O, X, Y ) CYCLES( O, X, Y )
 #endif

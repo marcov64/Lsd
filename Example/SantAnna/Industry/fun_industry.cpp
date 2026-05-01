@@ -327,7 +327,7 @@ EQUATION( "N" )
 V( "growthAvg" );							// make calculation before exits
 
 v[0] = 0;									// count staying firms
-CYCLE_SAFE( cur, "Firm" )					// scan all firms
+CYCLE( cur, "Firm" )						// scan all firms
 	if ( VS( cur, "_incumbent" ) )			// only if it's an incumbent
 	{
   		if ( VS( cur, "_s" ) <= V( "sMin" ) && // eq. 3

@@ -140,7 +140,7 @@ v[1] = V( "Lscale" );							// labor scaling
 v[2] = V( "Ls" );								// staying workers
 
 v[0] = v[3] = 0;								// emigrant/savings counters
-CYCLE_SAFE( cur, "Worker" )
+CYCLE( cur, "Worker" )
 	if ( VS( cur, "_emig" ) )					// emigrating?
 	{
 		v[3] += VLS( cur, "_SavAcc", 1 );		// worker savings

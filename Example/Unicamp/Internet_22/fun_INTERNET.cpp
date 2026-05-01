@@ -585,7 +585,7 @@ Creates new network objects for provider as required
 		{
 			cur1=ADDOBJ("Network");		// creates a new network technology for provider
 			WRITES(cur1,"tech",v[4]);	// tech ID
-			WRITES(cur1,"QMtech",v[12]);	// new capacity
+			WRITES(cur1,"QMtech",v[12]);// new capacity
 			WRITES(cur1,"Ktech",v[0]);	// and capital
 			WRITES(cur1,"t0tech",T); 	// time of adoption
 			WRITES(cur1,"atech",v[15]);	//	productivity
@@ -593,7 +593,7 @@ Creates new network objects for provider as required
 			WRITE_SHOOKS(cur1,cur);		// saves pointer to technology
 		}
 
-		CYCLE_SAFE(cur3,"Network")		// delete deprecated technologies
+		CYCLE(cur3,"Network")			// delete deprecated technologies
 		{
 			v[14]=VS(cur3,"depr");
 			if(v[14]==1)
@@ -1865,7 +1865,7 @@ Insert new entrants in market
 				WRITELLS(cur1,"strat",uniform_int(11,10+STRAT_ENTR),T-1,1);	// picks entrant strategy
 
 			v[24]=0;							// counts networks found
-			CYCLE_SAFES(cur1,cur2,"Network")	// removes existing networks
+			CYCLES(cur1,cur2,"Network")			// removes existing networks
 			{		// except first one
 				v[24]++;						// one more network
 				if(v[24]>1)						// keeps only first network object
@@ -1961,7 +1961,7 @@ Remove failing providers from market
 		PLOG("\n Warning: last provider (Nuser=%g) bailed-out at t=%g",v[4],T);
 	}
 
-	CYCLE_SAFE(cur,"Provider")					// scans all existing providers
+	CYCLE(cur,"Provider")						// scans all existing providers
 	{
 		v[6]=VS(cur,"provID");					// gets ID
 		v[2]=VS(cur,"negcashper");				// consecutive negative cash periods
@@ -3275,7 +3275,7 @@ if(SAVE_NETW)							// saves the network in a file
 	sprintf( name, "%s_%d", CONFIG, type + 1 );			// file name to save
 	SAVE_NETS( usernet, "User", name );
 	PLOG( "\nFinal network saved: %s%s%s_%d.net",
-		  PATH, strlen( PATH ) == 0 ? "" : "/", name, RND_SEED - 1 );
+		  PATH, strlen( PATH ) == 0 ? "" : "/", name, RND_SEEDS( usernet ) );
 }
 
 CLOSEEND

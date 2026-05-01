@@ -139,7 +139,7 @@ Also updates '_NW2', '_Deb2', _CD2', '_CD2c', '_CS2'
 */
 V( "_Q2" );										// make sure production decided
 V( "_supplier" );								// ensure supplier is selected
-RESULT( CFUN( invest, V( "_EId" ) ) )
+RESULT( CFUN( invest, V( "_EId" ), false ) )
 
 
 EQUATION( "_EId" )
@@ -178,6 +178,14 @@ else
 	v[0] = 0;									// no expansion investment
 
 RESULT( v[0] )
+
+
+EQUATION( "_Gsi" )
+/*
+Machine-replacement subsidy (monetary terms) received from government
+Updated in '_SI', '_SId, '__RSvint'
+*/
+RESULT( 0 )										// subsidy not used so far
 
 
 EQUATION( "_Kd" )
@@ -278,7 +286,7 @@ Effective substitution investment of firm in consumption-good sector
 Also updates '_NW2', '_Deb2', _CD2', '_CD2c', '_CS2'
 */
 V( "_EI" );										// make sure expansion done
-RESULT( CFUN( invest, V( "_SId" ) ) )
+RESULT( CFUN( invest, V( "_SId" ), true ) )
 
 
 EQUATION( "_Tax2" )
@@ -453,43 +461,7 @@ EQUATION( "_supplier" )
 Selected machine supplier by firm in consumption-good sector
 Also set firm 'hook' pointers to supplier firm object
 */
-
-VS( CAPSECL2, "inn" );							// ensure innovation is done and
-												// brochures distributed
-v[1] = VS( PARENT, "m2" );						// machine modularity
-v[2] = VS( PARENT, "b" );						// required payback period
-
-v[4] = DBL_MAX;									// supplier price/cost ratio
-i = 0;
-cur2 = cur3 = NULL;
-CYCLE( cur, "Broch" )							// use brochures to find supplier
-{
-	cur1 = PARENTS( SHOOKS( cur ) );			// pointer to supplier object
-
-	// compare total machine unit cost (acquisition + operation for payback period)
-	v[5] = VS( cur1, "_p1" ) / v[1] + VS( cur1, "_cTau" ) * v[2];
-	if ( v[5] < v[4] )							// best so far?
-	{
-		v[4] = v[5];							// save current best supplier
-		i = VS( cur1, "_ID1" );					// supplier ID
-		cur2 = SHOOKS( cur );					// own entry on supplier list
-		cur3 = cur;								// best supplier brochure
-	}
-}
-
-// if supplier is found, simply update it, if not, draw a random one
-if ( cur2 != NULL && cur3 != NULL )
-{
-	WRITES( cur2, "__tSel", T );				// update selection time
-	WRITE_HOOK( SUPPL, cur3 );					// pointer to current brochure
-}
-else											// no brochure received
-{
-	cur1 = CFUN( set_supplier );				// draw new supplier
-	i = VS( cur1, "_ID1" );
-}
-
-RESULT( i )
+RESULT( CFUN( select_supplier ) )
 
 
 /*============================ SUPPORT EQUATIONS =============================*/
@@ -629,7 +601,7 @@ v[7] = floor( v[2] / v[1] );					// machines to substitute in K
 
 j = T + 1;										// oldest vintage so far
 h = 0;											// oldest vintage ID
-CYCLE_SAFE( cur, "Vint" )						// search from older vintages
+CYCLE( cur, "Vint" )							// search from older vintages
 {
 	v[8] = VS( cur, "__RSvint" );				// number of machines to scrap
 
@@ -736,7 +708,7 @@ EQUATION( "_Pi2" )
 /*
 Profit of firm (before taxes) in consumption-good sector
 */
-RESULT( V( "_S2" ) + V( "_iD2" ) - V( "_C2" ) - V( "_i2" ) )
+RESULT( V( "_S2" ) + V( "_iD2" ) - V( "_C2" ) - V( "_i2" ) + V( "_Gsi" ) )
 
 
 EQUATION( "_Q2e" )
@@ -785,21 +757,29 @@ Desired substitution investment of firm in consumption-good sector
 
 v[1] = VS( PARENT, "m2" );						// machine output per period
 
-v[2] = 0;										// scrapped machine accumulator
+if ( SUBS_MACH_REPL( VS( GRANDPARENT, "flagIndPolicy" ) ) )
+	WRITE( "_Gsi", VL( "_f2", 1 ) * VS( PARENT, "gammaSI" ) *
+		   VLS( GRANDPARENT, "GDPnom", 1 ) );	// ensure restart subsidy pool
+
+v[2] = v[3] = 0;								// scrapped/subsidy accumulators
 CYCLE( cur1, "Vint" )							// search last vintage to scrap
 {
-	v[3] = VS( cur1, "__RSvint" );				// number of machines to scrap
+	RECALCS( cur1, "__RSvint" );				// restart subsidy accounting
+	v[4] = VS( cur1, "__RSvint" );				// number of machines to scrap
 
-	if ( v[3] == 0 )							// nothing else to do
+	if ( v[4] == 0 )							// nothing else to do
 		break;
 
-	v[2] += abs( v[3] );						// accumulate vintage
+	v[2] += abs( v[4] );						// accumulate vintage
+	v[3] += VS( cur1, "__Gsi" );				// accumulate subsidy used
 }
 
-v[4] = max( VL( "_K", 1 ) - V( "_Kd" ), 0 );	// capital shrinkage desired?
-v[5] = floor( v[4] / v[1] );					// machines to remove from K
+WRITE( "_Gsi", v[3] );							// effective subsidy used
 
-RESULT( max( v[2] - v[5], 0 ) * v[1] )
+v[5] = max( VL( "_K", 1 ) - V( "_Kd" ), 0 );	// capital shrinkage desired?
+v[6] = floor( v[5] / v[1] );					// machines to remove from K
+
+RESULT( max( v[2] - v[6], 0 ) * v[1] )
 
 
 EQUATION( "_W2" )

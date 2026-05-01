@@ -122,6 +122,24 @@ box_plots <- function( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat,
                      tit = "Government expenditure",
                      ylab = "Total government expenditure over GDP" )
 
+    temp <- mcData[[ k ]][ TmaskStat, "TaxCred", ] / mcData[[ k ]][ TmaskStat, "GDPnom", ]
+    temp[ ! is.finite( temp ) ] <- NA
+    stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
+                     tit = "R&D tax credit policy fiscal cost",
+                     ylab = "R&D tax credit fiscal cost over GDP" )
+
+    temp <- mcData[[ k ]][ TmaskStat, "Grd", ] / mcData[[ k ]][ TmaskStat, "GDPnom", ]
+    temp[ ! is.finite( temp ) ] <- NA
+    stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
+                     tit = "R&D subsidy policy expenditure",
+                     ylab = "R&D subsidy expenditure over GDP" )
+
+    temp <- mcData[[ k ]][ TmaskStat, "Gsi", ] / mcData[[ k ]][ TmaskStat, "GDPnom", ]
+    temp[ ! is.finite( temp ) ] <- NA
+    stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
+                     tit = "Machine-replacement policy expenditure",
+                     ylab = "Machine-replacement subsidy expenditure over GDP" )
+
     temp <- mcData[[ k ]][ TmaskStat, "Gbail", ] / mcData[[k]][ TmaskStat, "GDPnom", ]
     temp[ ! is.finite( temp ) ] <- NA
     stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
@@ -189,6 +207,16 @@ box_plots <- function( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat,
                      tit = "Dirty-energy innovation",
                      ylab = "Share of innovating firms in energy sector" )
 
+    stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "RDe", ],
+                                        na.rm = TRUE ),
+                     tit = "Energy R&D",
+                     ylab = "R&D expenditure in energy sector" )
+
+    stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "RD1", ],
+                                        na.rm = TRUE ),
+                     tit = "Machine R&D",
+                     ylab = "R&D expenditure in capital-good sector" )
+
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "innGE", ],
                                         na.rm = TRUE ),
                      tit = "Green-energy innovation",
@@ -202,8 +230,18 @@ box_plots <- function( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat,
 
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "imi", ],
                                         na.rm = TRUE ),
-                     tit = "Imitation",
+                     tit = "Machine imitation",
                      ylab = "Share of imitating firms in capital-good sector" )
+
+    stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "RSde", ],
+                                        na.rm = TRUE ),
+                     tit = "Dirty power plant scrapping",
+                     ylab = "Number of scrapped dirty power plants over total" )
+
+    stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "RSge", ],
+                                        na.rm = TRUE ),
+                     tit = "Green power plant scrapping",
+                     ylab = "Number of scrapped green power plants over total" )
 
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "dA", ],
                                         na.rm = TRUE ),
@@ -236,6 +274,25 @@ box_plots <- function( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat,
                                         na.rm = TRUE ),
                      tit = "Net entry of firms",
                      ylab = "Number of net entrant firms in all sectors" )
+
+    stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "exitE", ] +
+                                          mcData[[ k ]][ TmaskStat, "exit1", ] +
+                                          mcData[[ k ]][ TmaskStat, "exit2", ],
+                                        na.rm = TRUE ),
+                     tit = "Firm exit",
+                     ylab = "Number of exiting firms in all sectors over total" )
+
+    stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "exitEfail", ] +
+                                          mcData[[ k ]][ TmaskStat, "exit1fail", ] +
+                                          mcData[[ k ]][ TmaskStat, "exit2fail", ],
+                                        na.rm = TRUE ),
+                     tit = "Firm bankruptcy",
+                     ylab = "Number of bankrupt exiting firms in all sectors over total" )
+
+    stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "ageVint2avg", ],
+                                        na.rm = TRUE ),
+                     tit = "Machine vintage age",
+                     ylab = "Age in periods of machine vintages" )
 
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "pE", ],
                                         na.rm = TRUE ),

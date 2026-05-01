@@ -778,7 +778,7 @@ CFUN_DBL( fire_workers, int mode, double xsCap, double *redCap )
 	CFUN( order_workers, fOrder, OBJ_WRK2 );	// sort bridge objects
 
 	// check firing worker by worker: firm desired adjustments
-	CYCLE_SAFE( wrk, "Wrk2" )
+	CYCLE( wrk, "Wrk2" )
 	{
 		fire = false;
 		worker = SHOOKS( wrk );

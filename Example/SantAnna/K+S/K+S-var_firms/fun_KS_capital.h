@@ -110,7 +110,7 @@ CYCLE( cur, "Firm1" )
 
 // quit candidate firms exit, except the best one if all going to quit
 v[6] = i = j = 0;								// firm counters
-CYCLE_SAFE( cur, "Firm1" )
+CYCLE( cur, "Firm1" )
 {
 	if ( quit[ i ] )
 	{

@@ -122,7 +122,7 @@ namespace lsd
 			inline double _no_node_dbl_( const char *lab, const char *file, int line );
 			inline double _nul_lnk_dbl_( const char *file, int line );
 			inline eq_funcT _chk_eq_( const char *lab );
-			inline object *_cycle_obj_( object *parent, const char *label, const char *command );
+			inline object *_cycle_ctrl_( object *parent, object * & cyc_ptr, const char *label );
 			inline netlink *_bad_ptr_lnk_( object *ptr, const char *file, int line );
 			inline object *_bad_ptr_obj_( object *ptr, const char *file, int line );
 			inline object *_no_hook_obj_( object *ptr, unsigned num, const char *file, int line );

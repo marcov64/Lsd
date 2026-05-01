@@ -271,9 +271,10 @@ long equation::init_net( object *container, char const *lab, char const *dir, ch
 	switch ( typeNet )										// execute the appropriate functions
 	{
 		case 0:												// read external network file
-			numLinks = container->read_file_net( lab, dir, base_name, ( ( int ) RND_SEED - 1 ) % NUM_NETS + 1, "net" );
+			numLinks = container->read_file_net( lab, dir, base_name, 
+					   ( ( int ) RND_SEEDS( container ) ) % NUM_NETS + 1, "net" );
 			PLOG( "\n Network read from file: %s%s%s_%d.net", dir,
-				  fsep( dir ), base_name, ( ( int ) RND_SEED - 1 ) % NUM_NETS + 1 );
+				  fsep( dir ), base_name, ( ( int ) RND_SEEDS( container ) ) % NUM_NETS + 1 );
 		break;
 
 		case 1:												// Uniform network

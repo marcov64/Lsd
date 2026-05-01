@@ -23,7 +23,7 @@ Nominal (monetary terms) desired aggregated consumption
 
 // workers' net income after taxes
 // wages and unemployment bonuses this period and past period dividends
-v[0] = VS( LABSUPL0, "W" ) + V( "G" ) - VS( LABSUPL0, "TaxW" ) +
+v[0] = VS( LABSUPL0, "W" ) + V( "Gc" ) - VS( LABSUPL0, "TaxW" ) +
 	   VL( "Div", 1 ) - V( "TaxDiv" );
 
 // handle accumulated forced savings from the past
@@ -60,9 +60,9 @@ switch ( ( int ) V( "flagCons" ) )
 RESULT( v[0] )
 
 
-EQUATION( "G" )
+EQUATION( "Gc" )
 /*
-Government expenditure (exogenous demand)
+Government consumption expenditure (exogenous demand)
 */
 
 i = V( "flagGovExp" );							// type of govt. exped.
@@ -218,6 +218,20 @@ Total firm equity hold by workers/households
 RESULT( VS( ENESECL0, "EqE" ) + VS( CAPSECL0, "Eq1" ) + VS( CONSECL0, "Eq2" ) )
 
 
+EQUATION( "G" )
+/*
+Government expenditure (exogenous demand)
+*/
+RESULT( V( "Gc" ) + V( "Grd" ) + VS( CONSECL0, "Gsi" ) )
+
+
+EQUATION( "Grd" )
+/*
+Government R&D subsidy expenditure
+*/
+RESULT( VS( ENESECL0, "Grd1" ) + VS( CAPSECL0, "GrdE" ) )
+
+
 EQUATION( "GDPreal" )
 /*
 Real (in initial prices terms) gross domestic product
@@ -321,6 +335,29 @@ RECALC( "cExit" );								// returned equity from exits
 RECALCS( FINSECL0, "BadDeb" );					// bad debt update after exits
 
 VS( FINSECL0, "cScores" );						// set the credit pecking order
+
+RESULT( v[0] )
+
+
+EQUATION( "regChg" )
+/*
+Produces a regulatory regime change at the time step defined in TregChg
+If TregChg is zero, there is no regime change
+Changed parameters:
+	Global:
+		flagIndPolicy	-> flagIndPolicyChg
+*/
+
+if ( T == ( int ) V( "TregChg" ) )				// in time, replace parameters
+{
+	WRITE( "flagIndPolicy", V( "flagIndPolicyChg" ) );
+
+	LOG( "\n Regime changed (t=%g)", T );
+	PARAMETER;									// no more evaluate this eq.
+	v[0] = 1;
+}
+else
+	v[0] = 0;									// no change
 
 RESULT( v[0] )
 
@@ -431,7 +468,7 @@ WRITEL( "A", CFUN( init_cond, "A0" ), -1 );
 WRITEL( "Def", CFUN( init_cond, "Def0" ), -1 );
 WRITEL( "Em", CFUN( init_cond, "Em0" ), -1 );
 WRITEL( "En", CFUN( init_cond, "En0" ), -1 );
-WRITEL( "G", CFUN( init_cond, "G0" ), -1 );
+WRITEL( "Gc", CFUN( init_cond, "G0" ), -1 );
 WRITEL( "GDPnom", CFUN( init_cond, "GDPnom0" ), -1 );
 WRITEL( "GDPreal", CFUN( init_cond, "GDPnom0" ), -1 );
 WRITEL( "Tax", CFUN( init_cond, "Tax0" ), -1 );

@@ -223,7 +223,7 @@ CYCLE( cur, "Firm2" )
 // quit candidate firms exit, except the best one if all going to quit
 // and good bankrupt firms that are rescued by the government (statization)
 v[6] = i = j = n = 0;							// firm counters
-CYCLE_SAFE( cur, "Firm2" )
+CYCLE( cur, "Firm2" )
 {
 	if ( quit[ i ] == 2 )						// firm statization possible?
 	{

@@ -157,7 +157,7 @@ NEW_VS( v[18], CONSECL0, "p2avg" );				// average goods prices
 
 // government decides expenditure and workers set all income to buying goods,
 // demand is matched to supply of goods, producing inventories or forced savings
-NEW_VS( v[19], THIS, "G" );						// public total expenditures
+NEW_VS( v[19], THIS, "Gc" );					// public total consumption
 NEW_VS( v[20], CONSECL0, "D2d" );				// desired goods demand
 NEW_VS( v[21], CONSECL0, "D2" );				// fulfilled demand for goods
 NEW_VS( v[22], CONSECL0, "N" );					// accumulated inventories

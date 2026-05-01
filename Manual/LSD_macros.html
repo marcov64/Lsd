@@ -3286,7 +3286,7 @@ and <span class=Cdigo><a href="#_V(&quot;Lab&quot;),_VL(&quot;Lab&quot;,_lag),">
   </td>
   <td width="16%" style='width:16.48%;border:none;padding:2.85pt 2.85pt 2.85pt 2.85pt'>
   <p class=MsoNormal><span style='font-family:"Courier New"'><a
-  href="#_CYCLE(_cur,_&quot;obj_Lab&quot;">CYCLE/CYCLE_SAFE</a></span></p>
+  href="#_CYCLE(_cur,_&quot;obj_Lab&quot;">CYCLE</a></span></p>
   </td>
   <td width="21%" style='width:21.94%;border:none;background:#F2F2F2;
   padding:2.85pt 2.85pt 2.85pt 2.85pt'>
@@ -4062,8 +4062,8 @@ style='font-family:"Courier New";color:gray'><br>
 rate: </span></span><br>
 <span class=Cdigo><span style='color:#00B050'>PROF(t) = P(t) * A(t-1) - C - RIM
 – RIN * Inn </span></span><br>
-<span class=Cdigo><span style='color:#00B050'>profits per unit of capital are
-equal current price times lagged productivity </span></span><br>
+<span class=Cdigo><span style='color:#00B050'>profits per unit of capital are equal
+current price times lagged productivity </span></span><br>
 <span class=Cdigo><span style='color:#00B050'>minus the cost for research
 (innovative firms spend for both type </span></span><br>
 <span class=Cdigo><span style='color:#00B050'>of research) and fixed costs. </span></span><br>
@@ -4120,10 +4120,10 @@ class=Cdigo>v[1]</span>, <span class=Cdigo>v[2]</span> etc.</p>
 
 <p>Up to 1,000 temporary storage positions are available (from <span
 class=Cdigo>v[0]</span> to <span class=Cdigo>v[999]</span>) to each Equation.
-The values of <span class=Cdigo>v[…]</span> are reset for each Equation, and
-therefore cannot be used to transfer information from one Equation to another
-or between different time steps of the same Equation. Technically, this storage
-is configured as a volatile C++ double precision array.</p>
+The values of <span class=Cdigo>v[…]</span> are reset for each Equation, and therefore
+cannot be used to transfer information from one Equation to another or between
+different time steps of the same Equation. Technically, this storage is
+configured as a volatile C++ double precision array.</p>
 
 <h2>Example</h2>
 
@@ -4232,9 +4232,9 @@ LSD Macros</p>
 
 <p class=MsoNormal style='margin:0cm'>&nbsp;</p>
 
-<p class=MsoNormal style='margin:0cm'><b>Warning:</b> Despite the availability
-of C++ predefined pointers to operate on the Object structure, their use should
-be <i>avoided</i>. Very importantly, the corresponding LSD Macros offer pointer
+<p class=MsoNormal style='margin:0cm'><b>Warning:</b> Despite the availability of
+C++ predefined pointers to operate on the Object structure, their use should be
+<i>avoided</i>. Very importantly, the corresponding LSD Macros offer pointer
 checking to the operations, preventing hard-to-find crashes and easily pointing
 error locations to the modeler. If required, for a small performance gain,
 pointer checking can be disabled (see <span class=Cdigo><a href="#POINTER_CHECK">NO_POINTER_CHECK</a></span>)
@@ -4413,8 +4413,7 @@ Firm 4 | =&gt; . . . =&gt; | Firm 100 |</span><br>
 ||&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Worker 1 | =&gt; | Worker 1 | =&gt; .
 . . =&gt; | Worker 1000 |</span><br>
 <span class=Cdigo>&nbsp;&nbsp;&nbsp;&nbsp; ||&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;+----------+&nbsp;&nbsp;&nbsp;
-+----------+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;+----------+&nbsp;&nbsp;&nbsp; +----------+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 +-------------+ </span><br>
 <span class=Cdigo>&nbsp;+----------+&nbsp;&nbsp;&nbsp;
 +----------+&nbsp;&nbsp;&nbsp;
@@ -4478,12 +4477,12 @@ pointer initialization also disable pointer checking (see <span class=Cdigo><a
 href="#_NO_POINTER_CHECK_USE_POINTER_CHECK">NO_POINTER_CHECK</a></span> Macro
 for details).</p>
 
-<p>For example, when creating a new Object instance, one wants to initialize
-its Parameters. This is done by storing the new instance “address” in a
-temporary pointer and applying the LSD required Macros on it. For example, the
-following lines within an Equation create a new instance of Object <i>Firm</i>
-and set its Variable <i>K</i> to 0 (see the details in the description of the
-LSD Macros listed below). </p>
+<p>For example, when creating a new Object instance, one wants to initialize its
+Parameters. This is done by storing the new instance “address” in a temporary
+pointer and applying the LSD required Macros on it. For example, the following
+lines within an Equation create a new instance of Object <i>Firm</i> and set
+its Variable <i>K</i> to 0 (see the details in the description of the LSD
+Macros listed below). </p>
 
 <p><span class=Cdigo>... </span><span style='font-family:"Courier New";
 color:gray'><br>
@@ -5631,10 +5630,10 @@ to the choice of an interacting user. </p>
 class=Cdigo><span style='color:#00B050'>//minimum m.s. below which a firm
 should be removed </span></span><span style='font-family:"Courier New";
 color:gray'><br>
-<span class=Cdigo>CYCLE_SAFE( cur, &quot;Firm&quot; ) </span><br>
-<span class=Cdigo>{ </span></span><span class=Cdigo><span style='color:#00B050'>//Cycle
-through each firm, allowing for the removal of the pointer</span> </span><span
-style='font-family:"Courier New";color:gray'><br>
+<span class=Cdigo>CYCLE ( cur, &quot;Firm&quot; ) </span><br>
+<span class=Cdigo>{ </span></span><span class=Cdigo><span style='color:#00B050'>//cycle
+through each firm</span> </span><span style='font-family:"Courier New";
+color:gray'><br>
 <span class=Cdigo>&nbsp; v[0] = VS( cur, &quot;MarketShare&quot; ); </span></span><span
 class=Cdigo><span style='color:#00B050'>//read the market share</span> </span><span
 style='font-family:"Courier New";color:gray'><br>
@@ -5652,8 +5651,8 @@ style='font-family:"Courier New";color:gray'><br>
 <span class=Cdigo>&nbsp;&nbsp;} </span><br>
 <span class=Cdigo>} </span></span></p>
 
-<p>The cycle removes all <i>Firm</i>’s having market shares smaller than a
-given value and that the user permitted to. </p>
+<p>The cycle removes all <i>Firm</i>’s having market shares smaller than a given
+value and that the user permitted to. </p>
 
 <h2>Warning</h2>
 
@@ -5824,11 +5823,10 @@ calculation, <span class=Cdigo><a href="#_Parent_Object:_p">THIS</a></span>).
 The search process for <i>obj</i> is similar to <span class=MsoHyperlink><span
 style='font-family:"Courier New"'><a href="#_SEARCH(_&quot;obj_Lab&quot;_),">SEARCH(…)</a></span></span>.</p>
 
-<p>If a matching Object instance is found, the Macro returns the instance
-number representing the position of the specific instance pointed by <i>obj</i>
-in the <a href="#_Object’s_relatives:_up,">brotherhood chain</a>, starting from
-1. If the Object is not found, <span class=Cdigo>SEARCH_INST(…)</span> returns
-zero.</p>
+<p>If a matching Object instance is found, the Macro returns the instance number
+representing the position of the specific instance pointed by <i>obj</i> in the
+<a href="#_Object’s_relatives:_up,">brotherhood chain</a>, starting from 1. If
+the Object is not found, <span class=Cdigo>SEARCH_INST(…)</span> returns zero.</p>
 
 <p>If <i>obj</i> is set to <span class=Cdigo>NULL</span>, the Macros will
 return the instance number of the Object containing the Variable currently
@@ -6171,11 +6169,11 @@ family.</p>
 <p>If <i>Lab</i> is a Variable, these Macros will not trigger the computation
 of the Equation for <i>Lab</i> before the multiplication is performed. That is,
 if <i>Lab</i> was not yet computed in the current period (<i>t</i>), the last
-available value for <i>Lab</i> is used as the base for the multiplication and
-the result will be saved as the new value for <i>Lab</i> in <i>t</i>. No
-further recomputation will be automatically performed in <i>t</i>. If the
-previous computation of <i>Lab</i> is required, the user must do it explicitly
-before calling <span class=Cdigo>MULT(…)</span>.</p>
+available value for <i>Lab</i> is used as the base for the multiplication and the
+result will be saved as the new value for <i>Lab</i> in <i>t</i>. No further
+recomputation will be automatically performed in <i>t</i>. If the previous
+computation of <i>Lab</i> is required, the user must do it explicitly before
+calling <span class=Cdigo>MULT(…)</span>.</p>
 
 <div align=center>
 
@@ -6194,9 +6192,7 @@ before calling <span class=Cdigo>MULT(…)</span>.</p>
 
 <h1><a name="_CYCLE(_cur,_&quot;obj_Lab&quot;"></a><a name=CYCLE></a>CYCLE( <i>cur</i>,
 &quot;<i>obj_Lab</i>&quot; ) { }, CYCLES( <i>obj</i>_<i>from</i>, <i>cur</i>,
-&quot;<i>obj_Lab</i>&quot; ) { }<br>
-CYCLE_SAFE( <i>cur</i>, &quot;<i>obj_Lab</i>&quot; ) { }, CYCLE_SAFES( <i>obj</i>_<i>from</i>,
-<i>cur</i>, &quot;<i>obj_Lab</i>&quot; ) { }</h1>
+&quot;<i>obj_Lab</i>&quot; ) { }</h1>
 
 <p class=MsoNormal>These Macros scan all the Object instances labelled <i>obj_Lab</i>
 descending from current Object <a href="#_Parent_Object:_p"><span class=Cdigo><span
@@ -6249,60 +6245,8 @@ receives the value of the Variable named <i>Profit</i> related to that
 particular <i>Firm</i>, which is subsequently accumulated in <span class=Cdigo><a
 href="#_CURRENT">v[0]</a></span>. </p>
 
-<p class=MsoNormal>See also the example for <span class=Cdigo><a href="#RNDDRAW">RNDDRAW(…)</a></span>.</p>
-
-<h2><a name="_Warning"></a>Warning </h2>
-
-<p><b>Never</b> use <span class=Cdigo><a href="#_DELETE(_obj_)">DELETE(…)</a></span>
-inside a <span class=Cdigo>CYCLE(…)</span> to remove one of the Object
-instances being cycled at any nesting level. In fact, deleting any Object
-pointed to by <span class=Cdigo><a href="#_Temporary_Object's_pointers:">cur</a></span>
-prevents the <span class=Cdigo>CYCLE(…)</span>from identifying the next one in
-the brotherhood chain. Instead, use the alternative Macros <span class=Cdigo>CYCLE_SAFE(…)</span>.
-In this case, it is possible to delete the Object pointed by the cycling
-pointer <span class=Cdigo><a href="#_Temporary_Object's_pointers:">cur</a></span>.
-However, it is not possible to nest different <span class=Cdigo>CYCLE_SAFE(…)</span>
-levels. </p>
-
-<p>The example below is a mistake because <span class=Cdigo><a
-href="#_Temporary_Object's_pointers:">cur1</a></span> is deleted within a <span
-class=Cdigo>CYCLE(…)</span> command:</p>
-
-<p><b>ERROR - ERROR - ERROR</b> <br>
-<span class=Cdigo>CYCLE( cur, &quot;Market&quot; ) </span><span
-style='font-family:"Courier New";color:gray'><br>
-<span class=Cdigo>{ </span></span><span class=Cdigo><span style='color:#00B050'>//
-for each market</span> </span><span style='font-family:"Courier New";
-color:gray'><br>
-<span class=Cdigo>&nbsp; CYCLES( cur, cur1, &quot;Firm&quot; ) </span><br>
-<span class=Cdigo>&nbsp;&nbsp;{ </span></span><span class=Cdigo><span
-style='color:#00B050'>// for each firm, contained in cur</span> </span><span
-style='font-family:"Courier New";color:gray'><br>
-<span class=Cdigo>&nbsp;&nbsp;&nbsp; v[1] = VS( cur1, &quot;Profit&quot; ); </span><br>
-<span class=Cdigo>&nbsp;&nbsp;&nbsp; if ( v[1] &lt; 0 ) </span><br>
-<span class=Cdigo>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DELETE( cur1 ); </span></span><span
-class=Cdigo><span style='color:#00B050'>// ERROR: this undermines the inner
-CYCLE</span> </span><span style='font-family:"Courier New";color:gray'><br>
-<span class=Cdigo>&nbsp; } </span><br>
-<span class=Cdigo>} </span><br>
-</span><b>ERROR - ERROR - ERROR</b> </p>
-
-<p>Instead, the correct code should be: </p>
-
-<p><span class=Cdigo>CYCLE( cur, &quot;Market&quot; ) </span><span
-style='font-family:"Courier New";color:gray'><br>
-<span class=Cdigo>{ </span></span><span class=Cdigo><span style='color:#00B050'>//
-for each market</span> </span><span style='font-family:"Courier New";
-color:gray'><br>
-<span class=Cdigo>&nbsp; CYCLE_SAFES( cur, cur1, &quot;Firm&quot; ) </span><br>
-<span class=Cdigo>&nbsp;&nbsp;{ </span></span><span class=Cdigo><span
-style='color:#00B050'>// for each firm, contained in cur</span> </span><span
-style='font-family:"Courier New";color:gray'><br>
-<span class=Cdigo>&nbsp;&nbsp;&nbsp; v[1] = VS( cur1, &quot;Profit&quot; ); </span><br>
-<span class=Cdigo>&nbsp;&nbsp;&nbsp; if ( v[1] &lt; 0 ) </span><br>
-<span class=Cdigo>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DELETE( cur1 ); </span><br>
-<span class=Cdigo>&nbsp; } </span><br>
-<span class=Cdigo>} </span></span></p>
+<p class=MsoNormal>See also the example for <span class=Cdigo><a href="#RNDDRAW">RNDDRAW(…)</a></span>.<a
+name="_Warning"></a><span class=Cdigo> </span></p>
 
 </div>
 
@@ -6556,14 +6500,6 @@ delay, during which the to be deleted instance is still present and affecting
 calculations. The <span class=Cdigo><a href="#_DELETING,_DELETING(_obj">DELETING(…)</a></span>
 Macro can be used to detect if an Object instance is currently waiting to be
 deleted.</p>
-
-<p>It is <i>not</i> possible to delete Object instances inside a regular <span
-class=Cdigo><a href="#_CYCLE(_cur,_&quot;obj_Lab&quot;_">CYCLE(…)</a></span>
-loop Macro when the Object controlling it is of the same type (label) of the
-instance being deleted. This may produce hard crashes. Whenever an Object
-instance needs to be deleted inside such type of loop, it is required the use
-of the <span class=Cdigo><a href="#_CYCLE(_cur,_&quot;obj_Lab&quot;_">CYCLE_SAFE(…)</a></span>
-Macros. See <a href="#_Warning">above</a> for details and an example.</p>
 
 <div align=center>
 
@@ -7024,8 +6960,8 @@ INIT_LAT( <i>color</i> )<br>
 INIT_LAT( <i>color</i>, <i>rows</i>, <i>cols</i> )<br>
 INIT_LAT( <i>color</i>, <i>rows</i>, <i>cols</i>, <i>width</i>, <i>height</i> )</h1>
 
-<p class=MsoNormal>These Macros create a bi-dimensional lattice graphical
-window available for simulation run time updating. The lattice is formed by <i>rows</i>
+<p class=MsoNormal>These Macros create a bi-dimensional lattice graphical window
+available for simulation run time updating. The lattice is formed by <i>rows</i>
 lines and <i>cols</i> columns, set to 100 × 100 by default. The user can also
 set the physical window size as <i>width</i> × <i>height</i> pixels, set to 400
 × 400 by default, and the background <i>color</i>, set to white if not
@@ -7763,9 +7699,9 @@ Carlo analysis.</p>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><a
-  name="_SNAP_NET(_&quot;node_Lab&quot;,_&quot;filename"></a><a
-  name="_SNAP_NET()"></a><span style='font-size:10.0pt;color:black'><a
-  href="#top"><span style='color:red;text-decoration:none'>&#9650;Top</span></a></span></p>
+  name="_SNAP_NET()"></a><a name="_SNAP_NET(_&quot;node_Lab&quot;,_&quot;filename"></a><span
+  style='font-size:10.0pt;color:black'><a href="#top"><span style='color:red;
+  text-decoration:none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
@@ -8252,8 +8188,8 @@ Pareto distribution with scale <i>mu</i> and shape parameter <i>alpha</i></p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:32.2pt;text-indent:-18.0pt'><span style='font-size:10.0pt;
 font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>poisson( <i>mean</i> )</b>: a random draw from a Poisson
-distribution with mean <i>mean</i></p>
+</span></span><b>poisson( <i>mean</i> )</b>: a random draw from a Poisson distribution
+with mean <i>mean</i></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:32.2pt;text-indent:-18.0pt'><span style='font-size:10.0pt;
@@ -8284,24 +8220,24 @@ generator algorithm, selected by <span class=Cdigo><a
 href="#_RND_GENERATOR(_type_)">RND_GENERATOR(…)</a></span>, contained in the
 Object instance currently under computation (<span class=Cdigo>THIS</span>). To
 select the pseudo-random number generator (PRNG) of a different (<i>obj</i>)
-Object instance, please use the S-ended version of the functions:  </p>
+Object instance, please use the S-ended version of the functions:  </p>
 
 <p class=MsoNormal>alaplS( <i>obj</i>, <i>med</i>, <i>alpha1</i>, <i>alpha2</i>
 ), bernoulliS( <i>obj</i>, <i>p</i> ), betaS( <i>obj</i>, <i>alpha</i>, <i>beta</i>
 ), binomialS( <i>obj</i>, <i>p</i>, <i>t</i> ), bparetoS( <i>obj</i>, <i>alpha</i>,
-<i>min</i>, <i>max</i> ), cauchyS( <i>obj</i>, <i>a</i>, <i>b</i> ), chi_squaredS(
-<i>obj</i>, <i>n</i> ), exponentialS( <i>obj</i>, <i>lambda</i> ), fisherS( <i>obj</i>,
-<i>m</i>, <i>n </i>), gammaS( <i>obj</i>, <i>alpha</i>, <i>beta </i>), geometricS(
-<i>obj</i>, <i>p</i> ), lnormS( <i>obj</i>, <i>mean</i>, <i>dev</i> ), normS( <i>obj</i>,
-<i>mean</i>, <i>dev</i> ), paretoS( <i>obj</i>, <i>mu</i>, <i>alpha</i> ), poissonS(
-<i>obj</i>, <i>mean</i> ), studentS( <i>obj</i>, <i>n</i> ), uniformS( <i>obj</i>,
-<i>min</i>, <i>max</i> ), uniform_intS( <i>obj</i>, <i>min</i>, <i>max</i> ), weibullS(
-<i>obj</i>, <i>a</i>, <i>b</i> ).</p>
+<i>min</i>, <i>max</i> ), cauchyS( <i>obj</i>, <i>a</i>, <i>b</i> ),
+chi_squaredS( <i>obj</i>, <i>n</i> ), exponentialS( <i>obj</i>, <i>lambda</i>
+), fisherS( <i>obj</i>, <i>m</i>, <i>n </i>), gammaS( <i>obj</i>, <i>alpha</i>,
+<i>beta </i>), geometricS( <i>obj</i>, <i>p</i> ), lnormS( <i>obj</i>, <i>mean</i>,
+<i>dev</i> ), normS( <i>obj</i>, <i>mean</i>, <i>dev</i> ), paretoS( <i>obj</i>,
+<i>mu</i>, <i>alpha</i> ), poissonS( <i>obj</i>, <i>mean</i> ), studentS( <i>obj</i>,
+<i>n</i> ), uniformS( <i>obj</i>, <i>min</i>, <i>max</i> ), uniform_intS( <i>obj</i>,
+<i>min</i>, <i>max</i> ), weibullS( <i>obj</i>, <i>a</i>, <i>b</i> ).</p>
 
 <p class=MsoNormal>If the selected Object instance (<span class=Cdigo>THIS</span>
-or <i>obj</i>) does not have a pseudo-random number generator (PRNG), the (grand…)
-parent’s one is used, recursively until <span class=Cdigo>ROOT</span> (which
-always has a PRNG) as required.</p>
+or <i>obj</i>) does not have a pseudo-random number generator (PRNG), the
+(grand…) parent’s one is used, recursively until <span class=Cdigo>ROOT</span>
+(which always has a PRNG) as required.</p>
 
 <h2>Cumulative distribution functions</h2>
 
@@ -8422,8 +8358,8 @@ style='color:#00B050'>// turns the variable &quot;Init&quot; into a parameter
 
 <p><span class=Cdigo>RESULT( 1 )</span></p>
 
-<p class=MsoNormal>Notice that Eigen follows the C-language convention of
-starting indexes from zero, so the matrix element <span class=Cdigo>a<sub>11</sub></span>
+<p class=MsoNormal>Notice that Eigen follows the C-language convention of starting
+indexes from zero, so the matrix element <span class=Cdigo>a<sub>11</sub></span>
 is addressed by <span class=Cdigo>( 0, 0 )</span> and so on.</p>
 
 <p class=MsoNormal>To compute the matrix determinant and to directly access
@@ -8906,9 +8842,9 @@ LSD Log window. If a regular string <i>Comment</i> is provided, it is presented
 then the modeler can also present the numerical contents of C++ variables (like
 temporary storage <span class=Cdigo><u><span style='color:blue'><a
 href="#_CURRENT">v[…]</a></span></u></span>) and other data. <i>format</i> is
-defined exactly like for the standard C/C++ <span class=Cdigo>printf(…)</span> function
-and is very flexible in terms of what can be presented and how, please see the
-C/C++ standard library documentation.</p>
+defined exactly like for the standard C/C++ <span class=Cdigo>printf(…)</span>
+function and is very flexible in terms of what can be presented and how, please
+see the C/C++ standard library documentation.</p>
 
 <p>Any message submitted with <span class=Cdigo>LOG(…)</span> is only presented
 while LSD simulation is running in <span class=Cdigo><u><span style='color:
@@ -9175,9 +9111,9 @@ the saved values.</p>
 
 <p>Macros <span class=Cdigo>RND</span> produce a pseudo-random number uniformly
 distributed between 0 and 1 using the generator algorithm, selected by <span
-class=Cdigo><a href="#_RND_GENERATOR(_type_)">RND_GENERATOR(…)</a></span>, contained
-in the Object instance currently under computation (<span class=Cdigo>THIS</span>)
-or the chosen (<i>obj</i>) Object instance. </p>
+class=Cdigo><a href="#_RND_GENERATOR(_type_)">RND_GENERATOR(…)</a></span>,
+contained in the Object instance currently under computation (<span
+class=Cdigo>THIS</span>) or the chosen (<i>obj</i>) Object instance. </p>
 
 <p>If the selected Object instance (<span class=Cdigo>THIS</span> or <i>obj</i>)
 does not have a pseudo-random number generator (PRNG), the (grand…) parent’s
@@ -9205,8 +9141,8 @@ random number generator in (0,1)<br>
 <b>7</b>. Lagged Fibonacci (48-bit) in [0,1)</p>
 
 <p class=MsoNormal><b>Advanced Users</b>: the macro also returns a C++ <span
-class=Cdigo>void</span> pointer to the selected generator engine. This allow
-the simulation to share the same entropy source as the internal LSD functions.
+class=Cdigo>void</span> pointer to the selected generator engine. This allow the
+simulation to share the same entropy source as the internal LSD functions.
 Before usage, the returned pointer must be casted to the appropriate generator
 type (0:<span class=Cdigo>random_device</span>, 1/3:<span class=Cdigo>minstd_rand</span>,
 2/4:<span class=Cdigo>mt19937</span>, 5:<span class=Cdigo>mt19937_64</span>, 6:<span
@@ -9220,8 +9156,8 @@ RND_SETSEED( <i>seed</i> ), RND_SETSEEDS( <i>obj</i>, <i>seed</i> )</h2>
 <p class=MsoNormal>Macros <span class=Cdigo>RND_SETSEED(…)</span> change the
 integer seed number used by the pseudo-random number generator to <i>seed</i>,
 an unsigned integer value. <span class=Cdigo>RND_SEED</span> reads the
-currently set unsigned integer seed number in double precision format. The Macros
-can be applied to the Object instance currently under computation (<span
+currently set unsigned integer seed number in double precision format. The
+Macros can be applied to the Object instance currently under computation (<span
 class=Cdigo>THIS</span>) or the chosen (<i>obj</i>) Object instance.</p>
 
 <h2><a name="_SLEEP(_msecs_)"></a><a name="_ROOT"></a>ROOT</h2>
@@ -9565,13 +9501,12 @@ style='color:#00B050'>// turns the variable &quot;Init&quot; into a parameter
 
 <p><span class=Cdigo>RESULT( 1 )</span></p>
 
-<p>Then, in an Equation of a <i>Firm</i>-level Variable, it is possible to
-add/remove elements to the integer vector and read/change their values. In the
-example below, we make sure the <i>tech_params</i> vector is correctly set
-before using it to compute <i>Firm</i>’s productivity using an external library
-function (not shown below). If format is not ok, rebuild the vector, by
-clearing it and initializing the vector and the integer variable, before
-calling the function:</p>
+<p>Then, in an Equation of a <i>Firm</i>-level Variable, it is possible to add/remove
+elements to the integer vector and read/change their values. In the example
+below, we make sure the <i>tech_params</i> vector is correctly set before using
+it to compute <i>Firm</i>’s productivity using an external library function
+(not shown below). If format is not ok, rebuild the vector, by clearing it and
+initializing the vector and the integer variable, before calling the function:</p>
 
 <p><span class=Cdigo>…</span><span style='font-family:"Courier New";color:gray'><br>
 </span><span class=Cdigo><span style='color:#00B050'>// refill the
@@ -9757,8 +9692,8 @@ in the LSD Object <span class=Cdigo><a href="#_Parent_Object:_p"><span
 style='color:gray;text-decoration:none'><u><span style='color:blue'>THIS</span></u></span></a></span>
 under computation, or in the Object pointed by <i>obj</i>, if present. </p>
 
-<p><b>Warning:</b> the data extension <b>must</b> be set before using this
-Macro. If the target LSD Object has no data extension set previously by <span
+<p><b>Warning:</b> the data extension <b>must</b> be set before using this Macro.
+If the target LSD Object has no data extension set previously by <span
 class=Cdigo><u><span style='color:blue'><a href="#_ADDEXT(_class_),">ADDEXT(…)</a></span></u></span>,
 a LSD run time crash will happen.</p>
 
@@ -9846,7 +9781,7 @@ C++ data extensions and an example. </p>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><a
-  name="_HOOK(_num_),"></a><a name="_Basic_C++_coding"></a><span
+  name="_Basic_C++_coding"></a><a name="_HOOK(_num_),"></a><span
   style='font-size:10.0pt;color:black'><a href="#top"><span style='color:red;
   text-decoration:none'>&#9650;Top</span></a></span></p>
   </td>

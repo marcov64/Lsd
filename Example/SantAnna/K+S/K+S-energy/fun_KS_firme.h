@@ -36,7 +36,7 @@ else
 }
 
 // normalized worker-equivalent on R&D (for ever-growing energy prices)
-v[3] = ( VL( "_RDe", 1 ) / VLS( LABSUPL2, "wReal", 1 ) ) *
+v[3] = ( ( VL( "_RDe", 1 ) + VL( "_GrdE", 1 ) ) / VLS( LABSUPL2, "wReal", 1 ) ) *
 	   VS( LABSUPL2, "Ls0" ) / VLS( LABSUPL2, "Ls", 1 );
 
 // dirty energy innovation process (success probability)
@@ -213,10 +213,11 @@ else
 
 _IdeD = _IeD - _IgeD;							// desired dirty investment
 
-if ( _IdeD >= 1 )								// new dirty plant?
-	CFUN( add_plant, DIRTY, _IdeD, 0, false );	// create dirty plant object
+if ( _IdeD < 1 || ( CAP_DIRTY_PLANT( VS( GRANDPARENT, "flagIndPolicy" ) ) &&
+	 T >= VS( PARENT, "Tge" ) && VL( "_fKge", 1 ) <= VS( PARENT, "fGEmin" ) ) )
+	_IdeD = 0;									// don't build if small/capped
 else
-	_IdeD = 0;									// don't build if too small
+	CFUN( add_plant, DIRTY, _IdeD, 0, false );	// create dirty plant object
 
 if ( _IeD - _EIeD >= _IdeD + _IgeD )			// cannot cover substitution?
 	WRITE( "_SIe", _IdeD + _IgeD );				// adjust substitution
@@ -252,7 +253,7 @@ else
 }
 
 // normalized worker-equivalent on R&D (for ever-growing energy prices)
-v[3] = ( VL( "_RDe", 1 ) / VLS( LABSUPL2, "wReal", 1 ) ) *
+v[3] = ( ( VL( "_RDe", 1 ) + VL( "_GrdE", 1 ) ) / VLS( LABSUPL2, "wReal", 1 ) ) *
 	   VS( LABSUPL2, "Ls0" ) / VLS( LABSUPL2, "Ls", 1 );
 
 // green energy innovation process (success probability)
@@ -304,12 +305,16 @@ if ( v[1] > 0 )									// don't apply limit for entrant
 if ( T <= VS( CLIMATL2, "tA0" ) )				// before CO2 reference time?
 	v[0] *= VS( PARENT, "fGE0" );				// fixed share of green
 else											// regular periods
-	// if green plants are more expensive to built and operate than dirty ones
-	if ( V( "_ICtauGE" ) >
-		 VS( PARENT, "bE") * ( VS( PARENT, "pF" ) / V( "_AtauDE" ) +
-							   VS( LABSUPL2, "w" ) *
-							   ( VS( PARENT, "mDE" ) - VS( PARENT, "mGE" ) ) ) )
-		v[0] = 0;								// no green new plants
+	// consider dirty plants only if cap policy in not active
+	if ( ! CAP_DIRTY_PLANT( VS( GRANDPARENT, "flagIndPolicy" ) ) ||
+		 T < VS( PARENT, "Tge" ) || VL( "_fKge", 1 ) > VS( PARENT, "fGEmin" ) )
+		// if green plants are more expensive to built/operate than dirty ones
+		if ( V( "_ICtauGE" ) >
+			 VS( PARENT, "bE") * ( VS( PARENT, "pF" ) / V( "_AtauDE" ) +
+								   VS( LABSUPL2, "w" ) *
+								   ( VS( PARENT, "mDE" ) -
+									 VS( PARENT, "mGE" ) ) ) )
+			v[0] = 0;							// no green new plants
 
 RESULT( v[0] >= 1 ? v[0] : 0 )					// ignore too small expansions
 
@@ -318,12 +323,13 @@ EQUATION( "_NPVge" )
 /*
 Net present value of green energy project finance
 */
+v[1] = VLS( PARENT, "AeMavg", 1 );
+v[2] = v[1] > 0 ? VLS( PARENT, "wEmavg", 1 ) / v[1] : 0;
 RESULT( V( "_IgeD" ) * npv( VLS( PARENT, "pEmavg", 1 ) *
-							VLS( PARENT, "uEmavg", 1 ) -
-							VLS( PARENT, "wEmavg", 1 ) /
-							VLS( PARENT, "AeMavg", 1 ),
+							VLS( PARENT, "uEmavg", 1 ) - v[2],
 							V( "_rEdeb" ),
-							VS( PARENT, "etaE" ), VS( PARENT, "Tcon" ) ) -
+							VS( PARENT, "etaE" ),
+							VS( PARENT, "Tcon" ) ) -
 		V( "_IgeDnom" ) )
 
 
@@ -337,7 +343,7 @@ RESULT( SUM_CND( "__Kde", "__lifeDEcycle", "==", 2 ) +
 
 EQUATION( "_RDe" )
 /*
-R&D expenditure of energy producer
+R&D firm expenditure of energy producer
 */
 
 if ( VS( GRANDPARENT, "flagEnClim" ) == 0 )
@@ -429,13 +435,21 @@ RESULT( _NPVge + OV0 + max( OV1u, OV1d ) )
 EQUATION( "_TaxE" )
 /*
 Taxes paid by energy producer
-Also updates '_NWe', '_DebE', '_CDe', '_CDeC', '_CSe'
+Also updates '_TaxEcred', '_NWe', '_DebE', '_CDe', '_CDeC', '_CSe'
 */
 
 v[1] = V( "_PiE" );								// firm profit in period
 
 if ( v[1] > 0 )									// profits?
-	v[0] = v[1] * VS( GRANDPARENT, "tr" );		// tax to government
+{
+	v[0] = v[1] * VS( GRANDPARENT, "tr" );		// original tax due
+	if ( TAXC_ENE_RD( VS( GRANDPARENT, "flagIndPolicy" ) ) )// credit policy?
+	{
+		v[2] = max( v[0] - VS( GRANDPARENT, "phiRD" ) * V( "_RDe" ), 0 );
+		WRITE( "_TaxEcred", v[0] - v[2] );		// effective tax credit
+		v[0] = v[2];
+	}
+}
 else
 	v[0] = 0;									// no tax/dividend on losses
 
@@ -576,44 +590,7 @@ EQUATION( "_supplierE" )
 Selected capital supplier by firm in energy sector
 Also set firm 'hook' pointers to supplier firm object
 */
-
-VS( CAPSECL2, "inn" );							// ensure brochures distributed
-
-v[1] = VS( PARENT, "bE" );						// required payback period
-
-v[2] = DBL_MAX;									// supplier price/cost ratio
-i = 0;
-cur2 = cur3 = NULL;
-CYCLE( cur, "BrE" )								// use brochures to find supplier
-{
-	cur1 = PARENTS( SHOOKS( cur ) );			// pointer to supplier object
-
-	// compare total machine unit cost (acquisition + operation for payback period)
-	v[3] = VS( cur1, "_p1" ) + VS( cur1, "_cTau" ) * v[1];
-	if ( v[3] < v[2] )							// best so far?
-	{
-		v[2] = v[3];							// save current best supplier
-		i = VS( cur1, "_ID1" );					// supplier ID
-		cur2 = SHOOKS( cur );					// own entry on supplier list
-		cur3 = cur;								// best supplier brochure
-	}
-}
-
-// if supplier is found, simply update it, if not, draw a random one
-if ( cur2 != NULL && cur3 != NULL )
-	WRITES( cur2, "__tSelE", T );				// update selection time
-else											// no brochure received
-{
-	cur1 = RNDDRAWS( CAPSECL2, "Firm1", "_AtauLP" );// try draw new good supplier
-	i = VS( cur1, "_ID1" );
-
-	// create the brochure/client interconnected objects
-	cur3 = CFUNS( cur1, send_brochure, THIS );
-}
-
-WRITE_HOOK( SUPPL, cur3 );						// pointer to current brochure
-
-RESULT( i )
+RESULT( CFUN( select_supplier ) )
 
 
 /*============================ SUPPORT EQUATIONS =============================*/
@@ -823,7 +800,8 @@ EQUATION( "_LeDrd" )
 /*
 R&D labor demand of energy producer
 */
-RESULT( V( "_RDe" ) / VS( LABSUPL2, "w" ) )
+VS( GRANDPARENT, "Grd" );						// ensure R&D subsidy is paid
+RESULT( ( V( "_RDe" ) + V( "_GrdE" ) ) / VS( LABSUPL2, "w" ) )
 
 
 EQUATION( "_LeRD" )
@@ -838,7 +816,8 @@ EQUATION( "_PiE" )
 /*
 Profit (before taxes) of energy producer
 */
-RESULT( V( "_Se" ) - V( "_Ce" ) + V( "_iDe" ) - V( "_iE" ) - V( "_iGE" ) )
+RESULT( V( "_Se" ) - V( "_Ce" ) + V( "_iDe" ) - V( "_iE" ) - V( "_iGE" ) +
+		V( "_GrdE" ) )
 
 
 EQUATION( "_Qe" )
@@ -1053,6 +1032,18 @@ EQUATION_DUMMY( "_NWe", "" )
 /*
 Net worth of energy producer
 Updated in '_EIe', '_TaxE'
+*/
+
+EQUATION_DUMMY( "_GrdE", "GrdE" )
+/*
+R&D subsidy received from government
+Updated in 'GrdE'
+*/
+
+EQUATION_DUMMY( "_TaxEcred", "_TaxE" )
+/*
+Tax credit/deduction received from government policies
+Updated in '_TaxE'
 */
 
 EQUATION_DUMMY( "_emTauDE", "" )

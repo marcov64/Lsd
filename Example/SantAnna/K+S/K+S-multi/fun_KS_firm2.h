@@ -963,7 +963,7 @@ v[4] = max( VL( "_K2", 1 ) + v[3] - V( "_K2d" ), 0 );// machines to remove from 
 
 h = VNT( T, 0 );								// default vintage ID
 j = T + 1;										// oldest vintage so far
-CYCLE_SAFE( cur, "Vint" )						// search from older vintages
+CYCLE( cur, "Vint" )							// search from older vintages
 {
 	v[5] = VS( cur, "_RSvint" );				// number of machines to scrap
 
@@ -1270,7 +1270,7 @@ if ( VS( GRANDPARENT, "flagGovExp" ) < 2 )		// unemployment benefit exists?
 v[1] = VS( LABSUPL2, "wU" );					// unemployment benefit in t
 
 h = 0;
-CYCLE_SAFE( cur, "Wrk2" )
+CYCLE( cur, "Wrk2" )
 	if ( VS( SHOOKS( cur ), "_w" ) <= v[1] )	// under unemp. benefit?
 	{
 		CFUNS( SHOOKS( cur ), fire_worker );
@@ -1290,7 +1290,7 @@ if ( VS( LABSUPL2, "Tr" ) == 0 )				// retirement disabled?
 	END_EQUATION( 0 )
 
 h = 0;
-CYCLE_SAFE( cur, "Wrk2" )
+CYCLE( cur, "Wrk2" )
 	if ( VS( SHOOKS( cur ), "_age" ) == 1 )		// is a "reborn"?
 	{
 		CFUNS( SHOOKS( cur ), fire_worker );

@@ -39,6 +39,7 @@ double Deb1 = VS( CAPSECL1, "Deb1" );			// bank debt/loans
 double Div1_1 = VLS( CAPSECL1, "Div1", 1 );		// dividends
 double En1 = VS( CAPSECL1, "En1" );				// energy demand
 double Eq1 = VS( CAPSECL1, "Eq1" );				// equity
+double Grd1 = VS( CAPSECL1, "Grd1" );			// government R&D subsidy expen.
 double NW1 = VS( CAPSECL1, "NW1" );				// bank deposits
 double S1 = VS( CAPSECL1, "S1" );				// sales
 double Tax1 = VS( CAPSECL1, "Tax1" );			// taxes
@@ -56,6 +57,7 @@ double Deb2 = VS( CONSECL1, "Deb2" );			// bank debt/loans
 double Div2_1 = VLS( CONSECL1, "Div2", 1 );		// dividends
 double En2 = VS( CONSECL1, "En2" );				// energy demand
 double Eq2 = VS( CONSECL1, "Eq2" );				// equity
+double Gsi = VS( CONSECL1, "Gsi" );				// government substit. subsidy
 double Inom = VS( CONSECL1, "Inom" );			// investment (nominal terms)
 double Knom = VS( CONSECL1, "Knom" );			// capital (nominal terms)
 double NW2 = VS( CONSECL1, "NW2" );				// bank deposits
@@ -77,6 +79,7 @@ double DebGE = VS( ENESECL1, "DebGE" );			// bank project finance debt
 double Df = VS( ENESECL1, "Df" );				// demand for fuel
 double DivE_1 = VLS( ENESECL1, "DivE", 1 );		// dividends
 double EqE = VS( ENESECL1, "EqE" );				// equity
+double GrdE = VS( ENESECL1, "GrdE" );			// government R&D subsidy expen.
 double IeNom = VS( ENESECL1, "IeNom" );			// new plant investment (nominal)
 double KeNom = VS( ENESECL1, "KeNom" );			// plant capital (nominal)
 double NWe = VS( ENESECL1, "NWe" );				// bank deposits
@@ -157,7 +160,8 @@ double dSavAcc = SavAcc - SavAcc_1;				// change in deposits
 double C = VS( PARENT, "C" );					// consumption
 double Deb = VS( PARENT, "Deb" );				// government debt (total bonds)
 double Deb_1 = VLS( PARENT, "Deb", 1 );
-double G = VS( PARENT, "G" );					// government expenditure
+double G = VS( PARENT, "G" );					// government total expenditure
+double Gc = VS( PARENT, "Gc" );					// government consumption expen.
 double Tax = VS( PARENT, "Tax" );				// government income (taxes)
 double dDeb = Deb - Deb_1;						// change in debt (bond) stock
 
@@ -192,7 +196,7 @@ double Consumption = - C + S2;
 double Investment = + S1 - Inom - IeNom;
 double Energy = - pE * En1 - pE * En2 + Se - CeEq;
 double Fuel = - pF * Df + pF * Df;
-double GovExpend = + G - G;
+double GovExpend = + Gc + Grd1 + Gsi + GrdE - G;
 double Wages = + W - W1 - W2 - We;
 double Taxes = - TaxW - TaxDiv - Tax1 - Tax2 - TaxE - TaxB + Tax;
 double Profits = - netPi1 + netPi1 - netPi2 + netPi2 - netPiE + netPiE
@@ -231,7 +235,7 @@ v[3] = abs( Consumption ) + abs( Investment ) + abs( Energy ) + abs( Fuel ) +
 	   abs( GovDepoChg );
 
 // capital transaction sub-matrix column sums (net lending)
-double workersNL = - C + G + W - TaxW - TaxDiv + Div_1 - cEntry_1
+double workersNL = - C + Gc + W - TaxW - TaxDiv + Div_1 - cEntry_1
 				   + cExit_1 + rD_1 * SavAcc_1;
 double firms1nl = + netPi1 - Div1_1 + cEntry1_1 - cExit1_1 + BadDeb1_1;
 double firms2nl = - Inom + netPi2 - Div2_1 + cEntry2_1 - cExit2_1
@@ -248,11 +252,11 @@ v[4] = workersNL + firms1nl + firms2nl + firmsEnl + banksNL + cBankNL + govtNL;
 
 // transaction-flow matrix column sums (net flows/changes in stocks)
 double workers = + workersNL - dSavAcc;
-double firms1c = + S1 - pE * En1 - W1 - Tax1 - netPi1 + iD1 - i1;
+double firms1c = + S1 - pE * En1 + Grd1 - W1 - Tax1 - netPi1 + iD1 - i1;
 double firms1k = + firms1nl - dNW1 + dDeb1;
-double firms2c = + S2 - pE * En2 - W2 - Tax2 - netPi2 + iD2 - i2;
+double firms2c = + S2 - pE * En2 + Gsi - W2 - Tax2 - netPi2 + iD2 - i2;
 double firms2k = + firms2nl - dNW2 + dDeb2;
-double firmsEc = + Se - pF * Df - We - TaxE - netPiE + iDe - iE - iGE;
+double firmsEc = + Se - pF * Df + GrdE - We - TaxE - netPiE + iDe - iE - iGE;
 double firmsEk = + firmsEnl - dNWe + dDebE + dDebGE;
 double banksC = - TaxB - netPiB - BadDeb_1 - iDb + iB + rRes_1 * Res_1
 				- r_1 * LoansCB_1 + rBonds_1 * BondsB_1;
@@ -309,6 +313,18 @@ if ( T == 1 )
 	PLOG( "\n Optional statistics being computed in object 'Stats'" );
 	PARAMETER;									// compute for the last time
 }
+
+if ( VS( CAPSECL1, "mu1" ) < V0( minMu1 ) )
+	PLOG( "\n Warning: mu1 is insufficient: %.3lf < %.3lf",
+		  VS( CAPSECL1, "mu1" ), V0( minMu1 ) );
+
+if ( VS( CONSECL1, "mu20" ) < V0( minMu20 ) )
+	PLOG( "\n Warning: mu20 is insufficient: %.2lf < %.2lf",
+		  VS( CONSECL1, "mu20" ), V0( minMu20 ) );
+
+if ( VS( ENESTAL1, "muE0" ) < V0( minMuE0 ) )
+	PLOG( "\n Warning: muE0 is insufficient: %.4lf < %.4lf",
+		  VS( ENESTAL1, "muE0" ), V0( minMuE0 ) );
 
 v[1] = VL( "testInit", 1 );
 
@@ -652,6 +668,8 @@ double Def = VS( PARENT, "Def" );
 double Div = VS( PARENT, "Div" );
 double Eq = VS( PARENT, "Eq" );
 double G = VS( PARENT, "G" );
+double Gc = VS( PARENT, "Gc" );
+double Grd = VS( PARENT, "Grd" );
 double GDPreal = VS( PARENT, "GDPreal" );
 double GDPnom = VS( PARENT, "GDPnom" );
 double Sav = VS( PARENT, "Sav" );
@@ -684,8 +702,8 @@ double dA = VS( MACSTAL1, "dA" );
 
 double dN = VS( SECSTAL1, "dN" );
 
-double nonNeg[ ] = { Div, Eq, G, Ireal, Inom, N, Sav, SavAcc, Tax, TaxDiv,
-					 cEntry, cExit };
+double nonNeg[ ] = { Div, Eq, G, Gc, Grd, Ireal, Inom, N, Sav, SavAcc, Tax,
+					 TaxDiv, cEntry, cExit };
 double posit[ ] = { A, C, Creal, Cd, D2d, GDPreal, GDPnom, GDI };
 double finite[ ] = { dA, dAb, dGDP, dN, dNnom };
 
@@ -703,8 +721,8 @@ if ( T == v[1] )
 }
 
 // national accounting
-LOG( "\n  @@ (t=%g) dA=%.2g dGDP=%.2g C%%=%.2g I%%=%.2g G%%=%.2g dN%%=%.2g Sav%%=%.2g", T,
-	  dA, dGDP, C / GDPnom, Inom / GDPnom, G / GDPnom, dNnom / GDPnom, Sav / GDPnom );
+LOG( "\n  @@ (t=%g) dA=%.2g dGDP=%.2g C%%=%.2g I%%=%.2g Gc%%=%.2g dN%%=%.2g Sav%%=%.2g", T,
+	  dA, dGDP, C / GDPnom, Inom / GDPnom, Gc / GDPnom, dNnom / GDPnom, Sav / GDPnom );
 
 for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
 	CFUN( check_error, nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
@@ -1389,6 +1407,7 @@ double PiE = VS( ENESECL1, "PiE" );
 double Qe = VS( ENESECL1, "Qe" );
 double QeO = VS( ENESECL1, "QeO" );
 double Qge = VS( ENESECL1, "Qge" );
+double RDe = VS( ENESECL1, "RDe" );
 double SIe = VS( ENESECL1, "SIe" );
 double SIeD = VS( ENESECL1, "SIeD" );
 double Se = VS( ENESECL1, "Se" );
@@ -1432,7 +1451,6 @@ double EnGDP = VS( ENESTAL1, "EnGDP" );
 double HHe = VS( ENESTAL1, "HHe" );
 double HPe = VS( ENESTAL1, "HPe" );
 double ICtauGEavg = VS( ENESTAL1, "ICtauGEavg" );
-double RDe = VS( ENESTAL1, "RDe" );
 double RSe = VS( ENESTAL1, "RSe" );
 double ageEavg = VS( ENESTAL1, "ageEavg" );
 double dEmE = VS( ENESTAL1, "dEmE" );
@@ -1631,7 +1649,7 @@ double w = VS( LABSUPL1, "w" );
 double Vac = VS( LABSTAL1, "V" );
 
 double C = VS( PARENT, "C" );
-double G = VS( PARENT, "G" );
+double Gc = VS( PARENT, "Gc" );
 double Eq = VS( PARENT, "Eq" );
 double SavAcc = VS( PARENT, "SavAcc" );
 
@@ -1680,7 +1698,7 @@ CFUN( check_error, W1 + W2 < ( 1 - TOL / 10 ) * L * w ||
 LOG( "\n   + W=%.2g Div=%.2g cEntry=%.2g cExit=%.2g SavAcc=%.2g",
 	 W, Div_1, cEntry_1, cExit_1, SavAcc );
 
-CFUN( check_error, abs( - C + G + W - TaxW + Div_1 - cEntry_1 + cExit_1
+CFUN( check_error, abs( - C + Gc + W - TaxW + Div_1 - cEntry_1 + cExit_1
 						+ rD_1 * SavAcc_1 - ( SavAcc - SavAcc_1 ) ) > TOL,
 	  "INCONSISTENT-SFC-FLOW", 0, & errors );
 
@@ -1734,7 +1752,7 @@ CYCLES( CAPSECL1, cur, "Firm1" )
 		 VS( cur, "_AtauLP" ) <= TOL || VS( cur, "_BtauLP" ) <= TOL / 10 )
 		Aerr.push_back( cur );
 
-	if ( VS( cur, "_RD" ) < 0 )
+	if ( VS( cur, "_RD1" ) < 0 )
 		RDerr.push_back( cur );
 
 	if ( VS( cur, "_c1" ) <= 0 || VS( cur, "_p1" ) <= 0 )
@@ -1778,6 +1796,7 @@ double PPI = VS( CAPSECL1, "PPI" );
 double Pi1 = VS( CAPSECL1, "Pi1" );
 double Q1 = VS( CAPSECL1, "Q1" );
 double Q1e = VS( CAPSECL1, "Q1e" );
+double RD1 = VS( CAPSECL1, "RD1" );
 double S1 = VS( CAPSECL1, "S1" );
 double Tax1 = VS( CAPSECL1, "Tax1" );
 double W1 = VS( CAPSECL1, "W1" );
@@ -1802,12 +1821,11 @@ double CS1 = VS( SECSTAL1, "CS1" );
 double Ls = VS( LABSUPL1, "Ls" );
 double HH1 = VS( SECSTAL1, "HH1" );
 double HP1 = VS( SECSTAL1, "HP1" );
-double RD = VS( SECSTAL1, "RD" );
 double age1avg = VS( SECSTAL1, "age1avg" );
 
 double nonNeg[ ] = { CD1, CD1c, CS1, D1, Deb1, Div1, Em1, En1, Eq1, JO1, L1,
 					 L1d, L1dRD, L1rd, Q1, Q1e, S1, Tax1, W1, cEntry1, cExit1,
-					 i1, iD1, imi, inn, HH1, HP1, RD, age1avg };
+					 i1, iD1, imi, inn, HH1, HP1, RD1, age1avg };
 double posit[ ] = { A1, F1, PPI };
 double finite[ ] = { NW1, entry1exit, Pi1 };
 
@@ -1826,7 +1844,7 @@ for ( i = 0; i < LEN_ARR( posit ); ++i )
 	CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-	CFUN( check_error, ! is_finite( *itd ), 
+	CFUN( check_error, ! is_finite( *itd ),
 		  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 CFUN( check_error, Aerr.size( ) > TOL * F1, "ZERO-PROD-FIRMS", Aerr.size( ), & errors );
@@ -1848,7 +1866,7 @@ CFUN( check_error, ceil( L1dRD ) < L1rd || floor( L1rd ) > L1 || ceil( L1d ) < J
 LOG( "\n   ^ S1=%.3g W1=%.3g Tax1=%.3g Pi1=%.3g NW1=%.3g",
 	 S1, W1, Tax1, Pi1, NW1 );
 
-CFUN( check_error, S1 + RD < ( 1 - TOL ) * W1, "HIGH-WAGES", 0, & errors );
+CFUN( check_error, S1 + RD1 < ( 1 - TOL ) * W1, "HIGH-WAGES", 0, & errors );
 
 CFUN( check_error, c1err.size( ) > 0, "ZERO-COST-FIRM", c1err.size( ), & errors );
 
@@ -1974,6 +1992,7 @@ double Em2 = VS( CONSECL1, "Em2" );
 double En2 = VS( CONSECL1, "En2" );
 double Eq2 = VS( CONSECL1, "Eq2" );
 double F2 = VS( CONSECL1, "F2" );
+double Gsi = VS( CONSECL1, "Gsi" );
 double Id = VS( CONSECL1, "Id" );
 double Inom = VS( CONSECL1, "Inom" );
 double Ireal = VS( CONSECL1, "Ireal" );
@@ -2025,8 +2044,8 @@ double HP2 = VS( SECSTAL1, "HP2" );
 double age2avg = VS( SECSTAL1, "age2avg" );
 double mu2avg = VS( SECSTAL1, "mu2avg" );
 
-double nonNeg[ ] = { CD2, CD2c, CS2, CPI, CI, D2, D2d, D2e, Deb2, Div2,
-					 EI, Em2, En2, Eq2, Id, Inom, Ireal, JO2, K, Kavb, Kd, Knom,
+double nonNeg[ ] = { CD2, CD2c, CS2, CPI, CI, D2, D2d, D2e, Deb2, Div2, EI, Em2,
+					 En2, Eq2, Gsi, Id, Inom, Ireal, JO2, K, Kavb, Kd, Knom,
 					 L2, L2d, N, Q2, Q2d, Q2e, Q2p, Q2u, SI, S2, Tax2, W2,
 					 cEntry2, cExit2, i2, iD2, l2avg, HH2, HP2 };
 double posit[ ] = { A2, - Eavg, F2, oldVint, p2avg, age2avg, mu2avg };
@@ -2602,7 +2621,7 @@ if ( T == v[1] )
 		fprintf( firms1, "%s,%s,%s,%s,%s\n",	// file header
 				 "t,ID1,t1ent,Client",
 				 "AtauLP,BtauLP,AtauEE,BtauEE,AtauEF,BtauEF",
-				 "RD,c1,D1,Q1,Q1e,L1d,L1",
+				 "RD1,c1,D1,Q1,Q1e,L1d,L1",
 				 "Pi1,NW1,Deb1,Deb1max,CS1,CD1c",
 				 "HC,NC,BC,p1,S1,f1" );
 	}
@@ -2652,6 +2671,7 @@ CYCLES( CAPSECL1, cur, "Firm1" )
 	double _Em1 = VS( cur, "_Em1" );
 	double _En1 = VS( cur, "_En1" );
 	double _Eq1 = VS( cur, "_Eq1" );
+	double _Grd = VS( cur, "_Grd" );
 	double _HC = VS( cur, "_HC" );
 	double _L1 = VS( cur, "_L1" );
 	double _L1d = VS( cur, "_L1d" );
@@ -2662,7 +2682,7 @@ CYCLES( CAPSECL1, cur, "Firm1" )
 	double _Pi1 = VS( cur, "_Pi1" );
 	double _Q1 = VS( cur, "_Q1" );
 	double _Q1e = VS( cur, "_Q1e" );
-	double _RD = VS( cur, "_RD" );
+	double _RD1 = VS( cur, "_RD1" );
 	double _S1 = VS( cur, "_S1" );
 	double _Tax1 = VS( cur, "_Tax1" );
 	double _W1 = VS( cur, "_W1" );
@@ -2679,10 +2699,10 @@ CYCLES( CAPSECL1, cur, "Firm1" )
 	double _Div1_1 = VLS( cur, "_Div1", 1 );
 	double _NW1_1 = VLS( cur, "_NW1", 1 );
 
-	double nonNeg[ ] = { _CS1, _CD1, _CD1c, _Div1, _Em1, _En1, _Eq1, _HC, _NC,
-						 _RD, _D1, _Q1, _Q1e, _BC, _L1, _L1d, _L1dRD, _L1rd,
-						 _Deb1, _Deb1max, _S1, _Tax1, _W1, _f1, _i1, _iD1, _imi,
-						 _inn, _qc1 };
+	double nonNeg[ ] = { _CS1, _CD1, _CD1c, _Div1, _Em1, _En1, _Eq1, _Grd, _HC,
+						 _NC, _RD1, _D1, _Q1, _Q1e, _BC, _L1, _L1d, _L1dRD,
+						 _L1rd, _Deb1, _Deb1max, _S1, _Tax1, _W1, _f1, _i1,
+						 _iD1, _imi, _inn, _qc1 };
 	double posit[ ] = { _AtauEE, _AtauEF, _AtauLP, _BtauEE, _BtauEF, _BtauLP,
 						_c1, _p1 };
 	double finite[ ] = { _NW1, _Pi1 };
@@ -2718,14 +2738,14 @@ CYCLES( CAPSECL1, cur, "Firm1" )
 	// innovation, productivity
 	LOG( "\n   * AtauLP=%.3g BtauLP=%.3g AtauEE=%.3g BtauEE=%.3g AtauEF=%.3g BtauEF=%.3g",
 		 _AtauLP, _BtauLP, _AtauEE, _BtauEE, _AtauEF, _BtauEF );
-	LOG( "\n   * RD=%g c1=%.3g D1=%g Q1=%g Q1e=%g L1d=%g L1=%g",
-		 round( _RD ), _c1, _D1, _Q1, _Q1e, _L1d, _L1 );
+	LOG( "\n   * RD1=%g c1=%.3g D1=%g Q1=%g Q1e=%g L1d=%g L1=%g",
+		 round( _RD1 ), _c1, _D1, _Q1, _Q1e, _L1d, _L1 );
 	fprintf( firms1, ",%g,%g,%g,%g,%g,%g",
 			 _AtauLP, _BtauLP, _AtauEE, _BtauEE, _AtauEF, _BtauEF );
 	fprintf( firms1, ",%g,%g,%g,%g,%g,%g,%g",
-			 _RD, _c1, _D1, _Q1, _Q1e, _L1d, _L1 );
+			 _RD1, _c1, _D1, _Q1, _Q1e, _L1d, _L1 );
 
-	CFUN( check_error, _RD <= 0, "NO-R&D", 0, & errors );
+	CFUN( check_error, _RD1 <= 0, "NO-R&D", 0, & errors );
 
 	CFUN( check_error, _AtauEE < TOL || _BtauEE < TOL || _AtauEF < TOL ||
 		  _BtauEF < TOL || _AtauLP < TOL || _BtauLP < TOL / 10,
@@ -2917,6 +2937,7 @@ CYCLES( CONSECL1, cur, "Firm2" )
 	double _Em2 = VS( cur, "_Em2" );
 	double _En2 = VS( cur, "_En2" );
 	double _Eq2 = VS( cur, "_Eq2" );
+	double _Gsi = VS( cur, "_Gsi" );
 	double _Inom = VS( cur, "_Inom" );
 	double _JO2 = VS( cur, "_JO2" );
 	double _K = VS( cur, "_K" );
@@ -2958,11 +2979,11 @@ CYCLES( CONSECL1, cur, "Firm2" )
 					VS( cur1, "__pVint" ) : 0;
 
 	double nonNeg[ ] = { _A2, _CD2, _CD2c, _CI, _CS2, _D2, _D2d, _D2e, _Deb2,
-						 _Deb2max, _Div2, _EI, _EId, _Em2, _En2, _Eq2, _JO2, _K,
-						 _Kavb, _Kd, _L2, _L2d, _N, _Q2, _Q2d, _Q2e, _Q2p, _Q2pe,
-						 _Q2u, _RS2, _S2, _SI, _SId, _Tax2, _W2, _c2, _c2e,
-						 _f2, _i2, _iD2, _l2, _life2cycle, __pVint, _qc2,
-						 _t2ent };
+						 _Deb2max, _Div2, _EI, _EId, _Em2, _En2, _Eq2, _Gsi,
+						 _JO2, _K, _Kavb, _Kd, _L2, _L2d, _N, _Q2, _Q2d, _Q2e,
+						 _Q2p, _Q2pe, _Q2u, _RS2, _S2, _SI, _SId, _Tax2, _W2,
+						 _c2, _c2e, _f2, _i2, _iD2, _l2, _life2cycle, __pVint,
+						 _qc2, _t2ent };
 	double posit[ ] = { - _E, _mu2, _p2 };
 	double finite[ ] = { _NW2, _Pi2 };
 

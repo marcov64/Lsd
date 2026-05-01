@@ -20,7 +20,7 @@ Sum up the firm's productive capacity that was depreciated in each time step, no
 */
 	v[0]=0;																				//initializes the CYCLE on Capital. Will count the productiv capacity to depreciate
 	v[1]=V("sector_capital_duration");
-	CYCLE_SAFE(cur1, "CAPITALS")
+	CYCLE(cur1, "CAPITALS")
 	{
 		v[2]=VS(cur1, "capital_good_date_birth");										//capital good date of birth
 		v[3]=VS(cur1, "capital_good_productive_capacity");								//capital good's prductive capacity
@@ -125,7 +125,7 @@ In this variable, the firm receive the new capital goods ordered in the last inv
   		}
 
 	v[19]=0;
-	CYCLE_SAFE(cur, "CAPITALS")
+	CYCLE(cur, "CAPITALS")
 	{
 		v[20]=VS(cur, "capital_good_to_depreciate");
 		if(v[20]==1)

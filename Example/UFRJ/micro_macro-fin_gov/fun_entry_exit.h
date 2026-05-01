@@ -14,12 +14,12 @@ CYCLE(cur1, "SECTORS")
 {
 	i = COUNTS(cur1, "FIRMS" );									// count the existing number of firms
 	v[11]=v[12]=v[14]=v[20]=v[24]=0;							// initialize the cycles
-	CYCLE_SAFES( cur1, cur, "FIRMS" )							// use a robust cycle to delete objects
+	CYCLES( cur1, cur, "FIRMS" )								// use a robust cycle to delete objects
 	{
      v[1]=VS(cur, "Firm_Market_Share");							//firm's curent market share
      v[2]=VS(cur, "Firm_Productive_Capacity");					//firm's current productive capacity
      v[3]=VS(cur, "firm_date_birth");							//firm's date birth
-	 v[4]=VS(cur, "Firm_Debt_Rate");						//firm's avg debt rate
+	 v[4]=VS(cur, "Firm_Debt_Rate");							//firm's avg debt rate
      v[5]=VLS(cur, "Firm_Avg_Debt_Rate", 1);					//firm's avg debt rate in the last period
      v[6]=VS(cur, "Firm_Stock_Loans");
      v[7]=VS(cur, "Firm_Stock_Deposits");
@@ -317,7 +317,7 @@ In this variable a new firm enters if there is market space available and the en
 				WRITELLS(cur,"Firm_Demand_Capital_Goods", 0, T, i);
 
 			  v[50]=COUNTS(cur,"CAPITALS");
-			  CYCLE_SAFES(cur, cur1, "CAPITALS")								//CYCLE trough firm's capitals
+			  CYCLES(cur, cur1, "CAPITALS")											//CYCLE trough firm's capitals
 				{
 					if(v[50]>1)
 						{
@@ -340,7 +340,7 @@ In this variable a new firm enters if there is market space available and the en
 
 			v[13]=VS(cur6,"Bank_Interest_Rate_Long_Term");
 
-			CYCLE_SAFES(cur, cur1, "FIRM_LOANS")
+			CYCLES(cur, cur1, "FIRM_LOANS")
 			{
 				v[51]=VS(cur1, "firm_loan_fixed_object");
 				if (v[51]!=1)
