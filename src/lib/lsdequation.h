@@ -583,12 +583,12 @@
 #define V_CHEATLS( O, X, L, Y ) ( CHK_PTR_DBL( O ) O->cal( Y, X, L ) )
 
 #define ADDEXT( C ) { if ( _p_->cext != NULL ) DELETE_EXT( C ); _p_->cext = reinterpret_cast < void * > ( new C ); }
-#define ADDEXTS( O, C ) { CHK_PTR_NOP( O ); if ( O->cext != NULL ) DELETE_EXTS( O, C ); O->cext = reinterpret_cast < void * > ( new C ); }
+#define ADDEXTS( O, C ) { CHK_PTR_NOP( O ); if ( ( O )->cext != NULL ) DELETE_EXTS( O, C ); ( O )->cext = reinterpret_cast < void * > ( new C ); }
 #define ADDEXT_INIT( C, ... ) { if ( _p_->cext != NULL ) DELETE_EXT( C ); _p_->cext = reinterpret_cast < void * > ( new C( __VA_ARGS__ ) ); }
-#define ADDEXT_INITS( O, C, ... ) { CHK_PTR_NOP( O ); if ( O->cext != NULL ) DELETE_EXTS( O, C ); O->cext = reinterpret_cast < void * > ( new C( __VA_ARGS__ ) ); }
+#define ADDEXT_INITS( O, C, ... ) { CHK_PTR_NOP( O ); if ( ( O )->cext != NULL ) DELETE_EXTS( O, C ); ( O )->cext = reinterpret_cast < void * > ( new C( __VA_ARGS__ ) ); }
 
 #define DELETE_EXT( C ) { delete P_EXT( C ); _p_->cext = NULL; }
-#define DELETE_EXTS( O, C ) { CHK_PTR_NOP( O ); delete P_EXTS( O, C ); O->cext = NULL; }
+#define DELETE_EXTS( O, C ) { CHK_PTR_NOP( O ); delete P_EXTS( O, C ); ( O )->cext = NULL; }
 
 #define V_EXT( C, X ) ( P_EXT( C ) -> X )
 #define V_EXTS( O, C, X ) ( P_EXTS( O, C ) -> X )
@@ -600,7 +600,7 @@
 #define EXT( C ) ( * P_EXT( C ) )
 #define EXTS( O, C ) ( * P_EXTS( O, C ) )
 #define P_EXT( C ) ( reinterpret_cast < C * > ( _p_->cext ) )
-#define P_EXTS( O, C ) ( reinterpret_cast < C * > ( O->cext ) )
+#define P_EXTS( O, C ) ( reinterpret_cast < C * > ( ( O )->cext ) )
 
 #define WRITE_EXT( C, X, Y ) ( P_EXT( C ) -> X = Y )
 #define WRITE_EXTS( O, C, X, Y ) ( P_EXTS( O, C ) -> X = Y )
