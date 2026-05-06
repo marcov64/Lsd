@@ -4678,15 +4678,22 @@ void lsd::object::insert_label_mem( int *num_v, const char *lab )
  *************************************************************/
 void lsd::object::insert_label_mem( int *num_v, variable *v, int tag )
 {
+	int eff_end;
 	static bool warn_once = false;
 
 	if ( da->disable )
 	{
-		cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, v->start, v->end, *num_v, v->attr->par_attr->label );
+		// ensure last period values are valid when there was an unexpected interruption
+		if ( v->end == attr->cont->sim->eff_t && v->param != 1 && v->last_update < v->end )
+			eff_end = v->last_update;
+		else
+			eff_end = v->end;
+
+		cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, v->start, eff_end, *num_v, v->attr->par_attr->label );
 		++( *num_v );
 
-		if ( v->end > gui::num_t )
-			gui::num_t = v->end;
+		if ( eff_end > gui::num_t )
+			gui::num_t = eff_end;
 
 		if ( v->start < gui::first_t )
 			gui::first_t = v->start;
@@ -4789,11 +4796,22 @@ void lsd::object::insert_store_mem( int *num_v, variable *v, int tag )
 {
 	if ( da->disable )
 	{
+		// ensure last period values are valid when there was an unexpected interruption
+		int eff_end = v->end;
+		if ( v->end == attr->cont->sim->eff_t )
+		{
+			if ( v->param == 1 )
+				v->data[ v->end - v->start ] = v->val[ 0 ];
+			else
+				if ( v->last_update < v->end )
+					eff_end = v->last_update;
+		}
+
 		gui::vs[ *num_v ].label = v->attr->label;
 		gui::vs[ *num_v ].parent = v->attr->par_attr->label;
 		gui::vs[ *num_v ].tag = to_string( "%s%s", tag_pref[ tag ], v->lab_tit );
 		gui::vs[ *num_v ].start = v->start;
-		gui::vs[ *num_v ].end = v->end;
+		gui::vs[ *num_v ].end = eff_end;
 		gui::vs[ *num_v ].rank = *num_v;
 		gui::vs[ *num_v ].data = v->data;
 		gui::vs[ *num_v ].data_alias = true;
