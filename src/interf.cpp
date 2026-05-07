@@ -450,7 +450,8 @@ lsd::object *gui::operate( lsd::object *r )
 						}" );
 					cmd( "bind $T.f.ent_var <<ComboboxSelected>> { \
 							set s [ .addelem.f.ent_var get ]; \
-							.addelem.d.f.text insert end \"[ get_var_descr $s ]\"; \
+							.addelem.d.f.text delete 1.0 end; \
+							.addelem.d.f.text insert end \"[ get_var_descr $s ]\" \
 						}" );
 					cmd( "bind $T.f.ent_var <KeyPress-Return> { event generate .addelem.f.ent_var <<ComboboxSelected>>; if { [ .addelem.f.ent_num get ] > 0 } { focus $T.b.x } { focus $T.b.ok } }" );
 					cmd( "bind $T.f.ent_num <KeyPress-Return> { if { [ .addelem.f.ent_num get ] > 0 } { focus $T.b.x } { focus $T.b.ok } }" );
@@ -483,7 +484,8 @@ lsd::object *gui::operate( lsd::object *r )
 						}" );
 					cmd( "bind $T.f.ent_var <<ComboboxSelected>> { \
 							set s [ .addelem.f.ent_var get ]; \
-							.addelem.d.f.text insert end \"[ get_var_descr $s ]\"; \
+							.addelem.d.f.text delete 1.0 end; \
+							.addelem.d.f.text insert end \"[ get_var_descr $s ]\" \
 						}" );
 					cmd( "set help menumodel.html");
 					cmd( "bind $T.f.ent_var <KeyPress-Return> { event generate .addelem.f.ent_var <<ComboboxSelected>>; focus $T.b.ok }" );
