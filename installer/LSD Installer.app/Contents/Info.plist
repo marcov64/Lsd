@@ -96,6 +96,8 @@
         <true/>
         <key>NSAppleScriptEnabled</key>
         <true/>
+		<key>NSAppleEventsUsageDescription</key>
+		<string>This script needs to control other applications to run.</string>
         <key>NSHighResolutionCapable</key>
         <true/>
     </dict>

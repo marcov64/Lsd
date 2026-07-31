@@ -272,17 +272,23 @@ LSD 9.0 does not officially support macOS, despite it may work, depending on the
 
 For macOS users, the recommended path to use LSD is (1) installing a virtual machine (VM) hypervisor in macOS (VirtualBox, Fusion, Parallels, etc.), (2) downloading a pre-configured Windows or Linux VM image, and (3) installing LSD into the downloaded VM following the instructions above (section 4.1 or 4.2). There are many tutorials and sources on the internet about how to perform steps 1 and 2. The performance penalty of using LSD in a VM is relatively small, particularly in the case of Linux. However, Windows VMs are usually easier to set-up and use, and performance is still reasonable.
 
-The instructions below frequently worked with macOS up to version 15.7, but that may depend on specific machine configurations and can break at any moment given the constant Apple changes to its operating system. LSD developers are not able to help on fixing the possible problems.
+The instructions below frequently worked with macOS up to version 15.7, but that may depend on specific machine configurations and can break at any moment given the constant Apple changes to its operating system. LSD developers are not able to help on fixing the possible problems. Please notice that you MUST be a system administrator (root user) of the computer in which LSD is to be installed.
 
-To try to install LSD natively on macOS, the simplest alternative is to use the installer package (e.g. LSD-installer-mac-9-0-stable-1.dmg). Download it, double-click on the package file to mount it, double-click on the LSD Installer application, accept the unsupported message, and follow the instructions. The installer package can be unmounted and deleted after the installation.
+To try to install LSD natively on macOS, the simplest alternative is to use the installer package (e.g. LSD-installer-mac-9-0-stable-1.dmg). Download it, double-click on the package file to mount it, double-click on the LSD Installer application, accept the unsupported message, and follow the instructions. However, the default macOS configuration requires user to unlock LSD installer. If so, open macOS "System Settings" app, choose "Privacy & Security" option (left panel), scroll down to "Security" (right panel), locate the "LSD Intaller" item, and click on the option to allow it to run. See details below. Once installation is finished, the installer package can be unmounted and deleted after the installation.
 
-IMPORTANT: please pay attention to the Terminal windows opened by the installer, this is critical to a successful installation. The Terminal window do require your interaction, according to the instructions of the installer. Do not close any Terminal window which is not inactive. If the Terminal window is closed or interrupted by accident, please cancel the installation and restart.
+IMPORTANT: please pay attention to the Terminal windows opened by the installer, this is critical to a successful installation. The Terminal window do require your interaction, according to the instructions of the installer. Do not close any Terminal window which is not inactive. If the Terminal window is closed or interrupted by accident, please cancel the installation and restart. During Terminal operation, macOS will frequently open confirmation windows about the commands which are being performed at the terminal. Please confirm the commands whenever required.
 
-To try to manually install LSD, simply unzip a LSD distribution file (e.g., LSD-9.0-master.zip) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using Finder. This will create the whole LSD folder structure. Take note of the name of the main (topmost) folder where LSD is installed. The distribution file may be deleted after the extraction.
+To try to manually install LSD, simply download and unzip the LSD distribution file (e.g., LSD-9.0-master.zip) to the chosen directory (in most cases  "~/", the user home directory, is recommended). To do it, please open the Terminal application (located inside the Utilities app folder), and type the following commands (each line must be completed by pressing "Enter"):
 
-Next, open the Terminal application (located inside the Utilities app folder), and type the following commands (each line must be completed by pressing "Enter"):
+ cd ~
+ curl -LO https://github.com/SantAnnaKS/LSD/archive/refs/tags/9.0-stable-1.zip
+ unzip 9.0-stable-1.zip
 
- cd ~/Lsd-9.0-master
+This will create the whole LSD folder structure. Please note that you may have to adjust the name of the LSD version in use, "9.0-stable-1" in the commands above. from Take note of the name of the main (topmost) folder where LSD is installed. The distribution file may be deleted after the extraction.
+
+Next, use the below commands (followed by "Enter") to create a desktop shortcut and set LSD security clearances:
+
+ cd LSD-9.0-stable-1
  ./add-shortcut-mac.sh
 
 Please provide the user password when requested. After a successful installation, a desktop shortcut (icon) will be available for using LMM/LSD. A shortcut is also created in the computer Applications folder. Even if the user does not want the desktop shortcut, the commands above MUST be performed to prevent LSD executables translocation.
@@ -297,7 +303,9 @@ It is required to install Tcl/Tk and recommended to also install multitail, Gnup
 
  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 
-After Homebrew installation finishes (details at http://brew.sh), you can install multitail, Gnuplot and Cython using the following command in Terminal (Qt framework will be automatically installed too):
+After Homebrew installation finishes (details at http://brew.sh), it usually requests some commands to be manually performed, check at the Terminal mssages. Please cut and paste the requested code in the Terminal prompt and press ENTER before proceeding.
+
+Finally, you can install Tcl/Tk, multitail, Gnuplot and Cython using the following command in Terminal (Qt framework will be automatically installed too):
 
  brew install tcl-tk@8 multitail gnuplot cython
 

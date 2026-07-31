@@ -27,7 +27,7 @@ proc check_components { } {
 
 	if { $CurPlatform eq "mac" } {
 
-		if [ catch { exec which g++ } ] {
+		if [ catch { exec xcode-select -p } ] {
 			set xcode 1
 		}
 		if [ catch { exec which gnuplot } ] {
