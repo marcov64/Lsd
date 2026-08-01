@@ -44,6 +44,8 @@ else
 fi
 
 README="Readme.txt"
+MAC_FIRST="macOS first install.pdf"
+INST_SCRIPT="run-installer-mac.sh"
 LSD_VER="$LSD_VER_NUM-$LSD_VER_TAG"
 LSD_FILE_TAG="${LSD_VER//./-}"
 SRC_DIR="$LSD_DIR/src"
@@ -73,6 +75,8 @@ mkdir "/tmp/LSD_INSTALLER"
 mkdir "/tmp/LSD_INSTALLER/$APPNAME ($LSD_VER).app"
 cp -f -R "$DMG_DIR/$APPNAME.app/"* "/tmp/LSD_INSTALLER/$APPNAME ($LSD_VER).app/"
 cp -f "$LSD_DIR/$README" "/tmp/LSD_INSTALLER/"
+cp -f "$DMG_DIR/$MAC_FIRST" "/tmp/LSD_INSTALLER/"
+cp -f "$DMG_DIR/$INST_SCRIPT" "/tmp/LSD_INSTALLER/"
 
 hdiutil create /tmp/tmp.dmg -fs HFS+ -ov -quiet -volname "$APPNAME ($LSD_VER)" -srcfolder "/tmp/LSD_INSTALLER/"
 hdiutil convert /tmp/tmp.dmg -format UDBZ -o "$FILENAME-$LSD_FILE_TAG.dmg" -quiet

@@ -35,8 +35,7 @@ set lsd_src src
 set lsd_ico $lsd_src/icons
 set winRoot "C:/"
 
-set macPmPkg [ list install tcl-tk@8 multitail gnuplot cython ]
-set macPmCmd "brew install"
+set macPmPkg [ list tcl-tk@8 multitail gnuplot cython ]
 set linuxPmPkg(apt)	[ list	build-essential 	make	gdb		gnuplot		xterm	multitail	zlib1g-dev		tcl-dev			tk-dev			python3-dev			cython3	]
 set linuxPmPkg(yum)	[ list	gcc-c++ 			make	gdb		gnuplot		xterm	multitail	zlib-devel		tcl-devel		tk-devel		python3-devel		python3-cython	]
 set linuxPmPkg(dnf)	[ list	gcc-c++ 			make	gdb		gnuplot		xterm	multitail	zlib-devel		tcl-devel		tk-devel		python3-devel		python3-cython	]
@@ -101,6 +100,18 @@ if { ! [ check_components ] } {
 
 if { $CurPlatform eq "mac" } {
 	if { [ ttk::messageBox -parent "" -type okcancel -title Warning -icon warning -message "Unsupported platform" -detail "LSD may not work properly in macOS, see Readme.txt file for details.\n\nIf you decide to continue, please be patient and extremely careful on following all the requested activities in the Terminal window as installation proceeds." ] eq "cancel" } {
+		exit 1
+	}
+	
+	ttk::messageBox -parent "" -type ok -title "LSD Installation" -icon info -message "User interaction required" -detail "The next step of installation will check if LSD Installer is allowed to macOS automation.\n\nIf a security dialog opens, please allow the LSD Installer to control Terminal.\n\nThis is required so LSD Installer can proceed."
+	set scpt [ open "$env(TMPDIR)/terminal.as" w ]
+	puts $scpt "tell application \"Terminal\" to do script \"clear;exit\""
+	close $scpt
+	set res [ catch { exec osascript "$env(TMPDIR)/terminal.as" } ]
+	file delete -force "$env(TMPDIR)/terminal.tmp"
+
+	if { $res } {
+		ttk::messageBox -parent "" -type ok -title "LSD Installation" -icon error -message "macOS security automation unavailable" -detail "The required macOS authorizations for installation automation are not available to LSD Installer.\n\nA special procedure is required: (1) double click the downloaded package (ex. LSD-installer-mac-X-Y-stable-Z.dmg) to mount it, (2) control/two-finger-click the mounted image icon to open the context menu, (3) choose option 'New Terminal at Folder' in the menu, (4) in the opened Terminal window type './run-installer-mac.sh' (without quotes) followed by <Return>, (5) type your (admin) password followed by <Return> when requested, and (6) follow the LSD Installer instructions.\n\nMore details are available in 'macOS first install.pdf' and 'Readme.txt' files.\n\nLSD Installer will abort next. You may want to save a picture of the instructions above before proceeding."
 		exit 1
 	}
 
@@ -566,55 +577,43 @@ if [ string equal $CurPlatform windows ] {
 } elseif [ string equal $CurPlatform linux ] {
 	set res [ catch { exec $lsd_root/add-shortcut-linux.sh } result ]
 } else {
-	set scpt [ open "$env(TMPDIR)/terminal.as" w ]
-	puts $scpt "tell application \"Terminal\" to do script \"clear\""
+	ttk::messageBox -parent "" -type ok -title "LSD Installation" -icon info -message "User interaction required" -detail "The next step of installation will require the user to provide the system password.\n\nA Terminal window will open and the interaction must be performed there.\n\nThis is required so LSD can be installed out of the macOS quarantine zone for new executable files."
+	set wait [ waitbox .wait "Installing..." "Installing LSD" "1. if required, allow the Terminal to control System Events\n2. select the just-opened Terminal window\n3. type the macOS user password and press <Return>\n4. if required, allow the Terminal to control Finder" 1 "" ]
+
+	set scpt [ open "$env(TMPDIR)/add_shortcut.as" w ]
+	puts $scpt "tell application \"Terminal\""
+	set openMsg "clear; echo \\\"Installing LSD\\nPlease wait for this window to close/deactivate automatically.\\nType your password and press <Return>:\\\"; "
+	set shortcutInsta "/bin/bash -c \\\"${lsd_root}/add-shortcut-mac.sh 2>&1 /dev/nul\\\"; "
+	set closeMsg "touch \$TMPDIR/shortcut-done.tmp; exit"
+	puts $scpt "\tdo script \"${openMsg}${shortcutInsta}${closeMsg}\""
+	puts $scpt "end tell"
 	close $scpt
-	set res [ catch { exec osascript "$env(TMPDIR)/terminal.as" } ]
-	file delete -force "$env(TMPDIR)/terminal.tmp"
+	exec chmod +x "$env(TMPDIR)/add_shortcut.as"
 
-	if { $res } {
-		set osascript 0
-		set result "macOS security block"
-	} else {
-		set osascript 1
-		ttk::messageBox -parent "" -type ok -title "LSD Installation" -icon info -message "User interaction required" -detail "The next step of installation will require the user to provide the system password.\n\nA Terminal window will open and the interaction must be performed there.\n\nThis is required so LSD can be installed out of the macOS quarantine zone for new executable files."
-		set wait [ waitbox .wait "Installing..." "Installing LSD" "1. type the macOS user password and press <Return>\n2. if required, allow the Terminal to control Finder\n3. Terminal window will close/disable when done\n" 1 "" ]
+	file delete -force "$env(TMPDIR)/shortcut-done.tmp"
+	set res [ catch { exec osascript "$env(TMPDIR)/add_shortcut.as" } ]
 
-		set scpt [ open "$env(TMPDIR)/add_shortcut.as" w ]
-		puts $scpt "tell application \"Terminal\""
-		set openMsg "clear; echo \\\"Installing LSD\\nPlease wait for this window to close/deactivate automatically.\\nType your password and press <Return>:\\\"; "
-		set shortcutInsta "/bin/bash -c \\\"${lsd_root}/add-shortcut-mac.sh 2>&1 /dev/nul\\\"; "
-		set closeMsg "touch \$TMPDIR/shortcut-done.tmp; exit"
-		puts $scpt "\tdo script \"${openMsg}${shortcutInsta}${closeMsg}\""
-		puts $scpt "end tell"
-		close $scpt
-		exec chmod +x "$env(TMPDIR)/add_shortcut.as"
-
-		file delete -force "$env(TMPDIR)/shortcut-done.tmp"
-		set res [ catch { exec osascript "$env(TMPDIR)/add_shortcut.as" } ]
-
-		if { ! $res } {
-			set timeout 1800
-			set elapsed 0
-			while { ! [ file exists "$env(TMPDIR)/shortcut-done.tmp" ] && $elapsed < $timeout } {
-				$wait configure -text [ format "%02d:%02d" [ expr { int( $elapsed / 60 ) } ] [ expr { $elapsed % 60 } ] ]
-				update
-				after 1000
-				incr elapsed
-			}
-
-			if { $elapsed >= $timeout } {
-				set res 1
-				set result timeout
-			}
-
-		} else {
-			set result $res
+	if { ! $res } {
+		set timeout 1800
+		set elapsed 0
+		while { ! [ file exists "$env(TMPDIR)/shortcut-done.tmp" ] && $elapsed < $timeout } {
+			$wait configure -text [ format "%02d:%02d" [ expr { int( $elapsed / 60 ) } ] [ expr { $elapsed % 60 } ] ]
+			update
+			after 1000
+			incr elapsed
 		}
 
-		file delete -force "$env(TMPDIR)/add_shortcut.as" "$env(TMPDIR)/shortcut-done.tmp"
-		destroytop .wait
+		if { $elapsed >= $timeout } {
+			set res 1
+			set result timeout
+		}
+
+	} else {
+		set result $res
 	}
+
+	file delete -force "$env(TMPDIR)/add_shortcut.as" "$env(TMPDIR)/shortcut-done.tmp"
+	destroytop .wait
 }
 
 if { $res } {
@@ -636,17 +635,11 @@ if { $res } {
 #
 
 if [ info exists xcode ] {
-	if { $osascript } {
-		ttk::messageBox -parent "" -type ok -title "Xcode Installation" -icon info -message "User interaction required" -detail "The next step of installation will require the user to confirm Xcode command line tools installation.\n\nThis is required to install the C++ compiler and development tools."
-		waitbox .wait "Installing..." "Installing Xcode command line tools.\n\nAn internet connection is required.\n\nIt may take a while, please wait..." "1. if required, allow the Terminal access\n2. click on 'Install'\n3. agree with the license agreement\n4. wait for the download\n5. click on 'Done'" 0 ""
-		set res [ catch { exec xcode-select --install } result ]
-		destroytop .wait
-	} else {
-		set res 1
-		set result "macOS security block"
-	}
+	catch { exec xcode-select --install } result
+	after 3000
+	set res [ ttk::messageBox -parent "" -type yesno -title "Xcode Installation" -icon info -message "User interaction required" -detail "The next step of installation will require the user to confirm Xcode command line tools installation.\n\nThis is required to install the C++ compiler and development tools.\n\nPlease click on 'Install' in the 'xcode-select' dialog box that should have appeared before.\n\nPress 'Yes' if you clicked on 'Install', or click on 'No' otherwise" ]
 
-	if { $res } {
+	if { $res eq "no" } {
 		ttk::messageBox -parent "" -type ok -title Error -icon error -message "Error installing Xcode" -detail "The installation of Xcode command line tools failed ($result).\n\nTo use LSD you must do a manual install following the instructions in 'Readme.txt', in the the 'xcode-select --install' step."
 		lappend issues "Xcode Command Line tools missing (xcode-select --install)"
 	}
@@ -693,65 +686,64 @@ if { ! [ string equal $CurPlatform linux ] && ( [ info exists gnuplot ] || [ inf
 	}
 
 	if [ string equal $CurPlatform mac ] {
-		if { $osascript } {
-			# check if Homebrew is installed and install if not
-			set res 0
-			if [ catch { exec which brew } ] {
-				set brewInsta "/bin/bash -c \\\"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\\\"; "
-				set brewInstr "Homebrew package manager, "
-				set brewSteps "in Terminal type your password and press <Return> twice\n3. "
-				set brewMsg1 "Homebrew, "
-				set brewMsg2 "\\nType your password and press <Return> twice:"
-			} else {
-				set brewInsta ""
-				set brewInstr ""
-				set brewSteps ""
-				set brewMsg1 ""
-				set brewMsg2 ""
-			}
-
-			set pkgInsta "$macPmCmd $macPmPkg; "
-
-			ttk::messageBox -parent "" -type ok -title "Tools Installation" -icon info -message "User interaction required" -detail "The next step of installation will require the user to confirm installation of ${brewInstr}Gnuplot graphical terminal, MultiTail tool and/or Cython compiler.\n\nA Terminal window will open and the interaction must be performed there."
-			set wait [ waitbox .wait "Installing..." "Installing ${brewInstr} Gnuplot graphical terminal\nMultiTail and/or Cython.\nAn internet connection is required.\n\nIt may take a while, please wait..." "1. if required, allow the Terminal access\n2. ${brewSteps}Terminal window will close/disable when done\n" 1 "" ]
-
-			set scpt [ open "$env(TMPDIR)/install_homebrew.as" w ]
-			puts $scpt "tell application \"Terminal\""
-			set openMsg "clear; echo \\\"Installing ${brewMsg1}Gnuplot and/or MultiTail\\nPlease wait for this window to close/deactivate automatically.${brewMsg2}\\\"; "
-			set closeMsg "${pkgInsta}touch \$TMPDIR/brew-done.tmp; exit"
-			puts $scpt "\tdo script \"${openMsg}${brewInsta}${closeMsg}\""
-			puts $scpt "end tell"
-			close $scpt
-			exec chmod +x "$env(TMPDIR)/install_homebrew.as"
-
-			file delete -force "$env(TMPDIR)/brew-done.tmp"
-			set res [ catch { exec osascript "$env(TMPDIR)/install_homebrew.as" } ]
-
-			if { ! $res } {
-				set timeout 1800
-				set elapsed 0
-				while { ! [ file exists "$env(TMPDIR)/brew-done.tmp" ] && $elapsed < $timeout } {
-					$wait configure -text [ format "%02d:%02d" [ expr { int( $elapsed / 60 ) } ] [ expr { $elapsed % 60 } ] ]
-					update
-					after 1000
-					incr elapsed
-				}
-
-				if { $elapsed >= $timeout } {
-					set res 1
-					set result timeout
-				}
-
-			} else {
-				set result $res
-			}
-
-			file delete -force "$env(TMPDIR)/install_homebrew.as" "$env(TMPDIR)/brew-done.tmp"
-			destroytop .wait
+		# check if Homebrew is installed and install if not
+		set res 0
+		if [ catch { exec which brew } ] {
+			set brewInsta "/bin/bash -c \\\"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\\\"; "
+			set tclTkPath "echo >> ~/.zprofile; echo 'export PATH=\\\"\$(brew --prefix tcl-tk@8)/bin:\$PATH\\\"' >> ~/.zprofile; "
+			set brewPath "if \[ -d /opt/homebrew \]; then; echo >> ~/.zprofile; echo 'eval \\\"\$(/opt/homebrew/bin/brew shellenv zsh)\\\"' >> ~/.zprofile; fi; "
+			set brewInstr "Homebrew package manager, "
+			set brewSteps "\n3. in Terminal type your password and press <Return> twice"
+			set brewMsg1 "Homebrew "
+			set brewMsg2 "\\nType your password and press <Return> twice"
 		} else {
-			set res 1
-			set result "macOS security block"
+			set brewInsta ""
+			set tclTkPath ""
+			set brewPath ""
+			set brewInstr ""
+			set brewSteps ""
+			set brewMsg1 ""
+			set brewMsg2 ""
 		}
+
+		set pkgInsta "brew install -y -q $macPmPkg; "
+
+		ttk::messageBox -parent "" -type ok -title "Tools Installation" -icon info -message "User interaction required" -detail "The next step of installation will require the user to confirm installation of ${brewInstr}Gnuplot graphical terminal, MultiTail tool, Tcl/Tk, and/or Cython compiler.\n\nA Terminal window will open and the interaction must be performed there."
+		set wait [ waitbox .wait "Installing..." "Installing ${brewInstr} Gnuplot graphical terminal\nMultiTail and/or Cython.\nAn internet connection is required.\n\nIt may take a while, please wait..." "1. if required, allow the Terminal to control System Events\n2. select the just-opened Terminal window${brewSteps}" 1 "" ]
+
+		set scpt [ open "$env(TMPDIR)/install_homebrew.as" w ]
+		puts $scpt "tell application \"Terminal\""
+		set openMsg "clear; echo \\\"Installing ${brewMsg1}${macPmPkg}\\nPlease wait for this window to close/deactivate automatically.${brewMsg2}\\\"; "
+		set closeMsg "${pkgInsta}touch \$TMPDIR/brew-done.tmp; exit"
+		puts $scpt "\tdo script \"${openMsg}${brewInsta}${tclTkPath}${brewPath}${closeMsg}\""
+		puts $scpt "end tell"
+		close $scpt
+		exec chmod +x "$env(TMPDIR)/install_homebrew.as"
+
+		file delete -force "$env(TMPDIR)/brew-done.tmp"
+		set res [ catch { exec osascript "$env(TMPDIR)/install_homebrew.as" } ]
+
+		if { ! $res } {
+			set timeout 1800
+			set elapsed 0
+			while { ! [ file exists "$env(TMPDIR)/brew-done.tmp" ] && $elapsed < $timeout } {
+				$wait configure -text [ format "%02d:%02d" [ expr { int( $elapsed / 60 ) } ] [ expr { $elapsed % 60 } ] ]
+				update
+				after 1000
+				incr elapsed
+			}
+
+			if { $elapsed >= $timeout } {
+				set res 1
+				set result timeout
+			}
+
+		} else {
+			set result $res
+		}
+
+		file delete -force "$env(TMPDIR)/install_homebrew.as" "$env(TMPDIR)/brew-done.tmp"
+		destroytop .wait
 
 		if { $res } {
 			ttk::messageBox -parent "" -type ok -title Error -icon error -message "Error installing Gnuplot" -detail "The installation of Gnuplot graphical terminal (and/or other associated tools) failed ($result).\n\nTo use LSD you must do a manual install following the instructions in 'Readme.txt', starting in the the '$brewInsta' step."

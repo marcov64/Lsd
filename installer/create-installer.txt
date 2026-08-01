@@ -1,5 +1,7 @@
-To create Windows .exe installer
+To all:
+1. Update LSD_VER_NUM and LSD_VER_TAG in create-installer-xxxx.yyy
 
+To create Windows .exe installer
 1. Get 7-Zip LZMA SDK at https://www.7-zip.org (ex. lzma1900.7z)
 2. Copy 7zSD.sfx to gnu\installer folder in LSD installation
 3. Open 7zSD.sfx in Resource Hacker (http://www.angusj.com/resourcehacker)
@@ -11,7 +13,14 @@ To create Windows .exe installer
 9. Add files/patterns to exclude to exclude-installer-windows.txt
 10. Run create-installer-windows.bat to create installer
 
-
 To create macOS DMG installer
-1. Add files/patterns to exclude to exclude-installer-mac.txt
-2. Run create-installer-mac.sh to create the installer
+1. Update LSD_VER_NUM and LSD_VER_TAG in run-installer-mac.sh
+2. Add files/patterns to exclude to exclude-installer-mac.txt
+3. Run create-installer-mac.sh to create the installer
+
+To test macOS installer
+1. Remove previous installer authorizations: tccutil reset All com.marcov64.lsdi
+2. Remove previous terminal authorizations: tccutil reset AppleEvents com.apple.terminal
+3. Remove Xcode command line utilities: sudo rm -rf /Library/Developer/CommandLineTools
+4. Remove Homebrew and its packages: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
+5. Remove Homebrew environment variables: rm ~/.zprofile
