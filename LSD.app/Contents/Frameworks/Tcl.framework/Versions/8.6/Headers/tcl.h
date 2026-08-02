@@ -56,10 +56,10 @@ extern "C" {
 #endif
 #define TCL_MINOR_VERSION   6
 #define TCL_RELEASE_LEVEL   TCL_FINAL_RELEASE
-#define TCL_RELEASE_SERIAL  17
+#define TCL_RELEASE_SERIAL  18
 
 #define TCL_VERSION	    "8.6"
-#define TCL_PATCH_LEVEL	    "8.6.17"
+#define TCL_PATCH_LEVEL	    "8.6.18"
 
 /*
  *----------------------------------------------------------------------------
@@ -2421,7 +2421,7 @@ EXTERN void		Tcl_GetMemoryInfo(Tcl_DString *dsPtr);
  * table.
  */
 
-#include "tclDecls.h"
+#include "tclDecls.h"  /* IWYU pragma: export */
 
 /*
  * Include platform specific public function declarations that are accessible
@@ -2434,7 +2434,7 @@ EXTERN void		Tcl_GetMemoryInfo(Tcl_DString *dsPtr);
 #   define TCLAPI MODULE_SCOPE
 #endif
 
-#include "tclPlatDecls.h"
+#include "tclPlatDecls.h"  /* IWYU pragma: export */
 
 /*
  *----------------------------------------------------------------------------

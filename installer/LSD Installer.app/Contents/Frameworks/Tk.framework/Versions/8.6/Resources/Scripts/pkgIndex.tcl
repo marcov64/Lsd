@@ -1,2 +1,2 @@
 if {![package vsatisfies [package provide Tcl] 8.6.0]} return
-package ifneeded Tk 8.6.17 [list load [file normalize [file join $dir .. .. Tk]]]
+package ifneeded Tk 8.6.18 [list load [file normalize [file join $dir .. .. Tk]]]
