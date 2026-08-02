@@ -690,16 +690,16 @@ if { ! [ string equal $CurPlatform linux ] && ( [ info exists gnuplot ] || [ inf
 		set res 0
 		if [ catch { exec which brew } ] {
 			set brewInsta "/bin/bash -c \\\"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\\\"; "
-			set tclTkPath "echo >> ~/.zprofile; echo 'export PATH=\\\"\$(brew --prefix tcl-tk@8)/bin:\$PATH\\\"' >> ~/.zprofile; "
-			set brewPath "if \[ -d /opt/homebrew \]; then; echo >> ~/.zprofile; echo 'eval \\\"\$(/opt/homebrew/bin/brew shellenv zsh)\\\"' >> ~/.zprofile; fi; "
+			set brewPath "if \[ -d /opt/homebrew \]; then; echo >> ~/.zprofile; echo 'eval \\\"\$(/opt/homebrew/bin/brew shellenv zsh)\\\"' >> ~/.zprofile; eval \\\"\$(/opt/homebrew/bin/brew shellenv zsh)\\\"; fi; "
+			set tclTkPath "echo >> ~/.zshrc; echo 'export PATH=\\\"\$(brew --prefix tcl-tk@8)/bin:\$PATH\\\"' >> ~/.zshrc; echo 'export LDFLAGS=\\\"-L\$(brew --prefix tcl-tk@8)/lib \$LDFLAGS\\\"' >> ~/.zshrc; echo 'export CPPFLAGS=\\\"-I\$(brew --prefix tcl-tk@8)/include \$CPPFLAGS\\\"' >> ~/.zshrc; "
 			set brewInstr "Homebrew package manager, "
 			set brewSteps "\n3. in Terminal type your password and press <Return> twice"
 			set brewMsg1 "Homebrew "
 			set brewMsg2 "\\nType your password and press <Return> twice"
 		} else {
 			set brewInsta ""
-			set tclTkPath ""
 			set brewPath ""
+			set tclTkPath ""
 			set brewInstr ""
 			set brewSteps ""
 			set brewMsg1 ""

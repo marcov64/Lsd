@@ -20,7 +20,9 @@ To create macOS DMG installer
 
 To test macOS installer
 1. Remove previous installer authorizations: tccutil reset All com.marcov64.lsdi
-2. Remove previous terminal authorizations: tccutil reset AppleEvents com.apple.terminal
-3. Remove Xcode command line utilities: sudo rm -rf /Library/Developer/CommandLineTools
-4. Remove Homebrew and its packages: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
-5. Remove Homebrew environment variables: rm ~/.zprofile
+2. Remove previous LSD authorizations: tccutil reset All com.marcov64.lsd
+3. Remove previous LMM authorizations: tccutil reset All com.marcov64.lmm
+4. Remove previous terminal authorizations: tccutil reset AppleEvents com.apple.terminal
+5. Remove Xcode command line utilities: sudo rm -rf /Library/Developer/CommandLineTools
+6. Remove Homebrew and its packages: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
+7. Remove Homebrew environment variables: rm ~/.zprofile ~/.zshrc
