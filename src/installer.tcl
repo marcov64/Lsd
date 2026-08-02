@@ -105,7 +105,7 @@ if { $CurPlatform eq "mac" } {
 	
 	ttk::messageBox -parent "" -type ok -title "LSD Installation" -icon info -message "User interaction required" -detail "The next step of installation will check if LSD Installer is allowed to macOS automation.\n\nIf a security dialog opens, please allow the LSD Installer to control Terminal.\n\nThis is required so LSD Installer can proceed."
 	set scpt [ open "$env(TMPDIR)/terminal.as" w ]
-	puts $scpt "tell application \"Terminal\" to do script \"clear;exit\""
+	puts $scpt "tell application \"Terminal\" to do script \"clear; echo 'Checking Apple Events automation authorization'; exit\""
 	close $scpt
 	set res [ catch { exec osascript "$env(TMPDIR)/terminal.as" } ]
 	file delete -force "$env(TMPDIR)/terminal.tmp"
