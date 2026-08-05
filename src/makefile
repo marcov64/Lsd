@@ -31,6 +31,7 @@ SWITCH_CC_LSD=
 SWITCH_CC_DLL=
 SWITCH_CC_LNK=
 SWITCH_CC_LNK_DLL=
+SWITCH_CC_PUGIXML=-Wno-maybe-uninitialized
 
 # LSD file locations
 LSDROOT=..
@@ -147,7 +148,7 @@ $(OBJ_DIR_LMM)commonlib.o: $(LIB_DIR)commonlib.cpp $(DEP_GUI)
 
 $(OBJ_DIR_LMM)pugixml.o: $(CLIB_DIR)pugixml.cpp $(CLIB_DIR)pugixml.hpp $(CLIB_DIR)pugiconfig.hpp
 	$(MKDIR) $(@D)
-	$(CC) $(SWITCH_CC) $(SWITCH_CC_LMM) $(INCLUDE) -c $(CLIB_DIR)pugixml.cpp -o $(OBJ_DIR_LMM)pugixml.o
+	$(CC) $(SWITCH_CC) $(SWITCH_CC_LMM) $(SWITCH_CC_PUGIXML) $(INCLUDE) -c $(CLIB_DIR)pugixml.cpp -o $(OBJ_DIR_LMM)pugixml.o
 
 $(MANIF_LMM): $(SRC_DIR)LMM.exe.manifest.rc $(SRC_DIR)LMM.exe.manifest
 	$(MKDIR) $(@D)
@@ -224,7 +225,7 @@ $(OBJ_DIR_LSD)variab.o: $(LIB_DIR)variab.cpp $(DEP_LIB)
 
 $(OBJ_DIR_LSD)pugixml.o: $(CLIB_DIR)pugixml.cpp $(CLIB_DIR)pugixml.hpp $(CLIB_DIR)pugiconfig.hpp
 	$(MKDIR) $(@D)
-	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(SWITCH_CC_DLL) $(INCLUDE) -c $(CLIB_DIR)pugixml.cpp -o $(OBJ_DIR_LSD)pugixml.o
+	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(SWITCH_CC_PUGIXML) $(SWITCH_CC_DLL) $(INCLUDE) -c $(CLIB_DIR)pugixml.cpp -o $(OBJ_DIR_LSD)pugixml.o
 
 # LSD executable
 $(LSDROOT)/$(PKG_LSD)$(TARGET_LSD)$(EXE_EXT): $(MANIF_LSD) $(LIB_GUI) $(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT)
