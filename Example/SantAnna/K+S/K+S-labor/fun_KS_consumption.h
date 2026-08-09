@@ -338,8 +338,8 @@ CYCLES( LABSUPL1, cur, "Worker" )				// scan all workers
 	if ( cur1 != NULL )							// discard disalloc. unempl. s.1
 	{
 		i = VS( PARENTS( cur1 ), "__IDvint" );	// vintage ID
-		v[2] = VLS( cur, "_sV", 1 ) * v[1];		// last skills (weighted)
-		EXTS( PARENT, countryE ).vintProd[ i ].sVavg += v[2];
+		v[3] = VLS( cur, "_sV", 1 ) * v[1];		// last skills (weighted)
+		EXTS( PARENT, countryE ).vintProd[ i ].sVavg += v[3];
 		EXTS( PARENT, countryE ).vintProd[ i ].workers += v[1];
 		v[0] += v[2];
 		v[2] += v[1];

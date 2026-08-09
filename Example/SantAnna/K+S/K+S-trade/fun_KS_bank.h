@@ -22,7 +22,7 @@ bad debt (loans in default) and total bank assets
 */
 
 // losses with bad debt, discarding negative losses (proceedings)
-v[1] = VL( "_BadDeb1", 1 ) + VL( "_BadDeb1", 1 );
+v[1] = VL( "_BadDeb1", 1 ) + VL( "_BadDeb2", 1 );
 
 v[2] = VL( "_Loans", 1 ) + VL( "_BondsB", 1 ) +	// bank assets
 	   VL( "_Res", 1 ) + VL( "_ExRes", 1 );

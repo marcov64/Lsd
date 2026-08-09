@@ -15,6 +15,13 @@
 
 /*============================== KEY EQUATIONS ===============================*/
 
+EQUATION( "CeEq" )
+/*
+Cost (revenue) of energy price equalization supported by government
+*/
+RESULT( V( "Se" ) - V( "De" ) * V( "pE" ) )
+
+
 EQUATION( "De" )
 /*
 Demand of energy to energy sector
@@ -296,11 +303,11 @@ RESULT( CURRENT * ( 1 + V( "upsilonF" ) *
 					  CFUN( mov_avg_bound, "Df", v[1], v[2], 1 ) ) ) )
 
 
-EQUATION( "CeEq" )
+EQUATION( "trCO2e" )
 /*
-Cost (revenue) of energy price equalization supported by government
+Tax fee on CO2 (carbon) emissions of non-energy firms
 */
-RESULT( V( "Se" ) - V( "De" ) * V( "pE" ) )
+RESULT( ( 1 + VS( PARENT, "deltaTC" ) ) * CURRENT )
 
 
 /*============================ SUPPORT EQUATIONS =============================*/

@@ -2671,7 +2671,7 @@ CYCLES( CAPSECL1, cur, "Firm1" )
 	double _Em1 = VS( cur, "_Em1" );
 	double _En1 = VS( cur, "_En1" );
 	double _Eq1 = VS( cur, "_Eq1" );
-	double _Grd = VS( cur, "_Grd" );
+	double _Grd1 = VS( cur, "_Grd1" );
 	double _HC = VS( cur, "_HC" );
 	double _L1 = VS( cur, "_L1" );
 	double _L1d = VS( cur, "_L1d" );
@@ -2699,7 +2699,7 @@ CYCLES( CAPSECL1, cur, "Firm1" )
 	double _Div1_1 = VLS( cur, "_Div1", 1 );
 	double _NW1_1 = VLS( cur, "_NW1", 1 );
 
-	double nonNeg[ ] = { _CS1, _CD1, _CD1c, _Div1, _Em1, _En1, _Eq1, _Grd, _HC,
+	double nonNeg[ ] = { _CS1, _CD1, _CD1c, _Div1, _Em1, _En1, _Eq1, _Grd1, _HC,
 						 _NC, _RD1, _D1, _Q1, _Q1e, _BC, _L1, _L1d, _L1dRD,
 						 _L1rd, _Deb1, _Deb1max, _S1, _Tax1, _W1, _f1, _i1,
 						 _iD1, _imi, _inn, _qc1 };

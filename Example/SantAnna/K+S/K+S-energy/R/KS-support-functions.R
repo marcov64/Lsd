@@ -33,8 +33,7 @@ reqLibs <- c( "LSDinterface", "LSDsensitivity", "parallel", "tools", "abind",
               "plotrix", "textplot", "extrafont", "ggplot2", "gghalves",
               "ggthemes", "Rsubbotools" )
 
-repos <- c( "https://cloud.r-project.org", "https://ews.santannapisa.it/rpackages",
-            "https://erocoar.r-universe.dev" )
+repos <- c( "https://cloud.r-project.org", "https://ews.santannapisa.it/rpackages" )
 
 for( lib in reqLibs ) {
   if( ! lib %in% rownames( installed.packages( ) ) )
@@ -438,7 +437,6 @@ readCSV <- function( folder, baseName, num = "",
                      iniDrop = NULL, nTsteps = NULL ) {
 
   fn <- paste0( folder, "/", baseName, num, ".csv" )
-  tn <- c( "t", "time" )
 
   if( ! file.exists( fn ) )
     stop( "File '", fn, "' do not exist" )
@@ -455,7 +453,7 @@ readCSV <- function( folder, baseName, num = "",
   if( ncol( DCdata ) < 1 || nrow( DCdata ) < 1 )
     stop( "Insufficient data in '", fn, "'" )
 
-  tCol <- match( tolower( tn ), tolower( colnames( DCdata ) ) )
+  tCol <- match( c( "t", "time" ), tolower( colnames( DCdata ) ) )
   if( all( is.na( tCol ) ) ) {
     tCol <- 1
     filldf <- data.frame( matrix( 1 : nrow( DCdata ) ) )
@@ -477,23 +475,27 @@ readCSV <- function( folder, baseName, num = "",
       DCdata <- rbind( filldf, DCdata )
       DCdata[ 1 : ( minT - 1 ), tCol ] <- ( iniDrop + 1 ) : ( iniDrop + minT - 1 )
     } else
-      if( minT < iniDrop + 1 )
+      if( iniDrop != 0 && minT < iniDrop + 1 )
         DCdata <- DCdata[ - ( 1 : ( iniDrop + 1 - minT ) ), ]
   }
 
   if( ! is.null( nTsteps ) ) {
     maxT <- max( DCdata[ , tCol ], na.rm = TRUE )
+    minT <- min( DCdata[ , tCol ], na.rm = TRUE )
     nRow <- nrow( DCdata )
-    if( maxT - iniDrop != nRow )
+    if( maxT - minT + 1 != nRow )
       stop( "Inconsistent time sequence in column '",
             colnames( DCdata )[ tCol ], "'" )
 
-    if( nRow < nTsteps ) {
-      filldf <- data.frame( matrix( nrow = nTsteps - nRow,
+    nRowSim <- nrow( DCdata[ DCdata[ , tCol ] > 0, ] )
+    if( nRowSim < nTsteps ) {
+      filldf <- data.frame( matrix( nrow = nTsteps - nRowSim,
                                     ncol = ncol( DCdata ) ) )
       colnames( filldf ) <- colnames( DCdata )
       DCdata <- rbind( DCdata, filldf )
-      DCdata[ ( nRow + 1 ) : nTsteps, tCol ] <- ( maxT + 1 ) : ( maxT + nTsteps - nRow )
+      tMiss <- ( maxT + 1 ) : ( maxT + nTsteps - nRowSim )
+      DCdata[ ( nRow + 1 ) : ( nRow + length( tMiss ) ), tCol ] <-
+        ( maxT + 1 ) : ( maxT + nTsteps - nRowSim )
     }
   }
 
@@ -1304,6 +1306,8 @@ plot_laplace <- function( x, xlab = "", ylab = "", tit, subtit = "",
 #     statistic (mean or median), min, max, std. dev., conf. interval low and up
 #     (all with the same dimensions)
 #   DCdata: time series with data to compare
+#   t0: time shift of first data point in x-axis
+#   tScale: time multiple to scale x-axis
 #   stat: type of plot statistic (mean or median)
 #   nMC: number of Monte Carlo runs
 #   CI: confidence for confidence interval
@@ -1316,11 +1320,11 @@ plot_laplace <- function( x, xlab = "", ylab = "", tit, subtit = "",
 #	  leg2: legends fot type of plots
 #
 
-plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
-                        DCdata = NULL, nMC, sdMC = NULL, statMC = "mean",
-                        mask = NULL, CI = 0.95, log = FALSE, log0 = FALSE,
-                        na0 = FALSE, mrk = -1, xlab = "", ylab = "", tit = "",
-                        subtit = "", leg = NULL, leg2 = NULL, col = NULL,
+plot_lists <- function( vars, Pdata, mdata, Mdata, nMC, cdata = NULL, Cdata = NULL,
+                        DCdata = NULL, t0 = 0, tScale = 1, sdMC = NULL,
+                        statMC = "mean", mask = NULL, CI = 0.95, log = FALSE,
+                        log0 = FALSE, na0 = FALSE, mrk = -1, xlab = "", ylab = "",
+                        tit = "", subtit = "", leg = NULL, leg2 = NULL, col = NULL,
                         lty = NULL ) {
 
   nVar <- length( vars )
@@ -1353,7 +1357,6 @@ plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
     lty <- rep( "solid", nPlot )
 
   # prepare all time series
-  DCdata[ ! is.finite( DCdata ) ] <- NA
   for( k in 1 : nExp ) {
     Pdata[[ k ]][ ! is.finite( Pdata[[ k ]] ) ] <- NA
     mdata[[ k ]][ ! is.finite( mdata[[ k ]] ) ] <- NA
@@ -1369,24 +1372,37 @@ plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
       sdMC[[ k ]][ ! is.finite( sdMC[[ k ]] ) ] <- NA
   }
 
+  if( ! is.null( DCdata ) ) {
+    DCdata[ ! is.finite( DCdata ) ] <- NA
+
+    tDC <- mask[ 1 ]
+    if( tDC <= 0 ) {
+      DCmask <- 1 : length( mask )
+      mask <- mask[ mask > 0 ]
+    }
+    else
+      DCmask <- mask
+  }
+
   # produce plot data
-  plt <- min <- max <- CIlo <- CIhi <- list( )
+  pltx <- plty <- min <- max <- CIlo <- CIhi <- list( )
   k <- 1
   for( p in 1 : nPlot ) {
-    plt[[ p ]] <- min[[ p ]] <- max[[ p ]] <- CIlo[[ p ]] <- CIhi[[ p ]] <- list( )
+    plty[[ p ]] <- min[[ p ]] <- max[[ p ]] <- CIlo[[ p ]] <- CIhi[[ p ]] <- list( )
     for( j in 1 : nVar ) {
-      if( p == 1 && nPlot > nExp ) {
+      if( p == 1 && nPlot > nExp && ! is.null( DCdata ) ) {
         if( vars[ j ] %in% colnames( DCdata ) )
-          plt[[ p ]][[ j ]] <- DCdata[ mask, vars[ j ] ]
+          plty[[ p ]][[ j ]] <- DCdata[ DCmask, vars[ j ] ]
         else
-          plt[[ p ]][[ j ]] <- NA
+          plty[[ p ]][[ j ]] <- NA
 
         min[[ p ]][[ j ]] <- NA
         max[[ p ]][[ j ]] <- NA
         CIlo[[ p ]][[ j ]] <- NA
         CIhi[[ p ]][[ j ]] <- NA
+        pltx[[ p ]] <- t0 + ( tDC : max( mask ) ) / tScale
       } else {
-        plt[[ p ]][[ j ]] <- Pdata[[ k ]][ mask, vars[ j ] ]
+        plty[[ p ]][[ j ]] <- Pdata[[ k ]][ mask, vars[ j ] ]
         min[[ p ]][[ j ]] <- mdata[[ k ]][ mask, vars[ j ] ]
         max[[ p ]][[ j ]] <- Mdata[[ k ]][ mask, vars[ j ] ]
 
@@ -1394,7 +1410,7 @@ plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
           CIlo[[ p ]][[ j ]] <- cdata[[ k ]][ mask, vars[ j ] ]
         else {
           if( ! is.null( sdMC ) )
-            CIlo[[ p ]][[ j ]] <- plt[[ p ]][[ j ]] - af * sdMC[[ k ]][ mask, vars[ j ] ]
+            CIlo[[ p ]][[ j ]] <- plty[[ p ]][[ j ]] - af * sdMC[[ k ]][ mask, vars[ j ] ]
           else
             CIlo[[ p ]][[ j ]] <- NA
         }
@@ -1403,21 +1419,23 @@ plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
           CIhi[[ p ]][[ j ]] <- Cdata[[ k ]][ mask, vars[ j ] ]
         else {
           if( ! is.null( sdMC ) )
-            CIhi[[ p ]][[ j ]] <- plt[[ p ]][[ j ]] + af * sdMC[[ k ]][ mask, vars[ j ] ]
+            CIhi[[ p ]][[ j ]] <- plty[[ p ]][[ j ]] + af * sdMC[[ k ]][ mask, vars[ j ] ]
           else
             CIhi[[ p ]][[ j ]] <- NA
         }
+
+        pltx[[ p ]] <- t0 + mask / tScale
       }
 
       # apply logs if required
       if( log ) {
-        plt[[ p ]][[ j ]] <- logNA( plt[[ p ]][[ j ]] )
+        plty[[ p ]][[ j ]] <- logNA( plty[[ p ]][[ j ]] )
         min[[ p ]][[ j ]] <- logNA( min[[ p ]][[ j ]] )
         max[[ p ]][[ j ]] <- logNA( max[[ p ]][[ j ]] )
         CIlo[[ p ]][[ j ]] <- logNA( CIlo[[ p ]][[ j ]] )
         CIhi[[ p ]][[ j ]] <- logNA( CIhi[[ p ]][[ j ]] )
       } else if( log0 ) {
-        plt[[ p ]][[ j ]] <- log0( plt[[ p ]][[ j ]] )
+        plty[[ p ]][[ j ]] <- log0( plty[[ p ]][[ j ]] )
         min[[ p ]][[ j ]] <- log0( min[[ p ]][[ j ]] )
         max[[ p ]][[ j ]] <- log0( max[[ p ]][[ j ]] )
         CIlo[[ p ]][[ j ]] <- log0( CIlo[[ p ]][[ j ]] )
@@ -1425,8 +1443,8 @@ plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
       }
 
       # treat zeros as NAs
-      if( na0 && any( plt[[ p ]][[ j ]] <= 0 ) ) {
-        plt[[ p ]][[ j ]] <- min[[ p ]][[ j ]] <- max[[ p ]][[ j ]] <-
+      if( na0 && any( plty[[ p ]][[ j ]] <= 0 ) ) {
+        plty[[ p ]][[ j ]] <- min[[ p ]][[ j ]] <- max[[ p ]][[ j ]] <-
           CIlo[[ p ]][[ j ]] <- CIhi[[ p ]][[ j ]] <- NA
       }
     }
@@ -1436,34 +1454,40 @@ plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
   }
 
   # find y and x limits
-  yMax <- xMax <- -Inf
-  yMin <- xMin <- Inf
-  xM <- xm <- yM <- ym <- array( dim = c( nPlot, nVar ) )
+  yMax <- xMax <- idxMax <- -Inf
+  yMin <- xMin <- idxMin <- Inf
+  yM <- ym <- xM <- xm <- idxM <- idxm <- array( dim = c( nPlot, nVar ) )
 
   for( p in 1 : nPlot )
-    for( j in 1 : length( plt[[ p ]] ) ) {
+    for( j in 1 : length( plty[[ p ]] ) ) {
       # find first and last valid times
-      xM[ p, j ] <- xm[ p, j ] <- 1
-      for( i in 1 : length( plt[[ p ]][[ j ]] ) ) {
-        if( is.finite( plt[[ p ]][[ j ]][ i ] ) ) {
-          xM[ p, j ] <- i
+      idxM[ p, j ] <- idxm[ p, j ] <- 1
+      xM[ p, j ] <- xm[ p, j ] <- pltx[[ p ]][ 1 ]
+      for( i in 1 : length( plty[[ p ]][[ j ]] ) ) {
+        if( is.finite( plty[[ p ]][[ j ]][ i ] ) ) {
+          idxM[ p, j ] <- i
+          xM[ p, j ] <- pltx[[ p ]][ i ]
         } else {
           if( xM[ p, j ] == 1 ) {
-            xm[ p, j ] <- i + 1
+            idxm[ p, j ] <- i + 1
+            xm[ p, j ] <- pltx[[ p ]][ i + 1 ]
           }
         }
       }
 
-      suppressWarnings( yM[ p, j ] <- max( plt[[ p ]][[ j ]], na.rm = TRUE ) )
-      suppressWarnings( ym[ p, j ] <- min( plt[[ p ]][[ j ]], na.rm = TRUE ) )
+      suppressWarnings( yM[ p, j ] <- max( plty[[ p ]][[ j ]], na.rm = TRUE ) )
+      suppressWarnings( ym[ p, j ] <- min( plty[[ p ]][[ j ]], na.rm = TRUE ) )
       yMax = max( yMax, yM[ p, j ] )
       yMin = min( yMin, ym[ p, j ] )
       xMax = max( xMax, xM[ p, j ] )
       xMin = min( xMin, xm[ p, j ] )
+      idxMax = max( idxMax, idxM[ p, j ] )
+      idxMin = min( idxMin, idxm[ p, j ] )
     }
 
   # adjust margins for legends
   ylim <- findYlim( yMin, yMax )
+  xlim <- c( xMin, xMax )
 
   if( ! is.finite( xMin ) || ! is.finite( xMax ) ||
       ! is.finite( ylim[ 1 ] ) || ! is.finite( ylim[ 2 ] ) )
@@ -1476,14 +1500,15 @@ plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
   else
     sub <- subtit
 
-  plot( x = c( xMin : xMax ), y = plt[[ 1 ]][[ 1 ]][ xMin : xMax ], type = "l",
-        main = title, sub = paste( "(", sub, ")" ), xlab = xlab, ylab = ylab,
-        col = col[ 1 ], lty = lty[ 1 ], ylim = ylim )
+  plot( x = pltx[[ 1 ]][ idxm[ 1, 1 ] : idxM[ 1, 1 ] ],
+        y = plty[[ 1 ]][[ 1 ]][ idxm[ 1, 1 ] : idxM[ 1, 1 ] ],
+        type = "l", main = title, sub = paste( "(", sub, ")" ), xlab = xlab,
+        ylab = ylab, col = col[ 1 ], lty = lty[ 1 ], xlim = xlim, ylim = ylim )
 
   if( nPlot > 1 )
     for( p in 2 : nPlot )
-      lines( x = c( xm[ p, 1 ] : xM[ p, 1 ] ),
-             y = plt[[ p ]][[ 1 ]][ xm[ p, 1 ] : xM[ p, 1 ] ],
+      lines( x = pltx[[ p ]][ idxm[ p, 1 ] : idxM[ p, 1 ] ],
+             y = plty[[ p ]][[ 1 ]][ idxm[ p, 1 ] : idxM[ p, 1 ] ],
              col = col[ p ], lty = lty[ p ] )
 
   if( nVar > 1 )
@@ -1491,12 +1516,12 @@ plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
       for( j in 2 : nVar )
         if( is.finite( xm[ p, j ] ) && is.finite( xM[ p, j ] ) ) {
           if( lty[ 1 ] == lty[ length( lty ) ] )
-            lines( x = c( xm[ p, j ] : xM[ p, j ] ),
-                   y = plt[[ p ]][[ j ]][ xm[ p, j ] : xM[ p, j ] ],
+            lines( x = pltx[[ p ]][ idxm[ p, j ] : idxM[ p, j ] ],
+                   y = plty[[ p ]][[ j ]][ idxm[ p, j ] : idxM[ p, j ] ],
                    col = col[ p ], lty = j )
           else
-            lines( x = c( xm[ p, j ] : xM[ p, j ] ),
-                   y = plt[[ p ]][[ j ]][ xm[ p, j ] : xM[ p, j ] ],
+            lines( x = pltx[[ p ]][ idxm[ p, j ] : idxM[ p, j ] ],
+                   y = plty[[ p ]][[ j ]][ idxm[ p, j ] : idxM[ p, j ] ],
                    col = col[ p ], lty = lty[ p ], lwd = j )
         }
 
@@ -1534,39 +1559,43 @@ plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
     title <- paste( tit, "(", leg[ p ], ")" )
     subTitle <- paste0( "( gray: ", CI * 100,
                         "% confidence / light gray: min/max / ", sub, " )" )
-    plot( x = c( xMin : xMax ), y = plt[[ p ]][[ 1 ]][ xMin : xMax ], type = "l",
-          main = title, sub = subTitle, xlab = xlab, ylab = ylab, ylim = ylim )
+    plot( x = pltx[[ p ]][ idxm[ 1, 1 ] : idxM[ 1, 1 ] ],
+          y = plty[[ p ]][[ 1 ]][ idxm[ 1, 1 ] : idxM[ 1, 1 ] ],
+          type = "l", main = title, sub = subTitle, xlab = xlab, ylab = ylab,
+          xlim = xlim, ylim = ylim )
 
     # plot max/min area first for all series in experiment
     if( length( min ) == nPlot && length( max ) == nPlot )
-      for( j in 1 : length( plt[[ p ]] ) )
-        if( length( min[[ p ]][[ j ]] ) == length( plt[[ p ]][[ j ]] ) &&
-            length( max[[ p ]][[ j ]] ) == length( plt[[ p ]][[ j ]] ) &&
+      for( j in 1 : length( plty[[ p ]] ) )
+        if( length( min[[ p ]][[ j ]] ) == length( plty[[ p ]][[ j ]] ) &&
+            length( max[[ p ]][[ j ]] ) == length( plty[[ p ]][[ j ]] ) &&
             is.finite( xm[ p, j ] ) && is.finite( xM[ p, j ] ) )
-          polygon( c( xm[ p, j ] : xM[ p, j ], xM[ p, j ] : xm[ p, j ] ),
-                   c( pmin( max[[ p ]][[ j ]][ xm[ p, j ] : xM[ p, j ] ],
+          polygon( c( pltx[[ p ]][ idxm[ p, j ] : idxM[ p, j ] ],
+                      pltx[[ p ]][ idxM[ p, j ] : idxm[ p, j ] ] ),
+                   c( pmin( max[[ p ]][[ j ]][ idxm[ p, j ] : idxM[ p, j ] ],
                             ylim[ 2 ], na.rm = TRUE ),
-                      rev( pmax( min[[ p ]][[ j ]][ xm[ p, j ] : xM[ p, j ] ],
+                      rev( pmax( min[[ p ]][[ j ]][ idxm[ p, j ] : idxM[ p, j ] ],
                                  ylim[ 1 ], na.rm = TRUE ) ) ),
                    col = "gray90", border = NA )
 
     # then plot confidence interval area for all series
     if( length( CIlo ) == nPlot && length( CIhi ) == nPlot )
-      for( j in 1 : length( plt[[ p ]] ) )
-        if( length( CIhi[[ p ]][[ j ]] ) == length( plt[[ p ]][[ j ]] ) &&
-            length( CIlo[[ p ]][[ j ]] ) == length( plt[[ p ]][[ j ]] ) &&
+      for( j in 1 : length( plty[[ p ]] ) )
+        if( length( CIhi[[ p ]][[ j ]] ) == length( plty[[ p ]][[ j ]] ) &&
+            length( CIlo[[ p ]][[ j ]] ) == length( plty[[ p ]][[ j ]] ) &&
             is.finite( xm[ p, j ] ) && is.finite( xM[ p, j ] ) )
-          polygon( c( xm[ p, j ] : xM[ p, j ], xM[ p, j ] : xm[ p, j ] ),
-                   c( pmin( CIhi[[ p ]][[ j ]][ xm[ p, j ] : xM[ p, j ] ],
+          polygon( c( pltx[[ p ]][ idxm[ p, j ] : idxM[ p, j ] ],
+                      pltx[[ p ]][ idxM[ p, j ] : idxm[ p, j ] ] ),
+                   c( pmin( CIhi[[ p ]][[ j ]][ idxm[ p, j ] : idxM[ p, j ] ],
                             ylim[ 2 ], na.rm = TRUE ),
-                      rev( pmax( CIlo[[ p ]][[ j ]][ xm[ p, j ] : xM[ p, j ] ],
+                      rev( pmax( CIlo[[ p ]][[ j ]][ idxm[ p, j ] : idxM[ p, j ] ],
                                  ylim[ 1 ], na.rm = TRUE ) ) ),
                    col = "gray70", border = NA )
 
     # and finally plot the series lines, on top of all
-    for( j in 1 : length( plt[[ p ]] ) )
-      lines( x = c( xm[ p, j ] : xM[ p, j ] ),
-             y = plt[[ p ]][[ j ]][ xm[ p, j] : xM[ p, j ] ], lty = j )
+    for( j in 1 : length( plty[[ p ]] ) )
+      lines( x = pltx[[ p ]][ idxm[ p, j ] : idxM[ p, j ] ],
+             y = plty[[ p ]][[ j ]][ idxm[ p, j] : idxM[ p, j ] ], lty = j )
 
     # plot regime transition mark
     if( mrk > 0 )
@@ -1578,9 +1607,9 @@ plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
 
     # add data comparison
     if( nPlot > nExp ) {
-      for( j in 1 : length( plt[[ p ]] ) )
-        lines( x = c( xm[ 1, j ] : xM[ 1, j ] ),
-               y = plt[[ 1 ]][[ j ]][ xm[ 1, j] : xM[ 1, j ] ], lty = j,
+      for( j in 1 : length( plty[[ p ]] ) )
+        lines( x = pltx[[ 1 ]][ idxm[ 1, j ] : idxM[ 1, j ] ],
+               y = plty[[ 1 ]][[ j ]][ idxm[ 1, j] : idxM[ 1, j ] ], lty = j,
                col = col[ 2 ] )
       legend( x = "topleft", legend = c( leg[ p ], leg[ 1 ] ), inset = 0.03,
               cex = 0.8, lwd = 2, lty = c( lty[ 1 ], lty[ 2 ] ),
@@ -1623,6 +1652,8 @@ plot_bpf <- function( x, pl, pu, nfix, mask, resc = NA, mrk = -1,
     col <- rep( "black", nExp )
   if( is.null( lty ) )
     lty <- rep( "solid", nExp )
+
+  mask <- mask[ mask > 0 ]
 
   # produce bpf-filtered series & find max plot values
   x.plot <- list()

@@ -383,7 +383,8 @@ Label Root
 			Param: nE
 			Param: nuE
 			Param: pF0
-			Param: trCO2e
+			Param: trCO2e0
+			Param: trCO2e0chg
 			Param: upsilonE
 			Param: upsilonF
 			Param: xEinfEm
@@ -449,6 +450,7 @@ Label Root
 			Var: pE
 			Var: pEmavg
 			Var: pF
+			Var: trCO2e
 			Var: uE
 			Var: uEmavg
 			Var: wEmavg
@@ -1008,6 +1010,7 @@ Label Root
 		Param: Crec
 		Param: TregChg
 		Param: dGDP0
+		Param: deltaTC
 		Param: gammaRD
 		Param: gG
 		Param: mLim
@@ -1016,7 +1019,8 @@ Label Root
 		Param: phiRD
 		Param: stick
 		Param: tr
-		Param: trCO2
+		Param: trCO20
+		Param: trCO20chg
 		Param: x2inf
 		Param: x2sup
 		Var: A
@@ -1049,6 +1053,7 @@ Label Root
 		Var: initCountry
 		Var: regChg
 		Var: timeStep
+		Var: trCO2
 
 	}
 
@@ -1081,6 +1086,7 @@ Param: flagTax 0 n + n n	0
 Param: Crec 0 n + n n	0.2
 Param: TregChg 0 n + n n	0
 Param: dGDP0 0 n + n n	0
+Param: deltaTC 0 n + n n	0
 Param: gammaRD 0 n + n n	0.005
 Param: gG 0 n + n n	0.005
 Param: mLim 0 n + n n	1
@@ -1089,7 +1095,8 @@ Param: omicron 0 n + n n	0.5
 Param: phiRD 0 n + n n	0.2
 Param: stick 0 n + n n	1
 Param: tr 0 n + n n	0.1
-Param: trCO2 0 n + n n	0
+Param: trCO20 0 n + n n	0
+Param: trCO20chg 0 n + n n	0
 Param: x2inf 0 n + n n	-0.15
 Param: x2sup 0 n + n n	0.15
 Var: A 4 s + n n	0	0	0	0
@@ -1122,6 +1129,7 @@ Var: entryExit 0 n + n n
 Var: initCountry 0 n + n n
 Var: regChg 0 n + n n
 Var: timeStep 0 n + n n
+Var: trCO2 0 n + n n
 
 Object: Financial C	1
 Param: B 0 n + n n	1
@@ -1345,7 +1353,8 @@ Param: muEmax 0 n + n n	10
 Param: nE 0 n + n n	4
 Param: nuE 0 n + n n	0.01
 Param: pF0 0 n + n n	0.0005
-Param: trCO2e 0 n + n n	0
+Param: trCO2e0 0 n + n n	0
+Param: trCO2e0chg 0 n + n n	0
 Param: upsilonE 0 n + n n	0
 Param: upsilonF 0 n + n n	0.9
 Param: xEinfEm 0 n + n n	0
@@ -1411,6 +1420,7 @@ Var: iGE 0 s + n n
 Var: pE 5 s + n n	0	0	0	0	0
 Var: pEmavg 1 s + n n	0
 Var: pF 1 s + n n	0
+Var: trCO2e 0 n + n n
 Var: uE 4 s + n n	0	0	0	0
 Var: uEmavg 1 s + n n	0
 Var: wEmavg 1 s + n n	0
@@ -2188,6 +2198,13 @@ _INIT_
 All 1 instances equal to 0
 END_DESCRIPTION
 
+Parameter_deltaTC
+CO2 tax increase rate
+(>=0)
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
 Parameter_gammaRD
 Share of GDP for subsidy to R&D policies
 Activated by flagIndPolicies
@@ -2246,10 +2263,16 @@ _INIT_
 All 1 instances equal to 0.1.
 END_DESCRIPTION
 
-Parameter_trCO2
-Tax rate on CO2 (carbon) emissions of energy consumers
+Parameter_trCO20
+Initial tax rate on CO2 (carbon) emissions of energy consumers
 _INIT_
 All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_trCO20chg
+Initial tax rate on CO2 of energy consumers after regime change
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Parameter_x2inf
@@ -2425,6 +2448,10 @@ END_DESCRIPTION
 
 Variable_timeStep
 Optional scheduling of equations
+END_DESCRIPTION
+
+Variable_trCO2
+Tax fee on CO2 (carbon) emissions of non-energy firms
 END_DESCRIPTION
 
 Object_Financial
@@ -3725,11 +3752,17 @@ _INIT_
 All 1 instances equal to 0.0005
 END_DESCRIPTION
 
-Parameter_trCO2e
-Tax rate on CO2 (carbon) emissions of energy producer
+Parameter_trCO2e0
+Initial tax fee on CO2 (carbon) emissions of energy producer
 (>=0)
 _INIT_
 All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_trCO2e0chg
+Initial tax fee on CO2 emissions of energy producer after regime change
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Parameter_upsilonE
@@ -4054,6 +4087,10 @@ Price of fossil fuel
 (>0)
 _INIT_
 All 1 instances equal to 0
+END_DESCRIPTION
+
+Variable_trCO2e
+Tax fee on CO2 (carbon) emissions of non-energy firms
 END_DESCRIPTION
 
 Variable_uE

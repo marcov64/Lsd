@@ -213,6 +213,8 @@ bCase     <- 1      # experiment to be used as base case
 nBins     <- 15     # number of bins to use in histograms
 warmUpPlot<- 100    # number of "warm-up" runs for plots
 nTplot    <- -1     # last period to consider for plots (-1=all)
+t0        <- 0      # time shift of plot (0=none)
+tScale    <- 1      # time scale (1=none)
 warmUpStat<- 100    # warm-up runs to evaluate all statistics
 nTstat    <- -1     # last period to consider for statistics (-1=all)
 lowP      <- 6      # bandpass filter minimum period
@@ -301,15 +303,30 @@ for( k in 1 : nExp ) {
   l <- l + 1
 }
 
-# Number of periods to show in graphics and use in statistics
+# number of periods to show in graphics and use in statistics
 if( nTplot < 1 || nTplot > nTsteps || nTplot <= warmUpPlot )
   nTplot <- nTsteps
 if( nTstat < 1 || nTstat > nTsteps || nTstat <= warmUpStat )
   nTstat <- nTsteps
 if( nTstat < ( warmUpStat + 2 * bpfK + 4 ) )
   nTstat <- warmUpStat + 2 * bpfK + 4         # minimum number of periods
+
+# handle negative start plot time if external data comparison is enabled
+startPlot <- warmUpPlot + 1
+if( dComp && iniDrop == 0 && warmUpPlot == 0 ) {
+  tCol <- match( c( "t", "time" ), tolower( colnames( DCdata ) ) )
+  for( i in 1 : length( tCol ) )
+    if( ! is.na( tCol[ i ] ) ) {
+      tCol <- tCol[ i ]
+      break
+    }
+  tMin <- min( DCdata[ , tCol ], na.rm = TRUE )
+  if( tMin <= 0 )
+    startPlot <- tMin
+}
+
 TmaxStat <- nTstat - warmUpStat
-TmaskPlot <- ( warmUpPlot + 1 ) : nTplot
+TmaskPlot <- startPlot : nTplot
 TmaskStat <- ( warmUpStat + 1 ) : nTstat
 TmaskBpf <- ( bpfK + 1 ) : ( TmaxStat - bpfK )
 
@@ -329,8 +346,8 @@ par( mfrow = c ( plotRows, plotCols ) )             # define plots per page
 #
 
 time_plots( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata, DCdata,
-            mcStat, nExp, nSize, nTsteps, TmaskPlot, CI, Ptag, Xtag, plotLegends,
-            colors, lTypes, smoothing )
+            mcStat, nExp, nSize, nTsteps, t0, tScale, TmaskPlot, CI, Ptag, Xtag,
+            plotLegends, colors, lTypes, smoothing )
 
 box_plots( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat, warmUpStat, nTstat,
            legends, legendList, sDigits, bPlotCoef, bPlotNotc, folder, repName )

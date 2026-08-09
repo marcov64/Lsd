@@ -127,6 +127,13 @@ v[0] += - VL( "cEntry", 1 ) + VL( "cExit", 1 );
 RESULT( ROUND( v[0], 0, 0.001 ) )				// avoid rounding errors on zero
 
 
+EQUATION( "trCO2" )
+/*
+Tax fee on CO2 (carbon) emissions of non-energy firms
+*/
+RESULT( ( 1 + V( "deltaTC" ) ) * CURRENT )
+
+
 /*============================ SUPPORT EQUATIONS =============================*/
 
 EQUATION( "A" )
@@ -346,11 +353,17 @@ If TregChg is zero, there is no regime change
 Changed parameters:
 	Global:
 		flagIndPolicy	-> flagIndPolicyChg
+		trCO20	-> trCO20chg  (reset trCO2 variable too)
+		trCO2e0	-> trCO2e0chg (reset trCO2e variable too)
 */
 
 if ( T == ( int ) V( "TregChg" ) )				// in time, replace parameters
 {
 	WRITE( "flagIndPolicy", V( "flagIndPolicyChg" ) );
+	WRITE( "trCO20", V( "trCO20chg" ) );
+	WRITE( "trCO2", V( "trCO20chg" ) );
+	WRITES( ENESECL0, "trCO2e0", V( "trCO2e0chg" ) );
+	WRITES( ENESECL0, "trCO2e", V( "trCO2e0chg" ) );
 
 	LOG( "\n Regime changed (t=%g)", T );
 	PARAMETER;									// no more evaluate this eq.
@@ -463,7 +476,8 @@ EXEC_EXT( countryE, bankWgtd, reserve, B );
 WRITES( cur1, "lastID1", 0 );
 WRITES( cur2, "lastID2", 0 );
 
-// initialize lagged variables depending on parameters
+// initialize variables depending on parameters
+WRITE( "trCO2", V( "trCO20" ) );
 WRITEL( "A", CFUN( init_cond, "A0" ), -1 );
 WRITEL( "Def", CFUN( init_cond, "Def0" ), -1 );
 WRITEL( "Em", CFUN( init_cond, "Em0" ), -1 );
@@ -475,6 +489,7 @@ WRITEL( "Tax", CFUN( init_cond, "Tax0" ), -1 );
 WRITES( cur1, "pK0", p10 );
 WRITES( cur2, "pC0", p20 );
 WRITES( cur5, "ICge0", CFUN( init_cond, "ICge0" ) );
+WRITES( cur5, "trCO2e", VS( cur5, "trCO2e0" ) );
 WRITELS( cur1, "A1", CFUN( init_cond, "BtauLP0" ), -1 );
 WRITELS( cur1, "F1", F10, -1 );
 WRITELS( cur1, "L1", CFUN( init_cond, "L10" ), -1 );
