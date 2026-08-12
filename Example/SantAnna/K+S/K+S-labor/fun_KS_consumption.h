@@ -341,7 +341,7 @@ CYCLES( LABSUPL1, cur, "Worker" )				// scan all workers
 		v[3] = VLS( cur, "_sV", 1 ) * v[1];		// last skills (weighted)
 		EXTS( PARENT, countryE ).vintProd[ i ].sVavg += v[3];
 		EXTS( PARENT, countryE ).vintProd[ i ].workers += v[1];
-		v[0] += v[2];
+		v[0] += v[3];
 		v[2] += v[1];
 	}
 }
