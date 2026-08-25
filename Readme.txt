@@ -21,7 +21,7 @@ LSD is copyrighted by Marco Valente and Marcelo C. Pereira and is distributed ac
 LSD includes third party software under the original licenses of the copyright owners:
 
 GCC 15.2 and associated utilities are copyrighted by the Free Software Foundation, Inc. under GPL 3, https://gcc.gnu.org
-Tcl/Tk 8.6.17 is copyrighted by the Regents of the University of California, and other parties under BSD-style license, https://www.tcl.tk
+Tcl/Tk 8.6.18 is copyrighted by the Regents of the University of California, and other parties under BSD-style license, https://www.tcl.tk
 MSYS2 3.6.7, https://www.msys2.org
 Cygwin 3.6.7 is copyrighted under GNU GPL and LGPL 3, https://cygwin.com
 7-Zip LZMA SDK 24.09 is copyrighted by Igor Pavlov under GNU LGPL 2.1, https://www.7-zip.org
@@ -303,7 +303,16 @@ It is required to install Tcl/Tk and recommended to also install multitail, Gnup
 
  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 
-After Homebrew installation finishes (details at http://brew.sh), it usually requests some commands to be manually performed, check at the Terminal mssages. Please cut and paste the requested code in the Terminal prompt and press ENTER before proceeding.
+After Homebrew installation finishes (details at http://brew.sh), it may request some commands to be manually performed, check at the Terminal mssages. Please cut and paste the requested code in the Terminal prompt and press ENTER before proceeding. In more recent Apple Mx (non-Intel) macs, at least the additional commands below (or similar) are needed:
+
+ echo >> ~/.zprofile
+ echo 'eval "$(/opt/homebrew/bin/brew shellenv zsh)"' >> ~/.zprofile
+ eval "$(/opt/homebrew/bin/brew shellenv zsh)"
+
+If ZSH is not your default shell, the macOS default setting, you will need to adjust the above lines to your shell, or change the default shell back to ZSH in Terminal:
+
+ sudo chsh -s /bin/zsh
+ exit
 
 Finally, you can install Tcl/Tk, multitail, Gnuplot and Cython using the following command in Terminal (Qt framework will be automatically installed too):
 
