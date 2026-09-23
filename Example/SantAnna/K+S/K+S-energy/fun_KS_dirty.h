@@ -107,7 +107,8 @@ EQUATION( "__cDE" )
 Planned production unit cost of dirty power plant
 */
 RESULT( VS( GRANDPARENT, "pF" ) / V( "__Ade" ) +
-		VS( GRANDPARENT, "mDE" ) * VS( LABSUPL3, "w" ) )
+		VS( GRANDPARENT, "mDE" ) * VS( LABSUPL3, "w" ) +
+		VS( GRANDPARENT, "trCO2e" ) * V( "__emDE" ) )
 
 
 /*========================== SUPPORT LSD FUNCTIONS ===========================*/

@@ -128,7 +128,8 @@ v[1] = VS( LABSUPL1, "Ls" );					// available labor force
 v[2] = V( "LeRD" );								// R&D labor in energy sector
 v[3] = v[2] + VS( CAPSECL1, "L1rd" );			// R&D labor in all sectors
 v[4] = V( "LeD" );								// desired workers in en. sector
-v[5] = VS( CAPSECL1, "L1d" ) + VS( CONSECL1, "L2d" );// desired workers other sec.
+v[5] = VS( CAPSECL1, "L1d" ) + 					// desired workers other sec.
+	   VLS( CONSECL1, "L2d", VS( PARENT, "flagHireFric2" ) );
 v[6] = V( "LeShortMax" );						// max shortage allowed in sector
 
 v[4] = min( v[4], v[1] );						// ignore demand over total labor

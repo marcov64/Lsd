@@ -1,4 +1,4 @@
-Energy-augmented K+S Model (version 0.5.4)
+Energy-augmented K+S Model (version 0.5.5)
 ==========================================
 
 This version copyright by Marcelo C. Pereira.
@@ -25,6 +25,7 @@ v0.5.1 (01/01/2022) - consolidate energy producer cash-flow to government for SF
 v0.5.2 (25/09/2023) - implement real options analysis of green energy projects
 v0.5.3 (16/11/2025) - improve steady-state initial conditions
 v0.5.4 (09/04/2026) - implement industrial policies to spur energy transition
+v0.5.5 (27/08/2026) - add labor market friction in worker hiring
 
 
 Relevant references
@@ -165,7 +166,7 @@ Government industrial policies (parameter flagIndPolicy)
 +1  = cap new dirty power plants after certain time
 +2  = ban new inefficient/unfriendly machines below minimum standards
 +4  = Machine-replacement government subsidy to the consumption-good sector
-+8  = R&D government subsidy to the energy sector sector
++8  = R&D government subsidy to the energy sector
 +16 = R&D government subsidy to the capital-good sector
 +32 = R&D tax credit to the energy sector
 +64 = R&D tax credit to the capital-good sector
@@ -209,6 +210,11 @@ Additional (migrant) workers on full employment (parameter flagAddWorkers)
 -----------------------------------------------
 0 = vegetative worker population growth (as per parameter delta)
 1 = additional growth (delta+1%) during full employment (Ue<1%) periods
+
+Labor market friction on hiring (parameter flagHireFric2)
+-------------------------------
+0 = no hiring friction in consumption-good firms (same-period hiring)
+1-4 = periods from desired to effective hiring in consumption-good firms
 
 
 Model parameters

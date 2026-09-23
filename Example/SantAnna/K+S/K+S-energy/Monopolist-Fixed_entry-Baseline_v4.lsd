@@ -1003,6 +1003,7 @@ Label Root
 		Param: flagExpect
 		Param: flagFiscalRule
 		Param: flagGovExp
+		Param: flagHireFric2
 		Param: flagIndPolicy
 		Param: flagIndPolicyChg
 		Param: flagProjFinGE
@@ -1079,6 +1080,7 @@ Param: flagEnRDshare 0 n + n n	0
 Param: flagExpect 0 n + n n	0
 Param: flagFiscalRule 0 n + n n	0
 Param: flagGovExp 0 n + n n	2
+Param: flagHireFric2 0 n + n n	0
 Param: flagIndPolicy 0 n + n n	0
 Param: flagIndPolicyChg 0 n + n n	0
 Param: flagProjFinGE 0 n + n n	0
@@ -1756,7 +1758,7 @@ Var: K 1 s + n n	0
 Var: Kd 0 s + n n
 Var: Knom 0 s + n n
 Var: L2 0 s + n n
-Var: L2d 0 s + n n
+Var: L2d 4 s + n n	0	0	0	0
 Var: MC2 1 s + n n	0
 Var: N 1 s + n n	0
 Var: NW2 1 s + n n	0
@@ -1820,7 +1822,7 @@ Var: _K 1 n + n n	0
 Var: _Kd 0 n + n n
 Var: _Knom 0 n + n n
 Var: _L2 1 n + n n	0
-Var: _L2d 0 n + n n
+Var: _L2d 4 n + n n	0	0	0	0
 Var: _N 1 n + n n	0
 Var: _NW2 1 n + n n	0
 Var: _NW2p 0 n + n n
@@ -2133,6 +2135,14 @@ Government expenditure
 3 = pay unemployment benefit and spend government superavit if no public debt
 _INIT_
 All 1 instances equal to 2.
+END_DESCRIPTION
+
+Parameter_flagHireFric2
+Labor market friction on hiring in consumption-good sector
+0 = no hiring friction in consumption-good firms (same-period hiring)
+1-4 = periods from desired to effective hiring in consumption-good firms
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Parameter_flagIndPolicy

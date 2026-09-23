@@ -516,6 +516,9 @@ WRITELS( cur5, "EmE", CFUN( init_cond, "EmE0" ), -1 );
 WRITELS( cur5, "pE", CFUN( init_cond, "pE0" ), -1 );
 WRITELS( cur5, "pF", VS( cur5, "pF0" ), -1 );
 
+for ( i = 1; i <= 4; ++i )
+	WRITELS( cur2, "L2d", CFUN( init_cond, "L20" ), -i );
+
 // variables not to recalculate in t=1
 WRITES( cur5, "pE", CFUN( init_cond, "pE0" ) );
 

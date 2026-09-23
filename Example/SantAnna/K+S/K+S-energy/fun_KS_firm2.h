@@ -556,7 +556,8 @@ EQUATION( "_JO2" )
 /*
 Open job positions for a firm in consumption-good sector
 */
-RESULT( max( V( "_L2d" ) - VL( "_L2", 1 ), 0 ) )
+RESULT( max( VL( "_L2d", VS( GRANDPARENT, "flagHireFric2" ) ) -
+			 VL( "_L2", 1 ), 0 ) )
 
 
 EQUATION( "_K" )
@@ -677,15 +678,16 @@ EQUATION( "_L2" )
 /*
 Labor employed by firm in consumption-good sector
 */
-v[1] = VS( PARENT, "L2d" );
-RESULT( v[1] > 0 ? V( "_L2d" ) * VS( PARENT, "L2" ) / v[1] : 0 )
+i = VS( GRANDPARENT, "flagHireFric2" );			// length of hiring friction
+v[1] = VLS( PARENT, "L2d", i );
+RESULT( v[1] > 0 ? VL( "_L2d", i ) * VS( PARENT, "L2" ) / v[1] : 0 )
 
 
 EQUATION( "_L2d" )
 /*
 Labor demand of firm in consumption-good sector
 */
-RESULT( V( "_life2cycle" ) > 0 ? V( "_Q2" ) / V( "_A2" ) : 0 )
+RESULT( V( "_life2cycle" ) > 0 ? V( "_Q2" ) / V( "_A2" ) : CURRENT )
 
 
 EQUATION( "_N" )

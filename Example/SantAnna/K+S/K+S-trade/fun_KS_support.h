@@ -242,7 +242,7 @@ CFUN_OBJ( send_brochure, object *client )
 }
 
 
-// set initial supplier for entrant in equations 'entry2exit'
+// set initial supplier for entrant in equation 'entry2exit'
 
 CFUN_OBJ( set_supplier )
 {

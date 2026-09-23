@@ -2972,6 +2972,7 @@ CYCLES( CONSECL1, cur, "Firm2" )
 
 	double _Deb2_1 = VLS( cur, "_Deb2", 1 );
 	double _Div2_1 = VLS( cur, "_Div2", 1 );
+	double _L2d_n = VLS( cur, "_L2d", VS( PARENT, "flagHireFric2" ) );
 	double _Kavb = VLS( cur, "_K", 1 );
 	double _N_1 = VLS( cur, "_N", 1 );
 	double _NW2_1 = VLS( cur, "_NW2", 1 );
@@ -3046,7 +3047,7 @@ CYCLES( CONSECL1, cur, "Firm2" )
 	CFUN( check_error, QvintErr.size( ) > 0,
 		  "INVALID-PROD-VINT", QvintErr.size( ), & errors );
 
-	CFUN( check_error, _L2d > 0 && _L2 == 0, "NO-WORKER", 0, & errors );
+	CFUN( check_error, _L2d_n > 0 && _L2 == 0, "NO-WORKER", 0, & errors );
 
 	CFUN( check_error, LvintErr.size( ) > 0,
 		  "INVALID-LABOR-VINT", LvintErr.size( ), & errors );

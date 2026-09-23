@@ -947,6 +947,7 @@ CFUN_DBL( entry_firm2, int n, bool newInd )
 		{
 			WRITELLS( firm, "_D2", _D2e * ( 1 - _dD20 * ( i - 1 ) ), _t2ent, i );
 			WRITELLS( firm, "_D2d", _D2e * ( 1 - _dD20 * ( i - 1 ) ), _t2ent, i );
+			WRITELLS( firm, "_L2d", _L2, _t2ent, i );
 		}
 
 		if ( newInd )

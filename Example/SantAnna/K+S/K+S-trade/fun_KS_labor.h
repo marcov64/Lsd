@@ -46,8 +46,6 @@ RESULT( V( "GammaCost" ) * V( "wAvg" ) * V( "Ltrain" ) )
 EQUATION( "Ls" )
 /*
 Effective work force (labor) size
-Increase workforce if full employment and flagAddWorkers is set to 1
-Result is scaled according to the defined scale
 */
 
 v[1] = V( "Lscale" );							// labor scaling

@@ -25,7 +25,8 @@ v[1] = V( "delta" );							// population growth rate
 
 // growing workforce and demand is higher than labor supply?
 if ( VS( PARENT, "flagAddWorkers" ) == 1 && VS( ENESECL1, "LeD" ) +
-	 VS( CAPSECL1, "L1d" ) + VS( CONSECL1, "L2d" ) > CURRENT )
+	 VS( CAPSECL1, "L1d" ) +
+	 VLS( CONSECL1, "L2d", VS( PARENT, "flagHireFric2" ) ) > CURRENT )
 	v[1] += 0.02;								// lump grow in labor supply
 
 RESULT( CURRENT * ( 1 + v[1] ) )				// grow population

@@ -66,7 +66,8 @@ Work force (labor) size employed by capital-good sector
 v[1] = VS( LABSUPL1, "Ls" ) - VS( ENESECL1, "Le" );// available labor force
 v[2] = V( "L1rd" );								// R&D labor in sector 1
 v[3] = V( "L1d" );								// desired workers in sector 1
-v[4] = VS( CONSECL1, "L2d" );					// desired workers in sector 2
+v[4] = VLS( CONSECL1, "L2d", VS( PARENT, "flagHireFric2" ) );
+												// desired workers in sector 2
 v[5] = V( "L1shortMax" );						// max shortage allowed in sector
 
 v[2] = min( v[2], v[1] );						// ignore demand over total labor

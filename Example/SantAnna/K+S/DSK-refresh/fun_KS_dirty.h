@@ -52,7 +52,8 @@ EQUATION( "__cDE" )
 /*
 Production unit cost of dirty power plant
 */
-RESULT( VS( PARENT, "pF" ) / V( "__Ade" ) )
+RESULT( VS( PARENT, "pF" ) / V( "__Ade" ) +
+		VS( GRANDPARENT, "trCO2e" ) * V( "__emDE" ) )
 
 
 /*============================= DUMMY EQUATIONS ==============================*/

@@ -390,7 +390,8 @@ Work force (labor) size in consumption-good sector
 */
 v[1] = VS( LABSUPL1, "Ls" ) - VS( ENESECL1, "Le" ) - VS( CAPSECL1, "L1" );
 												// available labor force
-v[2] = V( "L2d" );								// desired workers in sector 2
+v[2] = VL( "L2d", VS( PARENT, "flagHireFric2" ) );
+												// desired workers in sector 2
 RESULT( min( v[2], v[1] ) )						// pick up to available
 
 
