@@ -1422,7 +1422,7 @@ CFUN_DBL( init_cond, const char *var )
 		v[ "En0" ] = v[ "En10" ] + v[ "En20" ];
 		v[ "Em10" ] = v[ "En10" ] * v[ "BtauEF0" ];
 		v[ "Em20" ] = v[ "En20" ] * v[ "AtauEF0" ];
-		v[ "EmE0" ] = v[ "De0" ] * emDE0;
+		v[ "EmE0" ] = ( 1 - fGE0 ) * v[ "De0" ] * emDE0;
 		v[ "Em0" ] = v[ "Em10" ] + v[ "Em20" ] + v[ "EmE0" ];
 
 		// firm net worth, loan debt and profits

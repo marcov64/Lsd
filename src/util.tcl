@@ -48,9 +48,34 @@ proc LsdCiting { dat { parWnd "." } } {
 
 	set year [ lindex $dat end ]
 
+	set msg "To cite LSD in publications"
+	set l1 "Please use (or adapt to your format)"
+	set l2 "Valente, M. and M. C. Pereira ($year)."
+	set l3 " \"LSD: Laboratory for Simulation Development\"."
+	set l4 " Universita' dell'Aquila"
+	set l5 " and Universidade Estadual de Campinas,"
+	set l6 " Aquila, Italy and Campinas, Brazil."
+	set l7 " <https://www.labsimdev.org/>."
+	set l8 "BibTex entry:"
+	set l9 "@Manual{LSD,"
+	set l10 "  title = {LSD: Laboratory for Simulation Development},"
+	set l11 "  author = {Valente, Marco and Pereira, Marcelo C.},"
+	set l12 "  organization = {Universita' dell'Aquila and"
+	set l13 "  Universidade Estadual de Campinas},"
+	set l14 "  address = {Aquila, Italy and Campinas, Brazil},"
+	set l15 "  year = {$year},"
+	set l16 "  url = {https://www.labsimdev.org/}"
+	set l17 "}"
+
+	plog "\n${l1} [ string tolower ${msg} 0 ]:\n\n${l2}${l3}\n${l4}${l5}\n${l6}${l7}\n\n${l8}\n${l9}\n${l10}\n${l11}\n${l12}\n${l13}\n${l14}\n${l15}\n${l16}\n${l17}\n"
+
 	ttk::messageBox -parent $parWnd -type ok -icon info -title "Citing LSD" \
-		-message "To cite LSD in publications" \
-		-detail "Please use (or adapt to your format):\n\n Valente, M. and M. C. Pereira ($year).\n \"LSD: Laboratory for Simulation Development\".\n Universita' dell'Aquila\n  and Universidade Estadual de Campinas,\n Aquila, Italy and Campinas, Brazil.\n <https://www.labsimdev.org/>.\n\nBibTex entry:\n\n @Manual{LSD,\n  title = {LSD: Laboratory for Simulation Development},\n  author = {Valente, Marco and Pereira, Marcelo C.},\n  organization = {Universita' dell'Aquila and\n   Universidade Estadual de Campinas},\n  address = {Aquila, Italy and Campinas, Brazil},\n  year = {$year},\n  url = {https://www.labsimdev.org/}\n }"
+		-message $msg \
+		-detail "${l1}:\n\n${l2}\n${l3}\n${l4}\n${l5}\n${l6}\n${l7}\n\n${l8}\n\n${l9}\n${l10}\n${l11}\n${l12}\n${l13}\n${l14}\n${l15}\n${l16}\n${l17}"
+
+	if { [ winfo exists .log ] } {
+		focustop .log
+	}
 }
 
 
@@ -1223,8 +1248,10 @@ proc upd_bars { } {
 # show a string in the LSD Log window
 #************************************************
 proc plog { cm { tag "" } } {
-	.log.text.text.internal insert end $cm $tag
-	.log.text.text.internal see end
+	if { [ winfo exists .log ] } {
+		.log.text.text.internal insert end $cm $tag
+		.log.text.text.internal see end
+	}
 }
 
 
