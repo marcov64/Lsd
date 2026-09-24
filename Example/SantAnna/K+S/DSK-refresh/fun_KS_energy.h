@@ -24,7 +24,7 @@ Also updates 'emTauDE', 'innDE'
 */
 
 v[0] = CURRENT;									// current efficiency
-v[1] = V( "emTauDE" );							// current emissions
+v[1] = VL( "emTauDE", 1 );						// current emissions
 
 // share of R&D expenditure among dirty and green innovation
 if ( VS( PARENT, "flagEnRDshare" ) == 0 )		// exogenous dirty/green share?

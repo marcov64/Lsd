@@ -45,7 +45,7 @@ EQUATION( "__EmDE" )
 /*
 CO2 emissions of dirty power plant
 */
-RESULT( V( "__Df" ) * V( "__emDE" ) )
+RESULT( V( "__Qde" ) * V( "__emDE" ) )
 
 
 EQUATION( "__cDE" )

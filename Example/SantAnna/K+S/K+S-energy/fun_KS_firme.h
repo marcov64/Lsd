@@ -24,7 +24,7 @@ Also updates '_emTauDE', '_innDE'
 */
 
 v[0] = CURRENT;									// current efficiency
-v[1] = V( "_emTauDE" );							// current emissions
+v[1] = VL( "_emTauDE", 1 );						// current emissions
 
 // share of R&D expenditure among dirty and green innovation
 if ( VS( GRANDPARENT, "flagEnRDshare" ) == 0 )	// exogenous dirty/green share?
@@ -1046,7 +1046,7 @@ Tax credit/deduction received from government policies
 Updated in '_TaxE'
 */
 
-EQUATION_DUMMY( "_emTauDE", "" )
+EQUATION_DUMMY( "_emTauDE", "_AtauDE" )
 /*
 Emissions of a new dirty energy power plant of energy producer
 Updated in '_AtauDE'

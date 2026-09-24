@@ -91,7 +91,7 @@ EQUATION( "__EmDE" )
 /*
 CO2 emissions of dirty power plant
 */
-RESULT( V( "__Df" ) * V( "__emDE" ) )
+RESULT( V( "__Qde" ) * V( "__emDE" ) )
 
 
 EQUATION( "__QdeU" )
@@ -117,9 +117,7 @@ EQUATION( "__LCOEde" )
 /*
 Compute the levelized cost of energy for the dirty power plant
 */
-RESULT( V( "__Kde" ) * ( 1 + VS( GRANDPARENT, "iotaE" ) ) *
-		(  V( "__cDE" ) + V( "__emDE" ) / V( "__Ade" ) *
-		   VS( GRANDPARENT, "trCO2e" ) ) )
+RESULT( V( "__Kde" ) * ( 1 + VS( GRANDPARENT, "iotaE" ) ) * V( "__cDE" ) )
 
 
 /*============================= DUMMY EQUATIONS ==============================*/
