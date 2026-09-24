@@ -444,7 +444,7 @@ EQUATION( "cE" )
 Average unit generation cost of energy sector
 */
 v[1] = VS( ENESECL2, "Qe" );
-RESULT( v[1] > 0 ? ( VS( ENESECL2, "Ce" ) - V( "RDe" ) ) /
+RESULT( v[1] > 0 ? ( VS( ENESECL2, "Ce" ) - VS( ENESECL2, "RDe" ) ) /
 				   VS( ENESECL2, "Qe" ) : 0 )
 
 

@@ -85,8 +85,8 @@ Government R&D subsidy to energy firms
 std::multimap < double, object * > candidates;	// ordered set of candidate firms
 std::multimap < double, object * >::reverse_iterator rit;
 
-i = V( "flagIndPolicy" );						// industrial policies in place
-j = V( "flagEnClim" );							// energy sector active?
+i = VS( PARENT, "flagIndPolicy" );				// industrial policies in place
+j = VS( PARENT, "flagEnClim" );					// energy sector active?
 
 if ( SUBS_CAP_RD( i ) && SUBS_ENE_RD( i ) && j == 1 )// split budget?
 {

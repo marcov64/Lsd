@@ -309,11 +309,11 @@ else											// regular periods
 	if ( ! CAP_DIRTY_PLANT( VS( GRANDPARENT, "flagIndPolicy" ) ) ||
 		 T < VS( PARENT, "Tge" ) || VL( "_fKge", 1 ) > VS( PARENT, "fGEmin" ) )
 		// if green plants are more expensive to built/operate than dirty ones
-		if ( V( "_ICtauGE" ) >
-			 VS( PARENT, "bE") * ( VS( PARENT, "pF" ) / V( "_AtauDE" ) +
-								   VS( LABSUPL2, "w" ) *
-								   ( VS( PARENT, "mDE" ) -
-									 VS( PARENT, "mGE" ) ) ) )
+		if ( V( "_ICtauGE" ) > VS( PARENT, "bE") *
+							   ( VS( PARENT, "pF" ) / V( "_AtauDE" ) +
+								 VS( LABSUPL2, "w" ) *
+								 ( VS( PARENT, "mDE" ) - VS( PARENT, "mGE" ) ) +
+								 VS( PARENT, "trCO2e" ) * V( "_emTauDE" ) ) )
 			v[0] = 0;							// no green new plants
 
 RESULT( v[0] >= 1 ? v[0] : 0 )					// ignore too small expansions

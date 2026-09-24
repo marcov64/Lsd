@@ -152,7 +152,9 @@ if ( T <= VS( CLIMATL1, "tA0" ) )
 	v[9] = v[2] - v[8];							// dirty new capacity
 }
 else
-	if ( v[4] <= V( "bE") * V( "pF" ) / v[3] )	// are green plants cheaper?
+	// if green plants are cheaper to built/operate than dirty ones
+	if ( v[4] <= V( "bE") *
+				 ( V( "pF" ) / v[3] + V( "trCO2e" ) * V( "emTauDE" ) ) )
 		// if cap is disabled or new green plants capacity is under cap
 		if ( v[5] == 0 || v[2] <= v[5] * v[6] )
 		{

@@ -322,9 +322,9 @@ if ( VS( CONSECL1, "mu20" ) < V0( minMu20 ) )
 	PLOG( "\n Warning: mu20 is insufficient: %.2lf < %.2lf",
 		  VS( CONSECL1, "mu20" ), V0( minMu20 ) );
 
-if ( VS( ENESTAL1, "muE0" ) < V0( minMuE0 ) )
+if ( VS( ENESECL1, "muE0" ) < V0( minMuE0 ) )
 	PLOG( "\n Warning: muE0 is insufficient: %.4lf < %.4lf",
-		  VS( ENESTAL1, "muE0" ), V0( minMuE0 ) );
+		  VS( ENESECL1, "muE0" ), V0( minMuE0 ) );
 
 v[1] = VL( "testInit", 1 );
 

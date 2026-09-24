@@ -119,7 +119,7 @@ Compute the levelized cost of energy for the dirty power plant
 */
 RESULT( V( "__Kde" ) * ( 1 + VS( GRANDPARENT, "iotaE" ) ) *
 		(  V( "__cDE" ) + V( "__emDE" ) / V( "__Ade" ) *
-		   VS( GRANDPARENTS( PARENT ), "trCO2" ) ) )
+		   VS( GRANDPARENT, "trCO2e" ) ) )
 
 
 /*============================= DUMMY EQUATIONS ==============================*/

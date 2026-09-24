@@ -23,8 +23,8 @@ Government R&D subsidy to capital-good firms
 std::multimap < double, object * > candidates;	// ordered set of candidate firms
 std::multimap < double, object * >::reverse_iterator rit;
 
-i = V( "flagIndPolicy" );						// industrial policies in place
-j = V( "flagEnClim" );							// energy sector active?
+i = VS( PARENT, "flagIndPolicy" );				// industrial policies in place
+j = VS( PARENT, "flagEnClim" );					// energy sector active?
 
 if ( SUBS_CAP_RD( i ) && SUBS_ENE_RD( i ) && j == 1 )// split budget?
 {
@@ -229,7 +229,7 @@ EQUATION( "Astd" )
 /*
 Minimum standard for machine energy efficiency/friendliness for ban policy
 */
-RESULT( BAN_SUBSTD_MACH( VS( GRANDPARENT, "flagIndPolicy" ) ) &&
+RESULT( BAN_SUBSTD_MACH( VS( PARENT, "flagIndPolicy" ) ) &&
 		T >= VS( PARENT, "Tstd" ) ? ( 1 + V( "deltaStd" ) ) *
 									WHTAVE( "_AtauEE", "_AtauEF" ) /
 									COUNT( "Firm1" ) : 0 )

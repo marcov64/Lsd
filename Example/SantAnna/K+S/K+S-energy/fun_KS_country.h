@@ -236,7 +236,7 @@ EQUATION( "Grd" )
 /*
 Government R&D subsidy expenditure
 */
-RESULT( VS( ENESECL0, "Grd1" ) + VS( CAPSECL0, "GrdE" ) )
+RESULT( VS( ENESECL0, "GrdE" ) + VS( CAPSECL0, "Grd1" ) )
 
 
 EQUATION( "GDPreal" )
