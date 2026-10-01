@@ -62,7 +62,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     }
 
                     // discard .csv header line
-                    $header = fgetcsv( $f );
+                    $header = fgetcsv( $f, null, ",", "\"", "\\" );
                     if ( ! isset( $header[ 0 ] ) || $header[ 0 ] != "Name" || ! isset( $header[ 1 ] ) || $header[ 1 ] != "Value" ) {
                         $err1 = "Error";
                         $err2 = "Invalid CSV file header";
@@ -73,7 +73,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
                     // read each configuration line
                     while ( ! feof( $f ) ) {
-                        $line = fgetcsv( $f );
+                        $line = fgetcsv( $f, null, ",", "\"", "\\" );
                         if ( ! isset( $line[ 0 ] ) || ! isset( $line[ 1 ] ) ) {
                             continue;
                         }

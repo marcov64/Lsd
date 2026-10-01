@@ -239,6 +239,8 @@ Please check your configuration has at least g++ version 6.4 installed (you may 
 
 Also make sure if Tcl/Tk version 8.6 or newer is present (use the command "echo 'puts $tcl_version;exit 0' | tclsh" to get the installed version).
 
+LSD graphical user interface is based on Tk which still uses the Xorg graphical interface in Linux. However, modern Linux distributions are migrating to the Wayland graphical system. Xorg apps, like LSD, operate in Wayland using the Xwayland legacy support layer. This limits some LSD graphical functions, particularly in multi-display setups and HiDPI (high dots per inch) monitors. This can be particularly problematic when HiDPI monitors are configured to use Wayland scaling (fractional or not). In recent Gnome desktop distributions, like Ubuntu 26.04+, the default video settings may make LSD to look weird. To restore the expected LSD visuals, please DISABLE the option to automatically adjust legacy apps scaling (named "Built-in Scaling for Legacy Apps") if available. In Gnome/Ubuntu, this option is available in the Settings app, Displays section. Screen scaling can be used with LSD, just the automatic app scaling option need to be disabled if available.
+
 To run LMM from a system shell, please open a terminal in the installation directory (or use your graphical file browser) and execute:
 
  ./LMM &

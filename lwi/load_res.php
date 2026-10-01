@@ -51,7 +51,7 @@ function getcsvheader( $fn, &$vars, &$err ) {
         return 0;
     }
 
-    $vars = fgetcsv( $f );
+    $vars = fgetcsv( $f, null, ",", "\"", "\\" );
 
     if ( is_countable( $vars ) ) {
         $tot_vars = count( $vars );
@@ -79,7 +79,7 @@ function getcsvdata( $fn, $log, &$series, &$err ) {
         return 0;
     }
 
-    $vars = fgetcsv( $f );
+    $vars = fgetcsv( $f, null, ",", "\"", "\\" );
 
     if ( is_countable( $vars ) ) {
         $tot_vars = count( $vars );
@@ -97,7 +97,7 @@ function getcsvdata( $fn, $log, &$series, &$err ) {
     $steps = 0;
     while ( ! feof( $f ) ) {
 
-        $line = fgetcsv( $f );
+        $line = fgetcsv( $f, null, ",", "\"", "\\" );
 
         // ignore blank lines
         if ( ! isset( $line[ 0 ] ) || $line[ 0 ] == "" ) {

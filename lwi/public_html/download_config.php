@@ -57,10 +57,10 @@ if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
         return;
     }
 
-    fputcsv( $f, array ( "Name", "Value" ) );
+    fputcsv( $f, array ( "Name", "Value" ), ",", "\"", "\\", "\n" );
 
     foreach ( $config as $name => $value ) {
-        fputcsv( $f, array ( $name, $value ) );
+        fputcsv( $f, array ( $name, $value ), ",", "\"", "\\", "\n" );
     }
 
     fclose( $f );

@@ -34,11 +34,11 @@ if ( ! $f ) {
     return;
 }
 
-fputcsv( $f, array ( "Name", "Value" ) );
+fputcsv( $f, array ( "Name", "Value" ), ",", "\"", "\\", "\n" );
 
 $seed = 1;
 foreach ( $config as $name => $value ) {
-    fputcsv( $f, array ( $name, $value ) );
+    fputcsv( $f, array ( $name, $value ), ",", "\"", "\\", "\n" );
     if ( $name === "_rndSeed_" ) {
         $seed = $value;
     }

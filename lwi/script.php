@@ -96,7 +96,7 @@ function read_config( $type_config ) {
     $f = fopen( $input_config, "r" );
 
     // find column indexes to all required names
-    $header = fgetcsv( $f );
+    $header = fgetcsv( $f, null, ",", "\"", "\\" );
 
     if ( is_countable( $header ) ) {
         $cols = count( $header );
@@ -123,7 +123,7 @@ function read_config( $type_config ) {
     $ln = 1;
     while ( ! feof( $f ) ) {
 
-        $line = fgetcsv( $f );
+        $line = fgetcsv( $f, null, ",", "\"", "\\" );
         ++$ln;
 
         if ( is_countable( $line ) ) {
@@ -208,7 +208,7 @@ function read_saved( ) {
     $f = fopen( $output_config, "r" );
 
     // find column indexes to all required names
-    $header = fgetcsv( $f );
+    $header = fgetcsv( $f, null, ",", "\"", "\\" );
 
     if ( is_countable( $header ) ) {
         $cols = count( $header );
@@ -235,7 +235,7 @@ function read_saved( ) {
     $ln = 1;
     while ( ! feof( $f ) ) {
 
-        $line = fgetcsv( $f );
+        $line = fgetcsv( $f, null, ",", "\"", "\\" );
         ++$ln;
 
         if ( is_countable( $line ) ) {
