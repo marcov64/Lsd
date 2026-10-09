@@ -30,8 +30,8 @@ v[6] = VS( WORLDL0, "delta2" );
 
 // compute country weighted averages in int'l currency
 v[7] = SUML( "Q2e", 1 );					// effective goods productions
-v[8] = v[7] > 0 ? log( V( "e" ) * ( 1 + AVE( "trX2" ) ) *
-					   WHTAVEL( "p2avg", "Q2e", 1 ) / v[7] + 1 ) : v[1];
+v[8] = v[7] > 0 ? log( WHTAVEL( "p2avg", "Q2e", 1 ) / v[7] / 
+					   ( ( 1 - AVE( "trX2" ) ) * V( "e" ) ) + 1 ) : v[1];
 v[9] = v[7] > 0 ? log( WHTAVEL( "q2avg", "Q2e", 1 ) / v[7] + 1 ) : v[4];
 
 // normalize price and quality to [0.1, 0.9]
