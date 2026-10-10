@@ -248,7 +248,10 @@ int lsd::kill_system( simulation *sim, int id )
  *************************************************************/
 void lsd::set_exec( const char *path, const char *file )
 {
+	char cwd[ PATH_MAX ];
 	strT exefile, exepath, libfile, libpath, fname;
+
+	getcwd( cwd, PATH_MAX );				// current dir, should be model's
 
 	if ( file != NULL && strlen( file ) > 0 )
 	{
@@ -261,18 +264,12 @@ void lsd::set_exec( const char *path, const char *file )
 			{
 				char *dir = get_path( file );
 
-				// if no path prefix, use working directory
-				if ( dir == NULL )
-				{
-					char cwd[ PATH_MAX ];
-					getcwd( cwd, PATH_MAX );
-
-					if ( access( to_string( "%s/%s", cwd, file ).c_str( ), F_OK ) == 0 )
-						dir = cwd;
-				}
-
 				if ( dir != NULL )
 					exepath = dir;
+				else
+					// if no path prefix, use working directory
+					if ( access( to_string( "%s/%s", cwd, file ).c_str( ), F_OK ) == 0 )
+						exepath = cwd;
 
 				delete [ ] dir;
 			}
@@ -289,7 +286,6 @@ void lsd::set_exec( const char *path, const char *file )
 
 #ifndef _LMM_
 	// try to set dynamic library information
-	libpath = exec_path;
 	libfile = "lib";
 	libfile += exec_file;						// base library name
 	if ( libfile.find( '.' ) != strT::npos )// remove Windows extension
@@ -305,19 +301,20 @@ void lsd::set_exec( const char *path, const char *file )
 #endif
 #endif
 
-	// check if lib file is in path
-	fname = exec_path;
-	fname += "/" + libfile;
-	FILE *f = fopen( fname.c_str( ), "r" );
-	if ( f != NULL )
-		fclose( f );
-
-	if ( f == NULL )							// lib not find
+	// check if lib file is in a known path
+	libpath = cwd;
+	fname = libpath + "/" + libfile;
+	if ( access( fname.c_str( ), F_OK ) != 0 )
 	{
-		if ( lib_path != NULL && lib_file != NULL )
-			return;								// keep previous lib
-
-		libfile = libpath = "";
+		libpath = exec_path;
+		fname = libpath + "/" + libfile;
+		if ( access( fname.c_str( ), F_OK ) != 0 )
+		{
+			if ( lib_path != NULL && lib_file != NULL )
+				return;							// keep previous lib
+			else
+				libfile = libpath = "";			// unknown
+		}
 	}
 
 	delete [ ] lib_path;
