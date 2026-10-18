@@ -270,15 +270,15 @@ IMPORTANT: if you modified the file "src/makefile" to recompile LSD binaries, th
 4.3 macOS installation (UNSUPPORTED)
 ************************************
 
-LSD 9.0 does not officially support macOS, despite it may work, depending on the specific macOS version, some required "adjustments" (hacks), and luck. Unfortunately, over the years, macOS became more and more a platform closed to open-source development. To complicate things further, Apple-exclusive processors made development to require Apple hardware (Mx), which is not the standard platform of LSD development (x86_64).
+LSD 9.0 does not officially support macOS, despite it may work, depending on the specific macOS version, some required "adjustments" (hacks), and luck. Unfortunately, over the years, macOS became more and more a platform closed to open-source development. To complicate things further, Apple-exclusive processors made development to require Apple hardware (arm64), which is not the standard platform of LSD development (x86_64). LSD precompiled code for macOS is usually provided only for Apple hardware (arm86 Mx). See below how to recompile LSD for old Intel (x86_64) hardware.
 
 For macOS users, the recommended path to use LSD is (1) installing a virtual machine (VM) hypervisor in macOS (VirtualBox, Fusion, Parallels, etc.), (2) downloading a pre-configured Windows or Linux VM image, and (3) installing LSD into the downloaded VM following the instructions above (section 4.1 or 4.2). There are many tutorials and sources on the internet about how to perform steps 1 and 2. The performance penalty of using LSD in a VM is relatively small, particularly in the case of Linux. However, Windows VMs are usually easier to set-up and use, and performance is still reasonable.
 
-The instructions below frequently worked with macOS up to version 15.7, but that may depend on specific machine configurations and can break at any moment given the constant Apple changes to its operating system. LSD developers are not able to help on fixing the possible problems. Please notice that you MUST be a system administrator (root user) of the computer in which LSD is to be installed.
+The instructions below frequently worked with macOS up to version 26.7, but that may depend on specific machine configurations and can break at any moment given the constant Apple changes to its operating system. LSD developers are not able to help on fixing the possible problems. Please notice that you MUST be a system administrator (root user) of the computer in which LSD is to be installed.
 
-To try to install LSD natively on macOS, the simplest alternative is to use the installer package (e.g. LSD-installer-mac-9-0-stable-1.dmg). Download it, double-click on the package file to mount it, double-click on the LSD Installer application, accept the unsupported message, and follow the instructions. However, the default macOS configuration requires user to unlock LSD installer. If so, open macOS "System Settings" app, choose "Privacy & Security" option (left panel), scroll down to "Security" (right panel), locate the "LSD Intaller" item, and click on the option to allow it to run. See details below. Once installation is finished, the installer package can be unmounted and deleted after the installation.
+To try to install LSD natively on macOS, the simplest alternative is to use the installer package (e.g. LSD-installer-mac-9-0-stable-1.dmg). Download it, double-click on the package file to mount it, double-click on the LSD Installer application, accept the unsupported message, and follow the instructions. However, the default macOS configuration requires user to unlock LSD installer. If so, open macOS "System Settings" app, choose "Privacy & Security" option (left panel), scroll down to "Security" (right panel), locate the "LSD Installer" item, and click on the option to allow it to run. See details below. Once installation is finished, the installer package can be unmounted and deleted after the installation.
 
-IMPORTANT: please pay attention to the Terminal windows opened by the installer, this is critical to a successful installation. The Terminal window do require your interaction, according to the instructions of the installer. Do not close any Terminal window which is not inactive. If the Terminal window is closed or interrupted by accident, please cancel the installation and restart. During Terminal operation, macOS will frequently open confirmation windows about the commands which are being performed at the terminal. Please confirm the commands whenever required.
+IMPORTANT: please pay attention to the Terminal windows opened by the installer, this is critical to a successful installation. The Terminal window does require your interaction, according to the instructions of the installer. Do not close any Terminal window which is not inactive. If the Terminal window is closed or interrupted by accident, please cancel the installation and restart. During Terminal operation, macOS will frequently open confirmation windows about the commands which are being performed at the terminal. Please confirm the commands whenever required.
 
 To try to manually install LSD, simply download and unzip the LSD distribution file (e.g., LSD-9.0-master.zip) to the chosen directory (in most cases  "~/", the user home directory, is recommended). To do it, please open the Terminal application (located inside the Utilities app folder), and type the following commands (each line must be completed by pressing "Enter"):
 
@@ -305,7 +305,7 @@ It is required to install Tcl/Tk and recommended to also install multitail, Gnup
 
  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 
-After Homebrew installation finishes (details at http://brew.sh), it may request some commands to be manually performed, check at the Terminal mssages. Please cut and paste the requested code in the Terminal prompt and press ENTER before proceeding. In more recent Apple Mx (non-Intel) macs, at least the additional commands below (or similar) are needed:
+After Homebrew installation finishes (details at http://brew.sh), it may request some commands to be manually performed, check at the Terminal messages. Please cut and paste the requested code in the Terminal prompt and press ENTER before proceeding. In more recent Apple Mx (non-Intel) macs, at least the additional commands below (or similar) are needed:
 
  echo >> ~/.zprofile
  echo 'eval "$(/opt/homebrew/bin/brew shellenv zsh)"' >> ~/.zprofile
@@ -360,19 +360,20 @@ LSD needs to control external programs to automate operation. The first time it 
 
 Authorized programs can be checked at System Preferences > Security & Privacy > Privacy > Automation.
 
-ARM64, ROSETTA AND COMPILATION ERRORS:
+INTEL X86_64 MACS:
 
-Newer mac hardware is based on ARM64 hardware, which is not the default LSD hardware platform (X86_64). If not already installed, macOS may ask you to install Rosetta, an Apple translation app, to allow running X86_64 code in newer macs. Without Rosetta, LMM will not run. You can also intall Rosetta using the Terminal and the commad:
+Older mac hardware is based on Intel x86_64 hardware, which is not the default LSD distribution format. You can recompile LSD for x86_64 using the Terminal, navigate to LSD folder (e.g., "~/LSD"), and use the commands:
+ cd ~/LSD
+ src/compile-tcltk-mac.sh
+ make
 
- softwareupdate –install-rosetta
+When your models compile, LSD should automatically produce code compatible with your machine. However, LSD precompiled libraries may have incompatible code, and you may get compilation errors because of this. The simple solution is to avoid using precompiled libraries, by adding (or changing to) the line "PRECOMPILED=false", without the quotes, to the system compilation options (menu Model in LMM).
 
-When your models compile, LSD should automatically produce ARM64 code in newer machines. However, LSD precompiled libraries have X86_64 code, and you may get compilation errors because of this. The simple solution is to avoid using precompiled libraries, by adding (or changing to) the line "PRECOMPILED=false", without the quotes, to the system compilation options (menu Model in LMM).
-
-Alternatively, LSD precompiled libraries can be recompiled. Open Terminal, navigate to LSD folder (e.g., "cd ~/LSD") and use the command:
+Alternatively, LSD precompiled libraries can be recompiled. Open Terminal and use:
 
  make LSD
 
-If there any errors, the line "PRECOMPILED=true" can be reinstated in the LSD system compilation options. This speeds up model compilation, but not the model execution.
+If there are no errors, the line "PRECOMPILED=true" can be reinstated in the LSD system compilation options. This speeds up model compilation, but not the model execution.
 
 
 ******************************************

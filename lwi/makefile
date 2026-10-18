@@ -36,7 +36,7 @@ LIB=-lz
 
 # Compiler options
 CC=g++
-GLOBAL_CC=-march=corei7-avx -Wall -Wextra -Wno-unused-result -Wno-unused-parameter -Wno-implicit-fallthrough
+GLOBAL_CC=-Wall -Wextra -Wno-unused-result -Wno-unused-parameter -Wno-implicit-fallthrough
 
 # specify where are the sources of LSD
 SRC_DIR=$(LSDROOT)/$(SRC)/
@@ -59,6 +59,7 @@ else
   ALL_FILES=*
   EXE_EXT=
   ifeq ($(shell uname -s),Darwin)
+    SDK=$(shell xcrun --show-sdk-version)
     OBJ_DIR=$(TMPDIR)lwi/
     EXE_SUF=-mac
     GLOBAL_CC+=-std=gnu++20 -mmacosx-version-min=11.0 -Wno-unused-but-set-variable -Wno-vla-cxx-extension
@@ -66,6 +67,11 @@ else
     OBJ_DIR=/tmp/lwi/
     EXE_SUF=
   endif
+endif
+
+# workaround for bugged macOS 27 compilation
+ifeq ($(SDK),27.0)
+  export SDKROOT=$(shell xcrun --sdk macosx26.5 --show-sdk-path)/
 endif
 
 # OS commands

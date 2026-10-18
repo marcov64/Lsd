@@ -41,6 +41,7 @@ else
   PYT_LIB_PATH=$(shell python3 -c "from distutils import sysconfig; print( sysconfig.get_config_var( 'LIBDIR' ) )")
   PYT_CFG=python$(PYT_VER)-config
   ifeq ($(shell uname -s),Darwin)
+    SDK=$(shell xcrun --show-sdk-version)
     OBJ_DIR=$(TMPDIR)/$(TARGET_TERM)/
     DLL_EXT=.dylib
     MAC_FRMWRK=-framework IOKit -framework CoreFoundation
@@ -54,6 +55,11 @@ else
     SWITCH_CC_LNK+=-Wl,-rpath '-Wl,$$ORIGIN'
     CP_TERM=cython
   endif
+endif
+
+# workaround for bugged macOS 27 compilation
+ifeq ($(SDK),27.0)
+  export SDKROOT=$(shell xcrun --sdk macosx26.5 --show-sdk-path)/
 endif
 
 # OS commands

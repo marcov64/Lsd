@@ -39,6 +39,7 @@ ifeq ($(OS),Windows_NT)
 else
   ifeq ($(shell uname -s),Darwin)
     PLAT=mac
+    SDK=$(shell xcrun --show-sdk-version)
     TMP_DIR=$(TMPDIR)
     PKG=$(TARGET).app/Contents/MacOS/
     DLL_EXT=.dylib
@@ -61,6 +62,11 @@ else
     LIB_END=-Wl,--no-whole-archive
     INCLUDE+=-I$(PATH_TCLTK_HEADER)
   endif
+endif
+
+# workaround for bugged macOS 27 compilation
+ifeq ($(SDK),27.0)
+  export SDKROOT=$(shell xcrun --sdk macosx26.5 --show-sdk-path)/
 endif
 
 # additional OS-specific locations

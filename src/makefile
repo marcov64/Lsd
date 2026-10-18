@@ -25,13 +25,13 @@
 TARGET_LMM=LMM
 TARGET_LSD=LSD
 
-SWITCH_CC=-O3 -march=corei7-avx -Wall -Wextra -Wno-unused-result -Wno-unused-parameter -Wno-implicit-fallthrough
+SWITCH_CC=-O3 -Wall -Wextra -Wno-unused-result -Wno-unused-parameter -Wno-implicit-fallthrough
 SWITCH_CC_LMM=-D_LMM_ -D_NP_
 SWITCH_CC_LSD=
 SWITCH_CC_DLL=
 SWITCH_CC_LNK=
 SWITCH_CC_LNK_DLL=
-SWITCH_CC_PUGIXML=-Wno-maybe-uninitialized
+SWITCH_CC_PUGIXML=-Wno-uninitialized
 
 # LSD file locations
 LSDROOT=..
@@ -47,6 +47,7 @@ DEP_GUI=$(DEP_LIB) $(SRC_DIR)LSD.h
 # handle platform-specific stuff
 ifeq ($(OS),Windows_NT)
   PLAT=windows
+  ARCH=$(PROCESSOR_ARCHITECTURE)
   TMP_DIR=$(TMP)
   ALL_FILES=\*
   EXE_EXT=.exe
@@ -67,8 +68,10 @@ ifeq ($(OS),Windows_NT)
   INCLUDE+=-I$(PATH_TCLTK_HEADER)
 else
   ALL_FILES=*
+  ARCH=$(shell uname -m)
   ifeq ($(shell uname -s),Darwin)
     PLAT=mac
+    SDK=$(shell xcrun --show-sdk-version)
     TMP_DIR=$(TMPDIR)
     PKG_LMM=$(TARGET_LMM).app/Contents/MacOS/
     PKG_LSD=$(TARGET_LSD).app/Contents/MacOS/
@@ -103,6 +106,19 @@ else
     LIB_END=-Wl,--no-whole-archive
     INCLUDE+=-I$(PATH_TCLTK_HEADER)
   endif
+endif
+
+# optimeze code for x86_64/AMD64
+ifeq ($(ARCH),AMD64)
+  ARCH=x86_64
+endif
+ifeq ($(ARCH),x86_64)
+  SWITCH_CC+=-march=corei7-avx
+endif
+
+# workaround for bugged macOS 27 compilation
+ifeq ($(SDK),27.0)
+  export SDKROOT=$(shell xcrun --sdk macosx26.5 --show-sdk-path)/
 endif
 
 # additional OS-specific locations
