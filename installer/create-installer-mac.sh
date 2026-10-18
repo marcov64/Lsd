@@ -55,6 +55,13 @@ FILENAME="$DMG_DIR/LSD-installer-mac"
 APPNAME="LSD Installer"
 EXC_LST="$( tr '\n' ' ' < $LSD_DIR/installer/exclude-installer-mac.txt )"
 
+ARCH="$( uname -m )"
+if [ "$ARCH" == "arm64" ]; then
+	DMGNAME="$FILENAME-$LSD_FILE_TAG.dmg"
+else
+	DMGNAME="$FILENAME-$ARCH-$LSD_FILE_TAG.dmg"
+fi
+
 # create zipped distribution package
 rm -f $DMG_DIR/LSD-archive-mac.zip
 cd "$LSD_DIR"
@@ -71,7 +78,7 @@ cp -f "$SRC_DIR/"*.tcl "$INST_DIR/Scripts/src/"
 cp -rf "$SRC_DIR/tklib" "$INST_DIR/Scripts/src/"
 
 # create .dmg archive
-rm -f -R /tmp/LSD_INSTALLER "$FILENAME-$LSD_FILE_TAG.dmg"
+rm -f -R /tmp/LSD_INSTALLER "$DMGNAME"
 mkdir -p "/tmp/LSD_INSTALLER/$APPNAME ($LSD_VER).app"
 cp -f -R "$DMG_DIR/$APPNAME.app/"* "/tmp/LSD_INSTALLER/$APPNAME ($LSD_VER).app/"
 cp -f "$LSD_DIR/$README" "/tmp/LSD_INSTALLER/"
@@ -79,13 +86,13 @@ cp -f "$DMG_DIR/$MAC_FIRST" "/tmp/LSD_INSTALLER/"
 cp -f "$DMG_DIR/$INST_SCRIPT" "/tmp/LSD_INSTALLER/"
 
 hdiutil create /tmp/tmp.dmg -fs HFS+ -ov -quiet -volname "$APPNAME ($LSD_VER)" -srcfolder "/tmp/LSD_INSTALLER/"
-hdiutil convert /tmp/tmp.dmg -format UDBZ -o "$FILENAME-$LSD_FILE_TAG.dmg" -quiet
+hdiutil convert /tmp/tmp.dmg -format UDBZ -o "$DMGNAME" -quiet
 
 # cleanup
 rm -f -R "$INST_DIR"/Package/LSD-archive-mac.zip "$INST_DIR"/Scripts/src/* /tmp/LSD_INSTALLER /tmp/tmp.dmg
 
-if [ -f "$FILENAME-$LSD_FILE_TAG.dmg" ]; then
-	echo "Self-extracting LSD package created: $FILENAME-$LSD_FILE_TAG.dmg"
+if [ -f "$DMGNAME" ]; then
+	echo "Self-extracting LSD package created: $DMGNAME"
 else
 	echo "Error creating LSD installer"
 fi
