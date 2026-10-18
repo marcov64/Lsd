@@ -31,7 +31,7 @@ SWITCH_CC_LSD=
 SWITCH_CC_DLL=
 SWITCH_CC_LNK=
 SWITCH_CC_LNK_DLL=
-SWITCH_CC_PUGIXML=-Wno-uninitialized
+SWITCH_CC_PUGIXML=
 
 # LSD file locations
 LSDROOT=..
@@ -63,6 +63,7 @@ ifeq ($(OS),Windows_NT)
   SWITCH_CC+=-mthreads -mwindows
   SWITCH_CC_DLL+=-shared
   SWITCH_CC_LMM+=-static-libstdc++
+  SWITCH_CC_PUGIXML+=-Wno-maybe-uninitialized
   LIB_INI=-Wl,--whole-archive
   LIB_END=-Wl,--no-whole-archive
   INCLUDE+=-I$(PATH_TCLTK_HEADER)
