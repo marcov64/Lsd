@@ -65,14 +65,14 @@ cd - > /dev/null
 
 # update the installer application
 rm -f "$INST_DIR/Package/LSD-archive-mac.zip" "$INST_DIR/Scripts/src/"*
+mkdir -p "$INST_DIR/Package" "$INST_DIR/Scripts/src"
 mv -f "$DMG_DIR/LSD-archive-mac.zip" "$INST_DIR/Package/"
 cp -f "$SRC_DIR/"*.tcl "$INST_DIR/Scripts/src/"
 cp -rf "$SRC_DIR/tklib" "$INST_DIR/Scripts/src/"
 
 # create .dmg archive
 rm -f -R /tmp/LSD_INSTALLER "$FILENAME-$LSD_FILE_TAG.dmg"
-mkdir "/tmp/LSD_INSTALLER"
-mkdir "/tmp/LSD_INSTALLER/$APPNAME ($LSD_VER).app"
+mkdir -p "/tmp/LSD_INSTALLER/$APPNAME ($LSD_VER).app"
 cp -f -R "$DMG_DIR/$APPNAME.app/"* "/tmp/LSD_INSTALLER/$APPNAME ($LSD_VER).app/"
 cp -f "$LSD_DIR/$README" "/tmp/LSD_INSTALLER/"
 cp -f "$DMG_DIR/$MAC_FIRST" "/tmp/LSD_INSTALLER/"
