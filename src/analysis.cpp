@@ -9810,13 +9810,15 @@ void gui::plot_canvas( int type, int nv, const int *start, const int *end, char 
 	cmd( "ttk::label $w.b.o.l3 -text \"%s+click: add line\"", platform == _MAC_ ? "Cmd" : "Ctrl" );
 	cmd( "pack $w.b.o.l1 $w.b.o.l2 $w.b.o.l3" );
 
+	// adjust button width
+	cmd( "if [ string equal $CurPlatform mac ] { set b1 [ expr $butWid - 2 ]; set b2 1 } { set b1 $butWid; set b2 3 }" );
 	cmd( "ttk::frame $w.b.s" );
-	cmd( "ttk::button $w.b.s.save -width $butWid -text Save -state disabled -command { \
+	cmd( "ttk::button $w.b.s.save -width $b1 -text Save -state disabled -command { \
 			set it \"%d) %s\"; \
 			set fromPlot 1; \
 			set choice 11 \
 		}", cur_plot, get_str( "tit" ) );
-	cmd( "ttk::button $w.b.s.det -width $butWid -text Detach -state disabled -command { \
+	cmd( "ttk::button $w.b.s.det -width $b1 -text Detach -state disabled -command { \
 			if { [ $daptab.tab%d.c.b.s.det cget -text ] eq \"Stop\" } { \
 				set choice 2 \
 			} else { \
@@ -9829,8 +9831,8 @@ void gui::plot_canvas( int type, int nv, const int *start, const int *end, char 
 	cmd( "ttk::label $w.b.z.l -text Zoom" );
 
 	cmd( "ttk::frame $w.b.z.b" );
-	cmd( "ttk::button $w.b.z.b.p -width 3 -text + -command { scale_canvas $daptab.tab%d.c.f.plots \"+\" zoomLevel%d } -state disabled", cur_plot, cur_plot );
-	cmd( "ttk::button $w.b.z.b.m -width 3 -text - -command { scale_canvas $daptab.tab%d.c.f.plots \"-\" zoomLevel%d } -state disabled", cur_plot, cur_plot	);
+	cmd( "ttk::button $w.b.z.b.p -width $b2 -text + -command { scale_canvas $daptab.tab%d.c.f.plots \"+\" zoomLevel%d } -state disabled", cur_plot, cur_plot );
+	cmd( "ttk::button $w.b.z.b.m -width $b2 -text - -command { scale_canvas $daptab.tab%d.c.f.plots \"-\" zoomLevel%d } -state disabled", cur_plot, cur_plot	);
 	cmd( "pack $w.b.z.b.p $w.b.z.b.m -pady $_4" );
 
 	cmd( "pack	$w.b.z.l $w.b.z.b -side left -padx $_2" );

@@ -349,9 +349,9 @@ void gui::init_plot( void )
 		} elseif [ string equal $CurPlatform linux ] { \
 			set centerB Center; \
 			set goWid 6 \
-		} { \
-			set centerB Cen.; \
-			set goWid 3 \
+		} else { \
+			set centerB Ctr; \
+			set goWid 2 \
 		}" );
 	cmd( "ttk::button $activeplot.fond.go -width $goWid -text $centerB -state disabled -command { set_c_var done_in 7 }" );
 

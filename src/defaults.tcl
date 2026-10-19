@@ -64,32 +64,32 @@ set refDPIlinux			96
 set refDPIwindows		96
 
 # OS specific minimum window sizes (horizontal & vertical) (must be even numbers)
-set hsizeLminMac		800	; # LMM window
-set vsizeLminMac		600
+set hsizeLminMac		900	; # LMM window
+set vsizeLminMac		620
 set hsizeLminLinux		800
 set vsizeLminLinux		600
 set hsizeLminWindows	800
 set vsizeLminWindows	600
-set hsizeBminMac		520	; # browser window
-set vsizeBminMac		600
+set hsizeBminMac		580	; # browser window
+set vsizeBminMac		620
 set hsizeBminLinux		460
 set vsizeBminLinux		600
 set hsizeBminWindows	420
 set vsizeBminWindows	600
-set hsizeGminMac		670	; # log window
-set vsizeGminMac		360
+set hsizeGminMac		700	; # log window
+set vsizeGminMac		510
 set hsizeGminLinux		670
 set vsizeGminLinux		430
 set hsizeGminWindows	620
 set vsizeGminWindows	360
-set hsizeAminMac		860	; # analysis of results window
-set vsizeAminMac		500
+set hsizeAminMac		1120	; # analysis of results window
+set vsizeAminMac		640
 set hsizeAminLinux		850
 set vsizeAminLinux		530
 set hsizeAminWindows	720
 set vsizeAminWindows	502
-set hsizePminMac		860	; # analysis of results plot window
-set vsizePminMac		580
+set hsizePminMac		1050	; # analysis of results plot window
+set vsizePminMac		630
 set hsizePminLinux		730
 set vsizePminLinux		560
 set hsizePminWindows	720
@@ -251,13 +251,13 @@ set butPadLinux 		10
 set butPadWindows 		10
 
 # OS specific button spacing in model structure window
-set bhstepMac			27 ; # button horizontal step
+set bhstepMac			39 ; # button horizontal step
 set bhstepLinux			35
 set bhstepWindows		25
-set bvstepMac			26 ; # button vertical step
+set bvstepMac			36 ; # button vertical step
 set bvstepLinux			30
 set bvstepWindows		26
-set bborderMac			10 ; # additional open space to border
+set bborderMac			2 ; # additional open space to border
 set bborderLinux		0
 set bborderWindows		0
 
