@@ -317,7 +317,7 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
                        ", samples = ", SA$samples,
                        ", time = [", iniDrop + 1, ",", nKeep, "]" ) )
 
-  saveCSV( SA$table, baseName = repName, baseFolder = folder,
+  saveCSV( SA$table, baseName = repName, nCnt = nCnt, baseFolder = folder,
            subFolder = outDir, suffix = datFilSfx, type = varName )
 
 
@@ -368,7 +368,7 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
                          ", time = [", iniDrop + 1, ",", nKeep, "]" ),
            ylab = "Sobol Index")
 
-    saveCSV( sSA$sa, baseName = repName, baseFolder = folder,
+    saveCSV( sSA$sa, baseName = repName, nCnt = nCnt, baseFolder = folder,
              subFolder = outDir, suffix = datFilSfx,
              type = paste0( "sobol_", varName ) )
 

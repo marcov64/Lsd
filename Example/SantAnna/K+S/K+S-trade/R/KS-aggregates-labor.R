@@ -42,9 +42,9 @@
 # data import parameters
 folder    <- "data"                 # data files folder
 baseName  <- "Sim"                  # data files base name (same as .lsd file)
-nExp      <- 2                      # number of experiments/countries
+nExp      <- 2                      # number of experiments/countries (0=named)
 mCnt      <- FALSE                  # experiments from multiple countries?
-nCnt      <- 1                      # country to use (mCnt = FALSE) (0=all)
+nCnt      <- 1                      # country to use (mCnt=FALSE) (0=all)
 iniDrop   <- 0                      # initial time steps to drop (0=none)
 nKeep     <- -1                     # number of time steps to keep (-1=all)
 coresExp  <- 0                      # max cores for experiments (0=all)
@@ -57,10 +57,11 @@ bootCI    <- NULL                   # bootstrap confidence interval method (SLOW
                                     # (NULL (no bootstrap), "basic", or "bca")
 
 # caption and file names
-expVal    <- c( "No shock", "Random shock" )              # experiment captions
-cntVal    <- c( "Country 1", "Country 2" )                # country captions
-caption   <- "K+S labor analysis"                         # caption for logs
-datFilSfx <- "labor"                                      # data file suffix
+expVal    <- c( "No SOE", "SOE in S" )          # experiment captions
+cntVal    <- c( "North country", "South country" )# country captions
+expNames  <- c( )                               # exp. file base names (nExp=0)
+caption   <- "K+S labor analysis"               # caption for logs
+datFilSfx <- "labor"                            # data file suffix
 
 # aggregated variables to import and add
 logVar    <- c( "A", "Yreal", "wAvg", "wAvgReal" )
@@ -72,6 +73,7 @@ addVar    <- c( )
 # ==== Libraries, support functions and global options ====
 
 source( "KS-support-functions.R" )
+source( "KS-add-vars.R" )
 
 options( warn = 0 )         # -1=no warning/0:warnings at end/2:warnings stop
 
@@ -81,7 +83,7 @@ options( warn = 0 )         # -1=no warning/0:warnings at end/2:warnings stop
 # !diagnostics suppress = log0, textplot, saveCSV, plot_xy, hpfilter, abs_max
 # !diagnostics suppress = twoord.plot, clearTemp, repFile, setLabels, outDir
 # !diagnostics suppress = mc, pool, nTsteps, nSize, legends, expLeg, listLeg
-# !diagnostics suppress = cntLeg, allLeg, setLabels
+# !diagnostics suppress = cntLeg, allLeg, setLabels, addVar_labor
 
 
 # ==== Process LSD result files ====
@@ -91,12 +93,11 @@ showStartMark( caption )  # log start mark
 setCmdLinePars( )         # read command line parameters (if any)
 
 # read LSD files or load existing temporary files according to the case
-files <- loadData( savDat = savDat, nExp = nExp, mCnt = mCnt, nCnt = nCnt,
-                   folder = folder, baseName = baseName, iniDrop = iniDrop,
-                   nKeep = nKeep, origVar = origVar, addVar = addVar,
-                   datFilSfx = datFilSfx, coresExp = coresExp,
-                   coresMC = coresMC, mcStat = mcStat, CI = CI,
-                   bootR = bootR, bootCI = bootCI )
+files <- loadData( savDat = savDat, mCnt = mCnt, nCnt = nCnt, folder = folder,
+                   baseName = baseName, iniDrop = iniDrop, nKeep = nKeep,
+                   origVar = origVar, addVar = addVar, addVarFn = addVar_labor,
+                   datFilSfx = datFilSfx, coresExp = coresExp, coresMC = coresMC,
+                   mcStat = mcStat, CI = CI, bootR = bootR, bootCI = bootCI )
 
 
 #******************************************************************
@@ -512,8 +513,9 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
       warmUpStat + 1, "-", nTstat, " / MC case = ", mcCase, " ", cntLeg," )" )
     title( main = title, sub = subTitle )
 
-    saveCSV( plot.results, baseName = repName, num = k, baseFolder = folder,
-             subFolder = outDir, suffix = datFilSfx, type = "shimer" )
+    saveCSV( plot.results, baseName = repName, exper = k, nCnt = nCnt,
+             baseFolder = folder, subFolder = outDir, suffix = datFilSfx,
+             type = "shimer" )
 
     # ---- MC results for curves parameters ----
 
@@ -573,7 +575,7 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
   title( main = title, sub = subTitle )
   mtext( listLeg, side = 1, line = -3, outer = TRUE )
 
-  saveCSV( curves.param, baseName = repName, baseFolder = folder,
+  saveCSV( curves.param, baseName = repName, nCnt = nCnt, baseFolder = folder,
            subFolder = outDir, suffix = datFilSfx, type = "curve_fit" )
 
 
@@ -610,12 +612,11 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
                       cntLeg, " )" )
   title( main = title, sub = subTitle )
 
-  saveCSV( recovery, baseName = repName, baseFolder = folder,
+  saveCSV( recovery, baseName = repName, nCnt = nCnt, baseFolder = folder,
            subFolder = outDir, suffix = datFilSfx, type = "Tu_recovery" )
 
 
-  clearTemp( savDat = savDat, files = files, nExp = nExp,
-             folder = folder, baseName = baseName, datFilSfx = datFilSfx )
+  clearTemp( savDat, files )
 
 
   # ------ End of report ------

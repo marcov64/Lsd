@@ -16,7 +16,7 @@
 # !diagnostics suppress = plot_epanechnikov, remove_outliers_table
 # !diagnostics suppress = mc, se, textplot, saveCSV, repFile
 
-wage_prod_regr <- function( files, nExp, nSize, warmUp, nTstat, sDigits,
+wage_prod_regr <- function( files, nExp, nCnt, nSize, warmUp, nTstat, sDigits,
                             legends, expLeg, sector, csBeg, csEnd, csJump,
                             ekOrd, ekPlt, outLim, CI, folder, outDir, repName,
                             datFilSfx, raster, res, plotH, plotW, plotRows,
@@ -74,8 +74,8 @@ wage_prod_regr <- function( files, nExp, nSize, warmUp, nTstat, sDigits,
       wAregs[[ k ]][ l, "R2 (parametric)" ] <- fit$r.squared
 
       # nonlinear model
-      nlFits[[ k ]][[ l ]] <- npreg( lrwAvg2 ~ lA2, data, ckerorder = ekOrd,
-                                     ckertype = "epanechnikov" )
+      nlFits[[ k ]][[ l ]] <- npreg( lrwAvg2 ~ lA2, data = data,
+                                     ckerorder = ekOrd, ckertype = "epanechnikov" )
       wAregs[[ k ]][ l, "Bandwidth" ] <- signif( nlFits[[ k ]][[ l ]]$bw, 2 )
       wAregs[[ k ]][ l, "R2 (non-parametric)" ] <- nlFits[[ k ]][[ l ]]$R2
 
@@ -128,7 +128,7 @@ wage_prod_regr <- function( files, nExp, nSize, warmUp, nTstat, sDigits,
                       max( steps ), " by ", csJump, " / ", sector, " )" )
   title( main = title, sub = subTitle )
 
-  saveCSV( wAregs.mc, baseName = repName, baseFolder = folder,
+  saveCSV( wAregs.mc, baseName = repName, nCnt = nCnt, baseFolder = folder,
            subFolder = outDir, suffix = datFilSfx, type = "wAregs" )
 
   # ------ Save Epanechnikov regression report ------

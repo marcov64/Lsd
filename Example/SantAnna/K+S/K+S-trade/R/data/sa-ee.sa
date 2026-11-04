@@ -14,8 +14,8 @@ trX2 0 2 f: 0 0.1
 # Government-owned firms
 LambdaG 0 2 f: 2 4
 bG 0 2 f: 1 12
-gamma1g 0 2 f: 0.2 2
-gamma2g 0 2 f: 0.2 2
+gamma1g 0 2 f: 0 2
+gamma2g 0 2 f: 0 2
 nuG 0 2 f: 0.04 0.1
 phi2g 0 2 f: 0 1
 phi3g 0 2 f: 0 1

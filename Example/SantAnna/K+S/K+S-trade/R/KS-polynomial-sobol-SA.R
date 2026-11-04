@@ -322,8 +322,8 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
   title( main = "Comparison of alternative polynomial models",
          sub = "Q2: cross validation ( higher is better )\nRMSE/MAE/RMA: external validation RMSE/MAE/RMA ( lower is better )" )
 
-  saveCSV( model$comparison, baseName = repName, baseFolder = folder,
-           subFolder = outDir, suffix = datFilSfx,
+  saveCSV( model$comparison, baseName = repName, nCnt = nCnt,
+           baseFolder = folder, subFolder = outDir, suffix = datFilSfx,
            type = paste0( "model_", varName ) )
 
   textplot( model$estimation.std, show.colnames = FALSE, cmar = 2, rmar = 1 )
@@ -337,8 +337,8 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
                        round( response$default$upper, digits = 2 ),
                        "], time = [", iniDrop + 1, ",", nKeep, "]" ) )
 
-  saveCSV( model$estimation.std, baseName = repName, baseFolder = folder,
-           subFolder = outDir, suffix = datFilSfx,
+  saveCSV( model$estimation.std, baseName = repName, nCnt = nCnt,
+           baseFolder = folder, subFolder = outDir, suffix = datFilSfx,
            type = paste0( "estim_", varName ) )
 
 
@@ -353,7 +353,7 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
   barplot( t( SA$sa ), col = c( "white", "gray" ), las = 2, ylim = c( 0, 1 ),
            legend.text = c( "main effects", "interactions" ) )
 
-  saveCSV( SA$sa, baseName = repName, baseFolder = folder,
+  saveCSV( SA$sa, baseName = repName, nCnt = nCnt, baseFolder = folder,
            subFolder = outDir, suffix = datFilSfx,
            type = paste0( "sobol_", varName ) )
 
@@ -590,7 +590,7 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
              ylab = colnames( data$doe )[ SA$topEffect[ 2 ] ] )
     }
 
-    saveCSV( maxMin, baseName = repName, baseFolder = folder,
+    saveCSV( maxMin, baseName = repName, nCnt = nCnt, baseFolder = folder,
              subFolder = outDir, suffix = datFilSfx,
              type = paste0( "max-min_", varName ) )
   }

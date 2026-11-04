@@ -31,10 +31,9 @@ reqLibs <- c( "LSDinterface", "LSDsensitivity", "parallel", "tools", "abind",
               "dplyr", "tseries", "normalp", "nortest", "zoo", "mFilter", "np",
               "matrixStats", "gplots", "corrplot", "rmutil", "robustbase",
               "plotrix", "textplot", "extrafont", "ggplot2", "gghalves",
-              "ggthemes", "fmsb", "Rsubbotools" )
+              "ggthemes", "fmsb", "Rsubbotools", "effsize" )
 
-repos <- c( "https://cloud.r-project.org", "https://ews.santannapisa.it/rpackages",
-            "https://erocoar.r-universe.dev" )
+repos <- c( "https://cloud.r-project.org", "https://ews.santannapisa.it/rpackages" )
 
 for( lib in reqLibs ) {
   if( ! lib %in% rownames( installed.packages( ) ) )
@@ -52,9 +51,6 @@ if( packageVersion( "LSDinterface" ) < "1.2.1" )
   stop( "Please update LSDinterface package to current version" )
 if( packageVersion( "LSDsensitivity" ) < "1.2.1" )
   stop( "Please update LSDsensitivity package to current version" )
-
-# remove warnings for support functions
-# !diagnostics suppress = paramp, CI
 
 
 # ==== Basic functions ====
@@ -651,12 +647,35 @@ setCmdLinePars <- function( sa = FALSE ) {
     cat( " Multi-country report =", mCnt, "\n" )
 
     if( mCnt )
-      cat( " Number of countries =", nExp, "\n" )
+      lab <- "countries"
     else
-      cat( " Number of experiments =", nExp, "\n" )
+      lab <- "experiments"
+
+    if( nExp < 1 )
+      n <- length( expNames )
+    else
+      n <- nExp
+
+    cat( " Number of", lab, "=", n, "\n" )
   }
 
-  cat( " Country to use =", nCnt, "\n" )
+  if( mCnt ) {
+    c <- ""
+    for( i in 1 : nExp )
+      if( length( cntVal ) >= i )
+        c <- paste( c, cntVal[ i ], " " )
+      else
+        c <- paste( c, "Country", i, " " )
+  } else
+    if( nCnt < 1 )
+      c <- "none"
+    else
+      if( length( cntVal ) >= nCnt )
+        c <- cntVal[ nCnt ]
+      else
+        c <- paste( "Country", nCnt )
+
+  cat( " Country to use =", c, "\n" )
   cat( " Initial time steps to drop =", iniDrop, "\n" )
   cat( " Time steps to keep =", nKeep, "\n" )
   cat( " Maximum cores to use (exp.) =", coresExp, "\n" )
@@ -742,12 +761,12 @@ catchError <- function( ex ) {
 # Generate labels & build labels list legend
 #
 # Output:
-#   set of changed variables in the caller environment
+#   set of changed variables in the global environment
 #
 # Input:
 #	  nExp: total number of experiments/countries
 #   mCnt: multi-country report? (TRUE/FALSE)
-#   nCnt: country to use (mCnt = FALSE) (0 = all)
+#   nCnt: country data to use (mCnt=FALSE) (0=all)
 #   dComp: data to be compared?
 #
 # !diagnostics suppress = repName, baseName, cntVal, expVal, dcVal, sector
@@ -809,7 +828,7 @@ setLabels <- function( nExp, mCnt, nCnt, dComp = FALSE ) {
     l <- l + 1
   }
 
-  if( cntLeg != "" && exists( "sector") && is.character( sector ) )
+  if( cntLeg != "" && exists( "sector" ) && is.character( sector ) )
     sector <<- paste( sector, cntLeg )
 }
 
@@ -826,6 +845,7 @@ setLabels <- function( nExp, mCnt, nCnt, dComp = FALSE ) {
 # Input:
 #   name: base name of report
 #   folder: relative folder to use
+#   nCnt: country data to use (mCnt=FALSE) (0=all)
 #   suffix: suffix to apply to base name
 #   width: report page width
 #   height: report page height
@@ -836,7 +856,7 @@ setLabels <- function( nExp, mCnt, nCnt, dComp = FALSE ) {
 #
 # !diagnostics suppress = fn
 
-repFile <- function( name, folder = ".", suffix = "",
+repFile <- function( name, folder = ".", nCnt = NULL, suffix = "",
                      width = 10, height = 7, rows = 1, cols = 1,
                      raster = FALSE, res = 300 ) {
 
@@ -854,19 +874,26 @@ repFile <- function( name, folder = ".", suffix = "",
     stop( "Cannot write report to '", fn, "'\nPlease close file if open" )
   }
 
+  fn <- paste0( folder, "/", outDir, "/", name )
+
+  if( ! is.null( nCnt ) && nCnt > 0 )
+    fn <- paste0( fn, "_", nCnt )
+
+  if( length( suffix ) > 0 )
+    fn <- paste0( fn, "_", suffix )
+
   # select type of output
-  if( raster ){
+  if( raster ) {
     # Open PNG (bitmap) files for output
-    fn <- paste0( folder, "/", outDir, "/", name, "_", suffix, "_%d.png" )
     tryCatch( {
-      png( fn, width = width, height = height, units = "in", res = res )
+      png( paste0( fn, "_%d.png" ), width = width, height = height,
+           units = "in", res = res )
     }, error = errF )
 
   } else {
     # Open PDF plot file for output
-    fn <- paste0( folder, "/", outDir, "/", name, "_", suffix, "_plots.pdf" )
     tryCatch( {
-      pdf( fn, width = width, height = height )
+      pdf( paste0( fn, "_plots.pdf" ), width = width, height = height )
     }, error = errF )
     par( mfrow = c ( rows, cols ) )             # define plots per page
   }
@@ -970,30 +997,79 @@ readCSV <- function( folder, baseName, num = "",
 #   baseName: base name of report
 #   baseFolder: relative base folder to use
 #   subFolder: sub folder inside base folder to use/create
-#   num: experiment/country number, if required
+#   exper: experiment/country number, if required
+#   nCnt: country data to use (mCnt=FALSE) (0=all)
 #   suffix: suffix to apply to base name/experiment/country number
 #   type: additional suffix indicating the type of data
 #
 saveCSV <- function( df, baseName, baseFolder = ".", subFolder = NULL,
-                     num = NULL, suffix = "", type = "" ) {
+                     exper = NULL, nCnt = NULL, suffix = "", type = "" ) {
   if( ! is.null( subFolder ) ) {
-
     folder <- paste0( baseFolder, "/", subFolder )
-
     if( ! dir.exists( folder ) )
       dir.create( folder )
-
   } else {
-
     folder <- baseFolder
   }
 
-  if( is.null( num ) )
-    fn <- paste0( folder, "/", baseName, "_", suffix, "_", type, ".csv" )
-  else
-    fn <- paste0( folder, "/", baseName, "_", num, "_", suffix, "_", type, ".csv" )
+  fn <- paste0( folder, "/", baseName )
 
-  write.csv( df, quote = FALSE, file = fn )
+  if( ! is.null( exper ) && exper > 0 )
+    fn <- paste0( fn, exper )
+
+  if( ! is.null( nCnt ) && nCnt > 0 )
+    fn <- paste0( fn, "_", nCnt )
+
+  if( length( suffix ) > 0 )
+    fn <- paste0( fn, "_", suffix )
+
+  if( length( type ) > 0 )
+    fn <- paste0( fn, "_", type )
+
+  write.csv( df, quote = FALSE, file = paste0( fn, ".csv" ) )
+}
+
+
+#
+# ====== function [] = addRelVars ======
+# Function to add relative variables to the dataset
+#
+# Output:
+#   The augmented dataset
+#
+# Input:
+#   mc: the original Monte Carlo dataset
+#   relVars: variables to be computed relative to refVar
+#   refVars: one or more reference variables
+#
+
+addRelVars <- function( mc, relVars, refVars ) {
+
+  for( i in 1 : dim( mc )[ 1 ] ) {            # all time steps
+    for( j in 1 : dim( mc )[ 3 ] ) {          # and all element instances
+      for( ref in refVars ) {                 # and all reference variables
+        # ensure reference variable is proper
+        if( is.na( mc[ i, ref, j ] ) ||  ! is.finite( mc[ i, ref, j ] ) ||
+            mc[ i, ref, j ] == 0 ) {
+          refVal <- NA
+        } else {
+          refVal <- mc[ i, ref, j ]
+        }
+
+        for( var  in relVars ) {               # all relative variables
+          if( is.na( mc[ i, var, j ] ) ||  ! is.finite( mc[ i, var, j ] ) ) {
+            relVal <- NA
+          } else {
+            relVal <- mc[ i, var, j ] / refVal
+          }
+
+          mc[ i, paste0( var, "_", ref ), j ] <- relVal
+        }
+      }
+    }
+  }
+
+  return( mc )
 }
 
 
@@ -1006,31 +1082,36 @@ saveCSV <- function( df, baseName, baseFolder = ".", subFolder = NULL,
 #   Array containing Monte Carlo data
 #
 # Input:
+#   dirMC: folder to save MC files
 #   nMC: sequential number of Monte Carlo runs (1, 2, ..., nSize)
 #   exper: sequential number of experiment/country (1, 2, ..., nExp)
+#   mCnt: multi-country analysis? (TRUE/FALSE)
 #   posit: country instance prefix (1_*, 2_*, ...)
+#   nCnt: country data to use (mCnt=FALSE) (0=all)
 #	  nSize: total number of Monte Carlo runs
 #	  nExp: total number of experiments/countries
 #   nVar: total number of variables in dataset (original+added)
-#   nAddVar: number of variables to be added to dataset
-#   addVar: new variables in the dataset
-#   addVarFn: function to create new variables in the dataset
+#   newVar: new variables in the dataset
+#   newVarFn: function to create new variables in the dataset
+#   relVar: variables to be computed relative to refVar
+#   refVar: one or more reference variables
 #   niceVarName: remove starting underscores from variable names (TRUE)
 #   resFiles: vector of Monte Carlo run file names
 #
 # Caller environment:
 #	  folder: data file folder to use (relative to current or absolute)
-#	  baseName: data file base name (same as .lsd file)
+#	  expNames: experiment file base names
 #   iniDrop: initial time steps to drop from analysis (0=none)
 #   nKeep: number of time steps to keep (-1=all)
 #   origVar: original variables in dataset (from LSD)
 #   datFilSfx: data file name suffix
 #
-# !diagnostics suppress = folder, baseName, posit, iniDrop, nKeep
+# !diagnostics suppress = folder, expNames, posit, iniDrop, nKeep
 # !diagnostics suppress = datFilSfx, mcStat, CI, bootCI, bootR, niceVarName
 
-readMC <- function( nMC, exper, posit, nSize, nExp, nVar, nAddVar, origVar,
-                    addVar, addVarFn, niceVarName, resFiles ) {
+readMC <- function( dirMC, nMC, exper, mCnt, posit, nCnt, nSize, nExp, nVar,
+                    origVar, newVar, newVarFn, relVar, refVar, niceVarName,
+                    resFiles ) {
 
   cat( "\n Monte Carlo run", nMC, "of", nSize )
 
@@ -1043,29 +1124,60 @@ readMC <- function( nMC, exper, posit, nSize, nExp, nVar, nAddVar, origVar,
 
   nTsteps <- dim( mc )[ 1 ]
   nElemMC <- dim( mc )[ 3 ]
-  newVar <- c( dimnames( mc )[[ 2 ]], name.var.lsd( addVar ) )
+  relVar <- name.var.lsd( relVar )
+  refVar <- name.var.lsd( refVar )
+  allVar <- c( dimnames( mc )[[ 2 ]], name.var.lsd( newVar ) )
+
+  for( ref in refVar ) {                  # all reference variables
+    if( ! ref %in% allVar )
+      stop( "Reference variable missing in the dataset" )
+
+    for( var  in relVar ) {               # all relative variables
+      if( ! var %in% allVar )
+        stop( "Reference variable missing in the dataset" )
+
+      if( var == "X" )                    # avoid "X_" removal (R standard)
+        var <- "X_X"
+
+      allVar <- append( allVar, paste0( var, "_", ref ) )
+    }
+  }
+
   mc <- abind( mc, array( as.numeric( NA ),
-                          dim = c( nTsteps, nAddVar, nElemMC ) ),
+                          dim = c( nTsteps, length( allVar ) - length( origVar ),
+                                   nElemMC ) ),
                along = 2, use.first.dimnames = TRUE )
 
   if( niceVarName )
-    dimnames( mc )[[ 2 ]] <- name.nice.lsd( newVar )
+    dimnames( mc )[[ 2 ]] <- name.nice.lsd( allVar )
   else
-    dimnames( mc )[[ 2 ]] <- newVar
+    dimnames( mc )[[ 2 ]] <- allVar
 
   cat( " (", nElemMC, "instance(s) )" )
 
   # add new variables to dataset
-  if( ! is.null( addVarFn ) )
-    mc <- addVarFn( mc, nElemMC, nTsteps, nVar )
+  if( ! is.null( newVarFn ) )
+    mc <- newVarFn( mc, nElemMC, nTsteps, nVar )
+
+  # add relative variables to dataset
+  mc <- addRelVars( mc, relVar, refVar )
 
   # save temporary single MC results to disk to save memory
-  mcFile <- paste0( folder, "/", baseName, "_", exper, "_", datFilSfx, "_mc", "/",
-                    baseName, "_", exper, "_", datFilSfx, "_mc_", nMC, ".Rdata" )
+  if( mCnt )
+    mcFile <- paste0( dirMC, "/", expNames[ 1 ], "_", exper, "_", datFilSfx,
+                      "_mc_", nMC, ".Rdata" )
+  else
+    if( nCnt < 1 )
+      mcFile <- paste0( dirMC, "/", expNames[ exper ], "_", datFilSfx, "_mc_",
+                        nMC, ".Rdata" )
+    else
+      mcFile <- paste0( dirMC, "/", expNames[ exper ], "_", nCnt, "_", datFilSfx,
+                        "_mc_", nMC, ".Rdata" )
+
   save( mc, nMC, exper, nElemMC, file = mcFile )
 
   return( list( mcFile = mcFile, mcOrigFile = mcOrigFile, nElemMC = nElemMC,
-                newVar = newVar ) )
+                allVar = allVar ) )
 }
 
 
@@ -1081,24 +1193,29 @@ readMC <- function( nMC, exper, posit, nSize, nExp, nVar, nAddVar, origVar,
 #   exper: sequential number of experiment/country (1, 2, ..., nExp)
 #   nExp: total number of experiments/countries
 #   mCnt: multi-country analysis? (TRUE/FALSE)
-#   nCnt: number of country to use (mCnt=TRUE)
+#   nCnt: country data to use (mCnt=FALSE) (0=all)
 #   origVar: original variables in dataset (from LSD)
-#   addVar: variables to be added to dataset
-#   addVarFn: function to create new variables in the dataset
+#   newVar: new variables to be added to dataset
+#   newVarFn: function to create new variables in the dataset
+#   relVar: variables to be computed relative to refVar
+#   refVar: one or more reference variables
 #   niceVarName: remove starting underscores from variable names (TRUE)
 #   coresMC: max cores to allocate for Monte Carlo (0=all)
 #
 # Caller environment:
 #	  folder: data file folder to use (relative to current or absolute)
-#	  baseName: data file base name (same as .lsd file)
+#	  expNames: experiment file base names
 #   iniDrop: initial time steps to drop from analysis (0=none)
 #   nKeep: number of time steps to keep (-1=all)
 #   datFilSfx: data file name suffix
+#   CI: confidence level for statistics
+#   bootR: bootstrap replicates (bootCI != NULL)
+#   bootCI: bootstrap confidence interval method (NULL: no bootstrap)
 #
-# !diagnostics suppress = mcDist
+# !diagnostics suppress = mcDist, expNames
 
-readExp <- function( exper, nExp, mCnt, nCnt, origVar, addVar,
-                     addVarFn, niceVarName, coresMC ) {
+readExp <- function( exper, nExp, mCnt, nCnt, origVar, newVar,
+                     newVarFn, relVar, refVar, niceVarName, coresMC ) {
   if( mCnt ) {
     lab <- "country"
     posit <- paste0( "^", exper, "(_.+)?$" )
@@ -1111,14 +1228,10 @@ readExp <- function( exper, nExp, mCnt, nCnt, origVar, addVar,
       posit <- NULL
   }
 
-  if( ! mCnt && nExp > 1 )
-    resFiles <- list.files.lsd( folder, paste0( baseName, exper ) )
-  else
-    resFiles <- list.files.lsd( folder, baseName )
-
+  resFiles <- list.files.lsd( folder, expNames[ exper ] )
   nSize <- length( resFiles )            # Monte Carlo sample size
   if( nSize < 1 )
-    stop( "Data files not found. Check 'folder', 'baseName' and 'nExp' parameters." )
+    stop( "Data files not found. Check 'folder', 'baseName', 'expNames' and 'nExp' parameters." )
 
   cat( "\nLoading", lab, exper, "of", nExp, "\n\nData files:", resFiles, "\n" )
 
@@ -1130,8 +1243,8 @@ readExp <- function( exper, nExp, mCnt, nCnt, origVar, addVar,
   nTsteps <- dim( mc )[ 1 ]              # number of time steps
   origNvar <- dim( mc )[ 2 ]             # number of variables (original)
   nElem <- dim( mc )[ 3 ]                # number of elements (instances)
-  nAddVar <- length( addVar )            # number of new variables to add
-  nVar <- length( origVar ) + nAddVar    # number of variables (worker-level)
+  nVar <- length( origVar ) + length( newVar ) +
+          length( relVar ) * length( refVar ) # total number of variables
 
   cat( "\n" )
   cat( toTitleCase( lab ), "details:\n" )
@@ -1146,23 +1259,27 @@ readExp <- function( exper, nExp, mCnt, nCnt, origVar, addVar,
   cat( "Creating new variables and saving Monte Carlo data..." )
 
   # create the output directory if needed
-  if( ! dir.exists( paste0( folder, "/", baseName, "_", exper, "_", datFilSfx,
-                            "_mc" ) ) )
-    dir.create( paste0( folder, "/", baseName, "_", exper, "_", datFilSfx,
-                        "_mc" ) )
+  if( mCnt )
+    dirMC <- paste0( folder, "/", expNames[ 1 ], "_", datFilSfx, "_mc" )
+  else
+    dirMC <- paste0( folder, "/", expNames[ exper ], "_", datFilSfx, "_mc" )
+
+  if( ! dir.exists( dirMC ) )
+    dir.create( dirMC )
 
   # ---- configure clusters for parallel loading ----
 
   # initiate and configure cluster for parallel loading
   # export required variables from global environment
-  cl <- startCores( coresMC, 0, "folder", "baseName", "iniDrop", "nKeep",
+  cl <- startCores( coresMC, 0, "folder", "expNames", "iniDrop", "nKeep",
                     "datFilSfx" )
 
   # load each experiment/country in parallel, with current function variables
-  mcRes <- autoLapply( cl, 1 : nSize, readMC, exper = exper, posit = posit,
-                       nSize = nSize, nExp = nExp, nVar = nVar,
-                       nAddVar = nAddVar, origVar = origVar, addVar = addVar,
-                       addVarFn = addVarFn, niceVarName = niceVarName,
+  mcRes <- autoLapply( cl, 1 : nSize, readMC, dirMC = dirMC, exper = exper,
+                       mCnt = mCnt, posit = posit, nCnt = nCnt, nSize = nSize,
+                       nExp = nExp, nVar = nVar, origVar = origVar,
+                       newVar = newVar, newVarFn = newVarFn, relVar = relVar,
+                       refVar = refVar, niceVarName = niceVarName,
                        resFiles = resFiles )
 
   stopCores( cl )
@@ -1176,14 +1293,14 @@ readExp <- function( exper, nExp, mCnt, nCnt, origVar, addVar,
     nElem <- nElem + mcRes[[ i ]]$nElemMC
 
   if( niceVarName )
-    newVar <- name.nice.lsd( mcRes[[ 1 ]]$newVar )
+    allVar <- name.nice.lsd( mcRes[[ 1 ]]$allVar )
   else
-    newVar <- mcRes[[ 1 ]]$newVar
+    allVar <- mcRes[[ 1 ]]$allVar
 
   # Create "flatter" 2D/3D arrays, appending data from different MC runs in sequence
   pool <- array( as.numeric( NA ), dim = c( nTsteps, nVar, nElem ),
                  dimnames = list( c( ( iniDrop + 1 ) : ( iniDrop + nTsteps ) ),
-                                  newVar, c( 1 : nElem ) ) )
+                                  allVar, c( 1 : nElem ) ) )
   mcFiles <- mcOrigFiles <- vector( "character", length = nSize )
   l <- rep( 1, nVar )                   # absolute variable x element instance counter
   netElemMC <- 0                        # net elements added (ignoring all NA elements)
@@ -1219,15 +1336,17 @@ readExp <- function( exper, nExp, mCnt, nCnt, origVar, addVar,
   rm( mc )
 
   # Compute Monte Carlo averages and std. deviation and store in 2D arrays
-  stats <- info.stats.lsd( pool, median = ( mcStat == "median" ), ci = mcStat,
+  stats <- info.stats.lsd( pool, median = ( mcStat == "median" ), ci = "auto",
                            ci.conf = CI, ci.boot = bootCI, boot.R = bootR )
 
   if( mcStat == "median" ) {
     P <- as.data.frame( stats$med )
     S <- as.data.frame( stats$mad )
+    mcStat2 <- "mad"
   } else {
     P <- as.data.frame( stats$avg )
     S <- as.data.frame( stats$sd )
+    mcStat2 <- "sd"
   }
 
   M <- as.data.frame( stats$max )
@@ -1258,22 +1377,37 @@ readExp <- function( exper, nExp, mCnt, nCnt, origVar, addVar,
   } else
     mcP <- mcX <- X <- NULL
 
+  # adjust names between normal and multi-country data
+  if( mCnt ) {
+    mcFile <- paste0( expNames[ 1 ], "_", exper )
+    poolFile <- paste0( dirMC, "/", expNames[ 1 ], "_", exper, "_", datFilSfx,
+                      "_pool.Rdata" )
+  } else
+    if( nCnt < 1 ) {
+      mcFile <- expNames[ exper ]
+      poolFile <- paste0( dirMC, "/", expNames[ exper ], "_", datFilSfx,
+                        "_pool.Rdata" )
+    } else {
+      mcFile <- paste0( expNames[ exper ], "_", nCnt )
+      poolFile <- paste0( dirMC, "/", expNames[ exper ], "_", nCnt, "_",
+                          datFilSfx, "_pool.Rdata" )
+    }
 
-  # save Monte Carlo statistics
-  saveCSV( P, baseName = baseName, num = exper, baseFolder = folder,
-           suffix = datFilSfx, type = mcStat )
-  saveCSV( S, baseName = baseName, num = exper, baseFolder = folder,
-           suffix = datFilSfx, type = "sd" )
-  saveCSV( M, baseName = baseName, num = exper, baseFolder = folder,
-           suffix = datFilSfx, type = "max" )
-  saveCSV( m, baseName = baseName, num = exper, baseFolder = folder,
-           suffix = datFilSfx, type = "min" )
-  saveCSV( n, baseName = baseName, num = exper, baseFolder = folder,
-           suffix = datFilSfx, type = "num" )
+  if( savDat ) {
+    # save Monte Carlo statistics
+    saveCSV( P, baseFolder = dirMC, baseName = mcFile, nCnt = nCnt,
+             suffix = datFilSfx, type = mcStat )
+    saveCSV( S, baseFolder = dirMC, baseName = mcFile, nCnt = nCnt,
+             suffix = datFilSfx, type = mcStat2 )
+    saveCSV( M, baseFolder = dirMC, baseName = mcFile, nCnt = nCnt,
+             suffix = datFilSfx, type = "max" )
+    saveCSV( m, baseFolder = dirMC, baseName = mcFile, nCnt = nCnt,
+             suffix = datFilSfx, type = "min" )
+    saveCSV( n, baseFolder = dirMC, baseName = mcFile, nCnt = nCnt,
+             suffix = datFilSfx, type = "num" )
+  }
 
   # save temporary results to disk to save memory
-  poolFile <- paste0( folder, "/", baseName, "_", exper, "_", datFilSfx,
-                      "_pool.Rdata" )
   save( pool, mcP, mcX, P, X, S, C, c, M, m, n, exper, nTsteps, nVar, nElem,
         nSize, file = poolFile )
 
@@ -1289,31 +1423,51 @@ readExp <- function( exper, nExp, mCnt, nCnt, origVar, addVar,
 #
 # Input:
 #   savDat: flag defining if temporary data files should be saved/used
-#	  nExp: total number of experiments/countries
 #   mCnt: multi-country report? (TRUE/FALSE)
-#   nCnt: country to use (mCnt = FALSE) (0 = all)
+#   nCnt: country data to use (mCnt=FALSE) (0=all)
 #	  folder: data file folder to use (relative to current or absolute)
 #	  baseName: data file base name (same as .lsd file)
+#   expNames: names of experiment base files (used only if nExp=0)
 #   iniDrop: initial time steps to drop from analysis (0=none)
 #   nKeep: number of time steps to keep (-1=all)
 #   origVar: original variables in dataset (from LSD)
-#   addVar: variables to be added to dataset
+#   addVar: new variables to be added to dataset
+#   addVarFn: function to create new variables in the dataset
+#   relVar: variables to be computed relative to refVar
+#   refVar: one or more reference variables
 #   niceVarName: remove starting underscores from variable names (TRUE)
 #   datFilSfx: data file name suffix
 #   coresExp: max cores to allocate for experiments/countries (0=all)
 #   coresMC: max cores to allocate for Monte Carlo (0=all)
-#   addVarFn: function to create new variables in the dataset
 #   mcStat: statistic to use
+#   mcDist: distance metric to find MC typical run
 #   CI: confidence level
 #   bootR: number of bootstrap samples
 #   bootCI: type of bootstrap confidence interval
 #
-
-loadData <- function( savDat, nExp = 1, mCnt = FALSE, nCnt = 0, folder = ".",
-                      baseName, iniDrop = 0, nKeep = -1, origVar, addVar = "",
+# Caller environment (values modified):
+#	  nExp: total number of experiments/countries (0=named experiment files)
+#   expNames: experiment file base names (nExp=0)
+#
+loadData <- function( savDat, mCnt = FALSE, nCnt = 0, folder = ".", baseName,
+                      iniDrop = 0, nKeep = -1,origVar, addVar = c( ),
+                      addVarFn = NULL, relVar = c( ), refVar = c( ),
                       niceVarName = TRUE, datFilSfx = "", coresExp = 0,
-                      coresMC = 0, addVarFn = NULL, mcStat = "mean",
-                      mcDist = NULL, CI = 0.95, bootR = 999, bootCI = NULL ) {
+                      coresMC = 0, mcStat = "mean", mcDist = NULL,
+                      CI = 0.95, bootR = 999, bootCI = NULL ) {
+
+  # choose the proper base name(s)
+  if( nExp < 1 ) {
+    nExp <<- length( expNames )
+  } else {
+    if( ! mCnt && nExp > 1 ) {
+      expNames <<- c( )
+      for( i in 1 : nExp )
+        expNames <<- c( expNames, paste0( baseName, i ) )
+    } else
+      # multi-country reads the same file mutiple times
+      expNames <<- rep( baseName, nExp )
+  }
 
   # only reprocess results file if requested/needed
   if( savDat ) {
@@ -1323,18 +1477,29 @@ loadData <- function( savDat, nExp = 1, mCnt = FALSE, nCnt = 0, folder = ".",
 
     # check all .dat files exist and are newer than .res files
     for( i in 1 : nExp ) {
-      if( ! mCnt && nExp > 1 )
-        resFiles <- list.files.lsd( folder, paste0( baseName, i ) )
-      else
-        resFiles <- list.files.lsd( folder, baseName )
+      # adjust names between normal and multi-country data
+      if( mCnt ) {
+        dirMC <- paste0( folder, "/", expNames[ 1 ], "_", datFilSfx, "_mc" )
+        mcFile <- paste0( expNames[ 1 ], "_", i, "_", datFilSfx,
+                          "_mc_[0-9]+.Rdata" )
+        poolFile <- paste0( dirMC, "/", expNames[ 1 ], "_", i, "_", datFilSfx,
+                            "_pool.Rdata" )
+      } else {
+        dirMC <- paste0( folder, "/", expNames[ i ], "_", datFilSfx, "_mc" )
+        if( nCnt < 1 ) {
+          mcFile <- paste0( expNames[ i ], "_", datFilSfx, "_mc_[0-9]+.Rdata" )
+          poolFile <- paste0( dirMC, "/", expNames[ i ], "_", datFilSfx,
+                              "_pool.Rdata" )
+        } else {
+          mcFile <- paste0( expNames[ i ], "_", nCnt, "_", datFilSfx,
+                            "_mc_[0-9]+.Rdata" )
+          poolFile <- paste0( dirMC, "/", expNames[ i ], "_", nCnt, "_", datFilSfx,
+                              "_pool.Rdata" )
+        }
+      }
 
-      poolFile <- paste0( folder, "/", baseName, "_", i, "_", datFilSfx,
-                          "_pool.Rdata" )
-      mcFiles <- list.files( path = paste0( folder, "/", baseName, "_", i, "_",
-                                            datFilSfx, "_mc" ),
-                             pattern = paste0( baseName, "_", i, "_", datFilSfx,
-                                               "_mc_[0-9]+.Rdata" ),
-                             full.names = TRUE )
+      resFiles <- list.files.lsd( folder, expNames[ i ] )
+      mcFiles <- list.files( path = dirMC, pattern = mcFile, full.names = TRUE )
 
       # if any .Rdata file is missing or .res file is newer, redo everything
       if( ! file.exists( poolFile ) || length( mcFiles ) != length( resFiles ) ||
@@ -1384,14 +1549,14 @@ loadData <- function( savDat, nExp = 1, mCnt = FALSE, nCnt = 0, folder = ".",
     }
 
     # initiate cluster for parallel loading
-    cl <- startCores( coresExp, 0, "folder", "baseName", "iniDrop", "nKeep",
+    cl <- startCores( coresExp, 0, "folder", "expNames", "iniDrop", "nKeep",
                       "datFilSfx", "mcStat", "mcDist", "CI", "bootCI", "bootR" )
 
     # load each experiment/country in parallel
     files <- autoLapply( cl, 1 : nExp, readExp, nExp = nExp, mCnt = mCnt,
-                         nCnt = nCnt, origVar = origVar, addVar = addVar,
-                         addVarFn = addVarFn, niceVarName = niceVarName,
-                         coresMC = coresMC )
+                         nCnt = nCnt, origVar = origVar, newVar = addVar,
+                         newVarFn = addVarFn, relVar = relVar, refVar = refVar,
+                         niceVarName = niceVarName, coresMC = coresMC )
     stopCores( cl )
   }
 
@@ -1406,22 +1571,21 @@ loadData <- function( savDat, nExp = 1, mCnt = FALSE, nCnt = 0, folder = ".",
 # Input:
 #   savDat: flag defining if temporary data files should be saved/used
 #   files: list of file names containing data
-#	  nExp: total number of experiments/countries
-#	  folder: data file folder to use (relative to current or absolute)
-#	  baseName: data file base name (same as .lsd file)
-#   datFilSfx: data file name suffix
 #
 
-clearTemp <- function( savDat, files, nExp, folder, baseName, datFilSfx ) {
+clearTemp <- function( savDat, files ) {
 
-  if( ! savDat ) {                    # delete temporary files, if needed
-    for( k in 1 : nExp ) {            # do for each experiment/country
-      file.remove( files[[ k ]]$pool )        # pooled data files
-      lapply( files[[ k ]]$mc, file.remove )  # MC data files
+  if( ! savDat ) {                          # delete temporary files, if needed
+    for( k in 1 : length( files ) ) {           # do for each experiment/country
+      if( file.exists( files[[ k ]]$pool ) )
+        file.remove( files[[ k ]]$pool )        # pooled data files
+
+      for( j in 1 : length( files[[ k ]]$mc ) )
+        if( file.exists( files[[ k ]]$mc[ j ] ) )
+          file.remove( files[[ k ]]$mc )        # MC data files
+
+      unlink( dirname( files[[ k ]]$mc[ 1 ] ), recursive = TRUE )
     }
-
-    unlink( paste0( folder, "/", baseName, "_", k, "_", datFilSfx, "_mc" ),
-            recursive = TRUE )
   }
 }
 
@@ -2424,25 +2588,31 @@ plot_quant <- function( x, y, bins = 10, xlab = "", ylab = "",
 #     statistic (mean or median), min, max, std. dev., conf. interval low and up
 #     (all with the same dimensions)
 #   DCdata: time series with data to compare
-#   stat: type of plot statistic (mean or median)
-#   nMC: number of Monte Carlo runs
-#   CI: confidence for confidence interval
 #   log, log0: log or zero-bounded log to be applied on series
 #   mrk: plot vertical dotted lin in timestep (only if >0)
-#	  leg: vector of experiment/country names
 #	  col, lty: vectors of experiment/country colors and line types
 #   xlab, ylab: label of x and y axes
 #   tit, subtit: title/subtitle of the plot
 #	  leg2: legends fot type of plots
 #   trend: show trend line ("lin", "loess" )
 #
+# Global environment
+#   nSize: number of Monte Carlo samples
+#   mcStat: Monte Carlo statistics type (mean/median)
+#   CI: confidence interval for statistics
+#   TmaskPlot: time vector to identify time range to plot
+#   transMk: time to plot transition vertical line (=-1 never)
+#	  plotLegends: vector of experiment/country names
+#   lTypes: line type of plots
+#   colors: colors of plots
+#
+# !diagnostics suppress = nSize, mcStat, CI, TmaskPlot, transMk
+# !diagnostics suppress = plotLegends, lTypes, colors
 
 plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
-                        DCdata = NULL, nMC, sdMC = NULL, mCnt = FALSE,
-                        statMC = "mean", mask = NULL, CI = 0.95, log = FALSE,
-                        log0 = FALSE, na0 = FALSE, mrk = -1, xlab = "",
-                        ylab = "", tit = "", subtit = "", leg = NULL,
-                        leg2 = NULL, col = NULL, lty = NULL, trend = "" ) {
+                        DCdata = NULL, sdMC = NULL, log = FALSE, log0 = FALSE,
+                        na0 = FALSE, xlab = "", ylab = "", tit = "",
+                        subtit = "", leg2 = NULL, trend = "" ) {
 
   nVar <- length( vars )
   nPlot <- nExp <- length( Pdata )
@@ -2451,27 +2621,27 @@ plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
     if( any( vars %in% colnames( DCdata ) ) )
       nPlot <- nPlot + 1
     else
-      if( ! is.null( leg ) && length( leg ) > nExp )
-        leg <- leg[ 2 : ( nExp + 1 ) ]
+      if( ! is.null( legends ) && length( legends ) > nExp )
+        legends <- legends[ 2 : ( nExp + 1 ) ]
   }
 
   # asymptotic distribution approximation factor when no CI is available
-  if( statMC == "mean" )
-    af <- qt( ( 1 - CI ) / 2, nMC - 1 ) / sqrt( nMC )
+  if( mcStat == "mean" )
+    af <- qt( ( 1 - CI ) / 2, nSize - 1 ) / sqrt( nSize )
   else
-    af <- sqrt( pi / ( 2 * nMC ) )  # asymptotic distribution factor
+    af <- sqrt( pi / ( 2 * nSize ) )  # asymptotic distribution factor
 
   # fill default values
-  if( is.null( mask ) )
-    mask <- 1 : length( Pdata[[ 1 ]][[ 1 ]] )
-  if( is.null( leg ) )
-    leg <- 1 : nPlot
+  if( is.null( TmaskPlot ) )
+    TmaskPlot <- 1 : length( Pdata[[ 1 ]][[ 1 ]] )
+  if( is.null( plotLegends ) )
+    plotLegends <- 1 : nPlot
   if( is.null( leg2 ) )
     leg2 <- rep( "", nPlot )
-  if( is.null( col ) )
-    col <- rep( "black", nPlot )
-  if( is.null( lty ) )
-    lty <- rep( "solid", nPlot )
+  if( is.null( colors ) )
+    colors <- rep( "black", nPlot )
+  if( is.null( lTypes ) )
+    lTypes <- rep( "solid", nPlot )
 
   # prepare all time series
   DCdata[ ! is.finite( DCdata ) ] <- NA
@@ -2498,7 +2668,7 @@ plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
     for( j in 1 : nVar ) {
       if( p == 1 && nPlot > nExp ) {
         if( vars[ j ] %in% colnames( DCdata ) )
-          plt[[ p ]][[ j ]] <- DCdata[ mask, vars[ j ] ]
+          plt[[ p ]][[ j ]] <- DCdata[ TmaskPlot, vars[ j ] ]
         else
           plt[[ p ]][[ j ]] <- NA
 
@@ -2507,24 +2677,26 @@ plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
         CIlo[[ p ]][[ j ]] <- NA
         CIhi[[ p ]][[ j ]] <- NA
       } else {
-        plt[[ p ]][[ j ]] <- Pdata[[ k ]][ mask, vars[ j ] ]
-        min[[ p ]][[ j ]] <- mdata[[ k ]][ mask, vars[ j ] ]
-        max[[ p ]][[ j ]] <- Mdata[[ k ]][ mask, vars[ j ] ]
+        plt[[ p ]][[ j ]] <- Pdata[[ k ]][ TmaskPlot, vars[ j ] ]
+        min[[ p ]][[ j ]] <- mdata[[ k ]][ TmaskPlot, vars[ j ] ]
+        max[[ p ]][[ j ]] <- Mdata[[ k ]][ TmaskPlot, vars[ j ] ]
 
         if( ! is.null( cdata ) )
-          CIlo[[ p ]][[ j ]] <- cdata[[ k ]][ mask, vars[ j ] ]
+          CIlo[[ p ]][[ j ]] <- cdata[[ k ]][ TmaskPlot, vars[ j ] ]
         else {
           if( ! is.null( sdMC ) )
-            CIlo[[ p ]][[ j ]] <- plt[[ p ]][[ j ]] - af * sdMC[[ k ]][ mask, vars[ j ] ]
+            CIlo[[ p ]][[ j ]] <- plt[[ p ]][[ j ]] -
+                                  af * sdMC[[ k ]][ TmaskPlot, vars[ j ] ]
           else
             CIlo[[ p ]][[ j ]] <- NA
         }
 
         if( ! is.null( Cdata ) )
-          CIhi[[ p ]][[ j ]] <- Cdata[[ k ]][ mask, vars[ j ] ]
+          CIhi[[ p ]][[ j ]] <- Cdata[[ k ]][ TmaskPlot, vars[ j ] ]
         else {
           if( ! is.null( sdMC ) )
-            CIhi[[ p ]][[ j ]] <- plt[[ p ]][[ j ]] + af * sdMC[[ k ]][ mask, vars[ j ] ]
+            CIhi[[ p ]][[ j ]] <- plt[[ p ]][[ j ]] +
+                                  af * sdMC[[ k ]][ TmaskPlot, vars[ j ] ]
           else
             CIhi[[ p ]][[ j ]] <- NA
         }
@@ -2596,43 +2768,43 @@ plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
   else
     title <- paste( tit, "( all experiments )" )
 
-  if( mrk > 0 )
+  if( transMk > 0 )
     sub <- paste( "vertical dotted line: regime change /", subtit )
   else
     sub <- subtit
 
   plot( x = c( xMin : xMax ), y = plt[[ 1 ]][[ 1 ]][ xMin : xMax ], type = "l",
         main = title, sub = paste( "(", sub, ")" ), xlab = xlab, ylab = ylab,
-        col = col[ 1 ], lty = lty[ 1 ], ylim = ylim )
+        col = colors[ 1 ], lty = lTypes[ 1 ], ylim = ylim )
 
   if( nPlot > 1 )
     for( p in 2 : nPlot )
       lines( x = c( xm[ p, 1 ] : xM[ p, 1 ] ),
              y = plt[[ p ]][[ 1 ]][ xm[ p, 1 ] : xM[ p, 1 ] ],
-             col = col[ p ], lty = lty[ p ] )
+             col = colors[ p ], lty = lTypes[ p ] )
 
   if( nVar > 1 )
     for( p in 1 : nPlot )
       for( j in 2 : nVar )
         if( is.finite( xm[ p, j ] ) && is.finite( xM[ p, j ] ) ) {
-          if( lty[ 1 ] == lty[ length( lty ) ] )
+          if( lTypes[ 1 ] == lTypes[ length( lTypes ) ] )
             lines( x = c( xm[ p, j ] : xM[ p, j ] ),
                    y = plt[[ p ]][[ j ]][ xm[ p, j ] : xM[ p, j ] ],
-                   col = col[ p ], lty = j )
+                   col = colors[ p ], lty = j )
           else
             lines( x = c( xm[ p, j ] : xM[ p, j ] ),
                    y = plt[[ p ]][[ j ]][ xm[ p, j ] : xM[ p, j ] ],
-                   col = col[ p ], lty = lty[ p ], lwd = j )
+                   col = colors[ p ], lty = lTypes[ p ], lwd = j )
         }
 
   # plot regime transition mark
-  if( mrk > 0 )
-    lines( x = c( mrk, mrk ), y = ylim, lty = 3, col = "black" )
+  if( transMk > 0 )
+    lines( x = c( transMk, transMk ), y = ylim, lty = 3, col = "black" )
 
-  legend( x = "topleft", legend = leg, inset = 0.03, cex = 0.8,
-          lty = lty, lwd = 2, col = col )
+  legend( x = "topleft", legend = plotLegends, inset = 0.03, cex = 0.8,
+          lty = lTypes, lwd = 2, col = colors )
   if( nVar > 1 )
-    if( lty[ 1 ] == lty[ length( lty ) ] )
+    if( lTypes[ 1 ] == lTypes[ length( lTypes ) ] )
       legend( x = "topright", legend = leg2, inset = 0.03,
               cex = 0.8, lty = 1 : 6, lwd = 2 )
     else
@@ -2644,7 +2816,7 @@ plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
   else
     tl <- paste( trend, "trend in blue / " )
 
-  # each experiment/country averages with confidence and max/min intervals
+  # each experiment/country means/medians with confidence and max/min intervals
   if( nPlot == nExp )
     first <- 1
   else
@@ -2661,7 +2833,7 @@ plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
     # adjust margins for legends
     ylim <- findYlim( yMin, yMax )
 
-    title <- paste( tit, "(", leg[ p ], ")" )
+    title <- paste( tit, "(", plotLegends[ p ], ")" )
     subTitle <- paste0( "( gray: ", CI * 100,
                         "% confidence / light gray: min/max / ", tl, sub, " )" )
     plot( x = c( xMin : xMax ), y = plt[[ p ]][[ 1 ]][ xMin : xMax ], type = "l",
@@ -2721,8 +2893,8 @@ plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
       }
 
     # plot regime transition mark
-    if( mrk > 0 )
-      lines( x = c( mrk, mrk ), y = ylim, lty = 3, col = "black" )
+    if( transMk > 0 )
+      lines( x = c( transMk, transMk ), y = ylim, lty = 3, col = "black" )
 
     if( nVar > 1 )
       legend( x = "topright", inset = 0.03, cex = 0.8, legend = leg2,
@@ -2733,10 +2905,11 @@ plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
       for( j in 1 : length( plt[[ p ]] ) )
         lines( x = c( xm[ 1, j ] : xM[ 1, j ] ),
                y = plt[[ 1 ]][[ j ]][ xm[ 1, j] : xM[ 1, j ] ], lty = j,
-               col = col[ 2 ] )
-      legend( x = "topleft", legend = c( leg[ p ], leg[ 1 ] ), inset = 0.03,
-              cex = 0.8, lwd = 2, lty = c( lty[ 1 ], lty[ 2 ] ),
-              col = c( col[ 1 ], col[ 2 ] ) )
+               col = colors[ 2 ] )
+      legend( x = "topleft", legend = c( plotLegends[ p ], plotLegends[ 1 ] ),
+              inset = 0.03, cex = 0.8, lwd = 2,
+              lty = c( lTypes[ 1 ], lTypes[ 2 ] ),
+              col = c( colors[ 1 ], colors[ 2 ] ) )
     }
   }
 }
@@ -3074,8 +3247,8 @@ plot_epanechnikov <- function( lFit, ekOrd = 4, CI = 0.95, xlab = "", ylab = "",
                   ckerorder = ekOrd, ckertype = "epanechnikov" )
 
   # get non-parametric results and bootstrap standard errors
-  nlPlot <- plot( nlFit, plot.behavior = "data", plot.errors.method = "bootstrap",
-                  plot.errors.quantiles = c( ( 1 - CI ) / 2, 1 - ( 1 - CI ) / 2 ) )
+  nlPlot <- plot( nlFit, behavior = "data", errors = "bootstrap",
+                  band = "pointwise", alpha = 1 - CI )
   xyVal <- data.frame( cbind( nlPlot$r1$eval[ , 1 ],
                               nlPlot$r1$mean,
                               nlPlot$r1$mean + nlPlot$r1$merr[ , 1 ],
@@ -3684,4 +3857,500 @@ spectrum_table <- function( data, lagsLT, logVar = 0, CI = 0.95 ) {
                           "p-value", "Max.", "Min." )
 
   return( table )
+}
+
+
+#
+# ====== function [] = gap_country ======
+# Output:
+#   compute relative gap between countries
+#
+# Input:
+#	  mc: Monte Carlo data
+#   var: name of variable to analyze
+#   cnt: country number
+#
+# Global environment:
+#   nExp: number of experiments
+#   nSize: number of Monte Carlo runs
+#   TmaxStat: last period of statistics data
+#   TmaskStat: time mask for statistics computation
+#   warmUpStat: warm-up period for statistics computation
+#
+# !diagnostics suppress = nSize, TmaxStat, TmaskStat, warmUpStat
+
+gap_country <- function( mc, var, cnt ) {
+
+  data <- matrix( nrow = TmaxStat, ncol = nSize )
+
+  for( j in 1 : nSize )
+    for( i in TmaskStat )
+      if( i == 1 ) {
+        data[ i - warmUpStat, j ] <- 0
+      } else {
+        if( cnt < nExp )
+          data[ i - warmUpStat, j ] <- ( ( mc[[ cnt ]][ i, var, j ] -
+                                           mc[[ cnt + 1 ]][ i, var, j ] ) /
+                                         mc[[ cnt ]][ i, var, j ] )
+        else
+          data[ i - warmUpStat, j ] <- ( ( mc[[ cnt - 1 ]][ i, var, j ] -
+                                           mc[[ cnt ]][ i, var, j ] ) /
+                                         mc[[ cnt ]][ i, var, j ] )
+      }
+
+  data[ ! is.finite( data ) ] <- NA
+  return( data )
+}
+
+
+#
+# ====== function [] = create_comp_data ======
+# Output:
+#   create data structure to compare experiments
+#
+# Input:
+#	  radarList: list of experiments to do radar plot
+#   statFn: function to add statistic data to data structure
+#
+# Global environment:
+#   nExp: number of experiments
+#   nSize: number of Monte Carlo samples
+#   maxStats: maximum number of experiments
+#
+# !diagnostics suppress = nExp, nSize
+
+create_comp_data <- function( radarList, statFn ) {
+
+  statsTb <- array( dim = c( maxStats, 8, nExp ) )
+  statsBp <- array( dim = c( maxStats, 5, nExp ) )
+  nBp <- array( dim = c( maxStats, nExp ) )
+  confBp <- array( dim = c( maxStats, 2, nExp ) )
+  data <- outBp <- array( list( ), dim = c( maxStats, nExp ) )
+  dataMC <- array( dim = c( maxStats, nSize, nExp ) )
+  names <- units <- statRad <- list( )
+
+  # create radar plot data structure
+  for( r in 1 : length( radarList ) )
+    statRad[[ r ]] <- matrix( nrow = nExp, ncol = length( radarList[[ r ]]$series ),
+                              dimnames = list( legends,
+                                               rep( "",
+                                                    length( radarList[[ r ]]$series ) ) ) )
+
+  for( k in 1 : nExp )
+    nStat <- statFn( k )                   # collect the data for each experiment
+
+  # remove unused stats space
+  dataMC <- dataMC[ - ( nStat + 1 : maxStats ), , , drop = FALSE ]
+  statsTb <- statsTb[ - ( nStat + 1 : maxStats ), , , drop = FALSE ]
+  statsBp <- statsBp[ - ( nStat + 1 : maxStats ), , , drop = FALSE ]
+  nBp <- nBp[ - ( nStat + 1 : maxStats ), , drop = FALSE ]
+  confBp <- confBp[ - ( nStat + 1 : maxStats ), , , drop = FALSE ]
+  outBp <- outBp[ - ( nStat + 1 : maxStats ), , drop = FALSE ]
+
+  return( list( data = data, dataMC = dataMC, names = names, units = units,
+                statsTb = statsTb, statRad = statRad, statsBp = statsBp,
+                nBp = nBp, confBp = confBp, outBp = outBp, nStat = nStat ) )
+}
+
+
+#
+# ====== function [] = addStat ======
+# Output:
+#   function to add a new statistic to compare from an experiment
+#   returns the number of the next available statistic, or zero if
+#   the maximum number of statistics was achieved (increas maxStats above)
+#
+# Input:
+#	  stat: the number of the new statistic to be added
+#   ex: number of the experiment being compared
+#   sdata: vector containing the data for the statistics to be computed
+#   tit: name/title to be used for the statistic
+#   ylab: unit/y-axis label for the statistic
+#
+# Global environment:
+#   mcStat: Monte Carlo statistic ("mean" or "median")
+#   CI: confidence level
+#   maxStats: maximum number of experiments
+#   bPlotCoef: boxplots coefficient
+#   radarStat: radar plot statistic
+#
+# Caller environment:
+#   radarList: list of statistics to radar plot
+#   data: comparison clean dataset storage
+#   dataMC: comparison raw dataset storage
+#   statsTb: table statistics
+#   statRad: radar statistics
+#   statsBp: boxplot statistics
+#   names: statistics names/titles
+#   units: statistics units/y-axis labels
+#   nBp: boxplot statistics number
+#   confBp: boxplot statistics configuration
+#   outBp: boxplot statistics outputs
+#
+# !diagnostics suppress = maxStats, bPlotCoef, radarStat, radarList, dataMC, statsTb
+# !diagnostics suppress = statRad, statsBp, names, units, nBp, confBp, outBp
+
+addStat <- function( stat, ex, sdata, tit, ylab ) {
+
+  if( stat <= 0 || stat > maxStats ) {
+    warning( "Insufficient space for stats, discarding" )
+    return( 0 )
+  }
+
+  env <- parent.frame( 2 )  # caller of caller (create_comp_data) environment
+
+  env$dataMC[ stat, , ex ] <- sdata
+  sdata <- na.remove( sdata )
+
+  n <- length( sdata )
+  avg <- mean( sdata )
+  med <-
+  sd <- sd( sdata )
+  mad <-
+
+  if( mcStat == "mean" ) {
+    d = abs( qt( ( 1 - CI ) / 2, n - 1 ) ) * sd / sqrt( n )
+    ciLo = avg - d
+    ciHi = avg + d
+  } else {
+    c <- suppressWarnings( wilcox.test( sdata, conf.int = TRUE, conf.level = CI,
+                                        digits.rank = 7 )$conf.int )
+    ciLo <- c[ 1 ]
+    ciHi <- c[ 2 ]
+  }
+
+  env$statsTb[ stat, , ex ] <- c( avg, median( sdata ), sd, mad( sdata ),
+                                  ciLo, ciHi, min( sdata ), max( sdata ) )
+
+  env$data[[ stat, ex ]] <- sdata
+  env$names[[ stat ]] <- tit
+  env$units[[ stat ]] <- ylab
+  bPlotStats <- boxplot.stats( sdata, coef = bPlotCoef )
+  env$statsBp[ stat, , ex ] <- bPlotStats$stats
+  env$nBp[ stat, ex ] <- bPlotStats$n
+  env$confBp[ stat, , ex ] <- bPlotStats$conf
+  env$outBp[[ stat, ex ]] <- bPlotStats$out
+
+  for( r in 1 : length( env$radarList ) ) {
+    pos <- match( stat, env$radarList[[ r ]]$series )
+    if( ! is.na( pos ) ) {
+      if( ex == 1 )
+        colnames( env$statRad[[ r ]] )[ pos ] <- tit
+
+      env$statRad[[ r ]][ ex, pos ] <- env$statsTb[ stat, radarStat, ex ]
+    }
+  }
+
+  return( stat + 1 )
+}
+
+
+#
+# ====== function [] = plot_boxplots ======
+# Output:
+#   plot boxplots comparing selected statistics
+#
+# Input:
+#	  data: list containing the pre-built data (create_comp_data)
+#
+# Global environment:
+#   nExp: number of experiments
+#   nSize: number of Monte Carlo samples
+#   bPlotNotc: boxplot notch
+#   warmUpStat: statistics warm-up period
+#   nTstat: number of periods to compute statistics
+#	  legends: vector of experiment/country names
+#   cntLeg: country legends
+#
+# !diagnostics suppress = nExp, nSize, bPlotNotc, warmUpStat, nTstat
+# !diagnostics suppress = legends, cntLeg
+
+plot_boxplots <- function( data ) {
+
+  # find max/mins for all experiments
+  for( stat in 1 : data$nStat ) {
+    lowLim <- Inf
+    upLim <- -Inf
+    for( k in 1 : nExp ) {
+      if( data$confBp[ stat, 1, k ] < lowLim )
+        lowLim <- data$confBp[ stat, 1, k ]
+      if( data$confBp[ stat, 2, k ] > upLim )
+        upLim <- data$confBp[ stat, 2, k ]
+    }
+    upLim <- upLim + ( upLim - lowLim )
+    lowLim <- lowLim - ( upLim - lowLim )
+
+    # build the outliers vectors
+    outVal <- outGrp <- vector( "numeric" )
+    for( k in 1 : nExp ) {
+      if( length( data$outBp[[ stat, k ]] ) == 0 )
+        next
+      outliers <- vector( "numeric" )
+      for( i in 1 : length( data$outBp[[ stat, k ]] ) ) {
+        if( data$outBp[[ stat, k ]][ i ] < upLim &&
+            data$outBp[[ stat, k ]][ i ] > lowLim )
+          outliers <- append( outliers, data$outBp[[ stat, k ]][ i ] )
+      }
+      if( length( outliers ) > 0 ) {
+        outVal <- append( outVal, outliers )
+        outGrp <- append( outGrp, rep( k, length( outliers ) ) )
+      }
+    }
+
+    if( nExp > 1 )
+      listBp <- list( stats = data$statsBp[ stat, , ], n = data$nBp[ stat, ],
+                      conf = data$confBp[ stat, , ], out = outVal,
+                      group = outGrp, names = legends )
+    else
+      listBp <- list( stats = matrix( data$statsBp[ stat, , ] ),
+                      n = matrix( data$nBp[ stat, ] ),
+                      conf = matrix( data$confBp[ stat, , ] ),
+                      out = outVal, group = outGrp, names = legends )
+
+    tit <- data$names[[ stat ]]
+    subtit <- paste0( "( bar: median / box: 2nd-3rd quartile / whiskers: max-min / points: outliers / period = ",
+                      warmUpStat + 1, "-", nTstat, " / MC runs = ", nSize, " ",
+                      cntLeg, " )" )
+
+    plot_bxp_vio( data$dataMC[ stat, , ], unit = data$units[[ stat ]],
+                  leg = legends, notch = bPlotNotc, tit = tit, subtit = subtit )
+  }
+}
+
+
+#
+# ====== function [] = plot_stat_table ======
+# Output:
+#   plot statistics table comparing selected statistics
+#
+# Input:
+#	  data: list containing the pre-built data (create_comp_data)
+#   tit: table legend
+#
+# Global environment:
+#   nExp: number of experiments
+#   nSize: number of Monte Carlo samples
+#   mcStat: Monte Carlo statistics type (mean/median)
+#   warmUpStat: statistics warm-up period
+#   nTstat: number of periods to compute statistics
+#   sDigits: number of significant digits to use
+#   cntLeg: country legends
+#   maxTabCol: maximum number of table columns
+#   maxTabRow: maximum number of table rows
+#
+# !diagnostics suppress = nExp, nSize, mcStat, warmUpStat, nTstat, sDigits
+# !diagnostics suppress = cntLeg, maxTabCol, maxTabRow
+
+plot_stat_table <- function( data, tit ) {
+
+  if( mcStat == "mean" ) {
+    scols <- c( 1, 3, 5, 6, 7, 8 )
+    slab <- "Mean"
+    dlab <- "SD"
+  } else {
+    scols <- c( 2, 4, 5, 6, 7, 8 )
+    slab <- "Med"
+    dlab <- "MAD"
+  }
+
+  for( k in 1 : nExp ){
+    stats <- data$statsTb[ , scols, k ]
+    names <- c( paste0( slab, "[", k, "]" ), paste0( dlab, "[", k, "]" ),
+                paste0( "CI-[", k, "]" ), paste0( "CI+[", k, "]" ),
+                paste0( "Min[", k, "]" ), paste0( "Max[", k, "]" ) )
+    if( k == 1 ) {
+      # first columns
+      table.stats <- stats
+      table.names <- names
+    } else {
+      # remaining columns, if any
+      table.stats <- cbind( table.stats, stats )
+      table.names <- cbind( table.names, names )
+    }
+  }
+
+  colnames( table.stats ) <- table.names
+  rownames( table.stats ) <- data$names
+
+  subtit = paste0( "( numbers in brackets: experiment number / period = ",
+                   warmUpStat + 1, "-", nTstat, " / MC runs = ", nSize, " ",
+                   cntLeg, " )" )
+
+  for( i in 1 : ceiling( ncol( table.stats ) / maxTabCol ) ) {
+    iniCol <- ( i - 1 ) * maxTabCol + 1
+    endCol <- min( i * maxTabCol, ncol( table.stats ) )
+    for( j in 1 : ceiling( nrow( table.stats ) / maxTabRow ) ) {
+      iniRow <- ( j - 1 ) * maxTabRow + 1
+      endRow <- min( j * maxTabRow, nrow( table.stats ) )
+
+      textplot( formatC( table.stats[ iniRow : endRow , iniCol : endCol ],
+                         digits = sDigits, format = "g" ), cmar = 1 )
+      title( main = tit, sub = subtit )
+      mtext( listLeg, side = 1, line = -2, outer = TRUE )
+    }
+  }
+
+  return( table.stats )
+}
+
+
+#
+# ====== function [] = plot_perf_comp ======
+# Output:
+#   plot statistics table comparing experiment relative performance
+#
+# Input:
+#	  data: list containing the pre-built data (create_comp_data)
+#   tit: table legend
+#
+# Global environment:
+#   nExp: number of experiments
+#   nSize: number of Monte Carlo samples
+#   mcStat: Monte Carlo statistics type (mean/median)
+#   warmUpStat: statistics warm-up period
+#   nTstat: number of periods to compute statistics
+#   cntLeg: country legends
+#   maxTabCol: maximum number of table columns
+#   maxTabRow: maximum number of table rows
+#
+# Effect Size Interpretation
+#               Cohen d     Cliff delta
+# Negligible    < 0.20      < 0.15
+# Small         0.20        0.15
+# Medium        0.50        0.33
+# Large         0.80        0.47
+#
+# !diagnostics suppress = nExp, nSize, warmUpStat, nTstat, cntLeg
+# !diagnostics suppress = maxTabCol, maxTabRow
+
+plot_perf_comp <- function( data, tit ) {
+
+  if( nExp  < 2 )
+    return( NULL )
+
+  if( mcStat == "mean" ) {
+    s1col <- 1        # mean
+    s2col <- 3        # SD
+    s1lab <- "Mean"
+    s2lab <- "d"
+    t1lab <- "t-test"
+    t2lab <- "Cohen d"
+  } else {
+    s1col <- 2        # median
+    s2col <- 4        # MAD
+    s1lab <- "Med"
+    s2lab <- "delta"
+    t1lab <- "U-test"
+    t2lab <- "Cliff delta"
+  }
+
+  # first column
+  perf.comp <- data$statsTb[ , s1col, 1 ]
+  perf.names <- paste0( s1lab, "[1]" )
+
+  # remaining columns
+  for( k in 2 : nExp ){
+    if( mcStat == "mean" ) {
+      # t-test
+      t <- ( data$statsTb[ , s1col, k ] - data$statsTb[ , s1col, 1 ] ) /
+           sqrt( ( data$statsTb[ , s2col, k ] ^ 2 +
+                   data$statsTb[ , s2col, 1 ] ^ 2 ) / nSize )
+      df <- floor( ( ( data$statsTb[ , s2col, k ] ^ 2 +
+                       data$statsTb[ , s2col, 1 ] ^ 2 ) / nSize ) ^ 2 /
+                   ( ( 1 / ( nSize - 1 ) ) *
+                     ( ( data$statsTb[ , s2col, k ] ^ 2 / nSize ) ^ 2 +
+                     ( data$statsTb[ , s2col, 1 ] ^ 2 / nSize ) ^ 2 ) ) )
+      pval <- 2 * pt( - abs ( t ), df )
+      # Cohen d statistic
+      d <- abs( data$statsTb[ , s1col, k ] - data$statsTb[ , s1col, 1 ] ) /
+                sqrt( ( nSize - 1 ) * ( data$statsTb[ , s2col, k ] ^ 2 +
+                                        data$statsTb[ , s2col, 1 ] ^ 2 ) /
+                      ( 2 * nSize - 2 ) )
+    } else {
+      pval <- d <- rep( NA, data$nStat )
+      for( stat in 1 : data$nStat ) {
+        # U-test (Mann-Whitney-Wilcoxon)
+        pval[ stat ] <- suppressWarnings(
+          wilcox.test( data$data[[ stat, k ]], data$data[[ stat, 1 ]],
+                       digits.rank = 7 )$p.value )
+        # Cliff delta statistic
+        d[ stat ] <- abs( suppressWarnings(
+          cliff.delta( data$data[[ stat, k ]],
+                       data$data[[ stat, 1 ]] )$estimate ) )
+      }
+    }
+
+    perf.comp <- cbind( perf.comp, data$statsTb[ , s1col, k ] )
+    perf.comp <- cbind( perf.comp,
+                        data$statsTb[ , s1col, k ] /
+                          data$statsTb[ , s1col, 1 ] )
+    perf.comp <- cbind( perf.comp, pval )
+    perf.comp <- cbind( perf.comp, d )
+    perf.names <- cbind( perf.names, t( c( paste0( s1lab, "[", k, "]" ),
+                                           paste0( "Ratio[", k, "]" ),
+                                           paste0( "p-val[", k, "]" ),
+                                           paste0( s2lab, "[", k, "]" ) ) ) )
+  }
+
+  colnames( perf.comp ) <- perf.names
+  rownames( perf.comp ) <- data$names
+
+  subtit = paste0( "( experiment number in brackets / ", t1lab,
+                   " H0: no difference to [1] / ", t2lab, " / period = ",
+                   warmUpStat + 1, "-", nTstat, " / MC runs = ", nSize, " ",
+                   cntLeg, " )" )
+
+  for( i in 1 : ceiling( ncol( perf.comp ) / maxTabCol ) ) {
+    iniCol <- ( i - 1 ) * maxTabCol + 1
+    endCol <- min( i * maxTabCol, ncol( perf.comp ) )
+    for( j in 1 : ceiling( nrow( perf.comp ) / maxTabRow ) ) {
+      iniRow <- ( j - 1 ) * maxTabRow + 1
+      endRow <- min( j * maxTabRow, nrow( perf.comp ) )
+
+      textplot( formatC( perf.comp[ iniRow : endRow , iniCol : endCol ],
+                         digits = sDigits, format = "g" ), cmar = 1 )
+      title( main = tit, sub = subtit )
+      mtext( listLeg, side = 1, line = -2, outer = TRUE )
+    }
+  }
+
+  return( perf.comp )
+}
+
+
+#
+# ====== function [] = plot_radars ======
+# Output:
+#   plot radars comparing selected variables
+#
+# Input:
+#	  data: list containing the pre-built data (create_comp_data)
+#   tit: table legend
+#   subtit: plot secondary legend
+#
+# Global environment
+#   nExp: number of experiments
+#   nSize: number of Monte Carlo samples
+#   radarStat: statistic to use on radar plots
+#   radarZoom: zoom level of radar plot
+#   warmUpStat: statistics warm-up period
+#   nTstat: number of periods to compute statistics
+#   cntLeg: country legends
+#   lTypes: line type of plots
+#   colors: colors of plots
+#
+# !diagnostics suppress = nExp, nSize, radarStat, radarZoom
+# !diagnostics suppress = warmUpStat, nTstat, cntLeg, lTypes, colors
+
+plot_radars <- function( data, radarList ) {
+
+  statNames <- c( "mean", "median", "std. dev.", "MAD", "minimum", "maximum" )
+  subTitle <- paste0( "( ", statNames[ radarStat ], " values / period = ",
+                      warmUpStat + 1, "-", nTstat, " / MC runs = ", nSize,
+                      " ", cntLeg, " )" )
+
+  for( r in 1 : length( radarList ) )
+    if( length( radarList[[ r ]]$series ) >= 3 )
+      plot_radar( data$statRad[[ r ]], zoom = radarZoom, dig = 2, col = colors,
+                  lty = lTypes, tit = radarList[[ r ]]$title, subtit = subTitle )
 }

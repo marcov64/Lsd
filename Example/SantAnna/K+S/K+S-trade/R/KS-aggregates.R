@@ -42,16 +42,16 @@
 # data import parameters
 folder    <- "data"                 # data files folder
 baseName  <- "Sim"                  # data files base name (same as .lsd file)
-nExp      <- 2                      # number of experiments/countries
-mCnt      <- FALSE                  # experiments from multiple countries?
-nCnt      <- 2                      # country to use (mCnt = FALSE) (0=all)
+nExp      <- 2                      # number of experiments/countries (0=named)
+mCnt      <- FALSE                  # compare multiple countries?
+nCnt      <- 1                      # country to use (mCnt=FALSE) (0=all)
 dComp     <- FALSE                  # compare experiments to data (baseName0.csv)
 iniDrop   <- 0                      # initial time steps to drop (0=none)
 nKeep     <- -1                     # number of time steps to keep (-1=all)
 coresExp  <- 0                      # max cores for experiments (0=all)
 coresMC   <- 0                      # max cores for Monte Carlo (0=all)
 savDat    <- FALSE                  # save data files and re-use if available?
-mcStat    <- "median"               # Monte Carlo statistic ("mean", "median")
+mcStat    <- "mean"                 # Monte Carlo statistic ("mean", "median")
 mcDist    <- ""                     # distance metric to find MC typical run
 CI        <- 0.95                   # confidence level
 bootR     <- 999                    # bootstrap replicates (bootCI != NULL)
@@ -59,12 +59,13 @@ bootCI    <- NULL                   # bootstrap confidence interval method (SLOW
                                     # (NULL (no bootstrap), "basic", or "bca")
 
 # caption and file names
-expVal    <- c( "Only private firms", "Private & public firms" )# experiment captions
-cntVal    <- c( "North country", "South country" )        # country captions
-dcVal     <- "Empirical data"                             # comparison data
-firmTypes <- c( "Pre-change firms", "Post-change firms" ) # firm-type captions
-caption   <- "K+S aggregate analysis"                     # log caption
-datFilSfx <- "aggr"                                       # data file suffix
+expVal    <- c( "No SOE", "SOE in S" )          # experiment captions
+cntVal    <- c( "North country", "South country" )# country captions
+firmTypes <- c( "Pre-change firms", "Post-change firms" )# firm-type captions
+expNames  <- c( )                               # exp. file base names (nExp=0)
+dcVal     <- "Empirical data"                   # comparison data
+caption   <- "K+S aggregate analysis"           # log caption
+datFilSfx <- "aggr"                             # data file suffix
 
 # aggregated variables to import and add
 logVar    <- c( "A", "A1", "A2", "A2preChg", "A2posChg", "BadDeb", "Bon2", "C",
@@ -84,12 +85,27 @@ nlogVar   <- c( "A2sdPreChg", "A2sdPosChg", "Bda", "Bfail", "CPI", "DebY",
                 "q2posChg", "r", "sTavg", "sVavg", "V1", "V2", "V3", "wGini",
                 "wLogSD" )
 origVar   <- c( logVar, nlogVar )
-addVar    <- c( )
+addVar    <- c( "A2sd", "BonW2", "Uzero", "W", "XkNet", "XcNet", "Xnet", "Y100",
+                "dYreal", "nEntT1", "nEntT2", "tCrisis" )
+relVar    <- c( "BadDeb", "Bon2", "C", "CD", "CS", "Creal", "Deb1", "Deb2", "G",
+                "Gc", "Gbail", "Ged", "Gtrain", "In", "Inom", "Loans", "M",
+                "Mk", "Mc", "NWb", "NW1", "NW2", "Sav", "SavAcc", "S1", "S2",
+                "TC", "Tax", "W", "W1", "W2", "X", "Xc", "XcNet", "Xk", "XkNet",
+                "dNnom" )
+refVar    <- c( "Y" )
+gapVar <- list( c( "A1", "A1gap", TRUE ), c( "U1", "U1gap", FALSE ),
+                c( "U2", "U2gap", FALSE ), c( "U3", "U3gap", FALSE ),
+                c( "V1", "V1gap", FALSE ), c( "V2", "V2gap", FALSE ),
+                c( "V3", "V3gap", FALSE ), c( "Yreal", "Ygap", TRUE ),
+                c( "wAvg1real", "w1gap", TRUE ), c( "wAvg2real", "w2gap", TRUE ),
+                c( "wAvg3real", "w3gap", TRUE ) ) # c( origVar, gapVar, logVar )
+
 
 
 # ==== Libraries, support functions and global options ====
 
 source( "KS-support-functions.R" )
+source( "KS-add-vars.R" )
 source( "KS-time-plots.R" )
 source( "KS-box-plots.R" )
 source( "KS-crisis-recover.R" )
@@ -105,7 +121,7 @@ options( warn = 0 )         # -1=no warning/0:warnings at end/2:warnings stop
 # !diagnostics suppress = crisis_recover, ergod.test.lsd, repFile, readCSV
 # !diagnostics suppress = saveCSV, mc, mcP, mcX, pool, P, X, S, C, c, M, m, n
 # !diagnostics suppress = nTsteps, nVar, nSize, legends, plotLegends, expLeg
-# !diagnostics suppress = listLeg, cntLeg, allLeg, outDir
+# !diagnostics suppress = listLeg, cntLeg, allLeg, outDir, addVar_aggr, addGapVar
 
 
 # ==== Process LSD result files ====
@@ -115,12 +131,12 @@ showStartMark( caption )    # log start mark
 setCmdLinePars( )           # read command line parameters (if any)
 
 # read LSD files or load existing temporary files according to the case
-files <- loadData( savDat = savDat, nExp = nExp, mCnt = mCnt, nCnt = nCnt,
-                   folder = folder, baseName = baseName, iniDrop = iniDrop,
-                   nKeep = nKeep, origVar = origVar, addVar = addVar,
-                   datFilSfx = datFilSfx, coresExp = coresExp,
-                   coresMC = coresMC, mcStat = mcStat, mcDist = mcDist,
-                   CI = CI, bootR = bootR, bootCI = bootCI )
+files <- loadData( savDat = savDat, mCnt = mCnt, nCnt = nCnt, folder = folder,
+                   baseName = baseName, iniDrop = iniDrop, nKeep = nKeep,
+                   origVar = origVar, addVar = addVar, addVarFn = addVar_aggr,
+                   relVar = relVar, refVar = refVar, datFilSfx = datFilSfx,
+                   coresExp = coresExp, coresMC = coresMC, mcStat = mcStat,
+                   mcDist = mcDist, CI = CI, bootR = bootR, bootCI = bootCI )
 
 
 #******************************************************************
@@ -137,6 +153,7 @@ warmUpPlot<- 100    # number of "warm-up" runs for plots
 nTplot    <- -1     # last period to consider for plots (-1=all)
 warmUpStat<- 300    # warm-up runs to evaluate all statistics
 nTstat    <- -1     # last period to consider for statistics (-1=all)
+maxStats  <- 99     # maximum number of statistics to handle in comparisons
 lowP      <- 6      # bandpass filter minimum period
 highP     <- 32     # bandpass filter maximum period
 bpfK      <- 12     # bandpass filter order
@@ -155,6 +172,8 @@ crisisRun <- 0      # the crisis case to be plotted (0=auto)
 repName   <- ""     # report files base name (if "" same baseName)
 transMk   <- -1     # regime transition mark after warm-up (-1:none)
 sDigits   <- 4      # significant digits in tables
+maxTabRow <- 50     # maximum number of table rows
+maxTabCol <- 12     # maximum number of table columns
 plotRows  <- 1      # number of plots per row in a page
 plotCols  <- 1  	  # number of plots per column in a page
 plotW     <- 10     # plot window width
@@ -224,6 +243,9 @@ for( k in 1 : nExp ) {                      # realocate data in separate lists
 
 rm( pool, mc, mcP, mcX, P, X, S, C, c, M, m, n )
 
+# add country gap variables, if needed
+addGapVar( gapVar, mCnt, nExp )
+
 # read data comparison file
 if( ! mCnt && dComp ) {
   DCdata <- readCSV( folder, baseName, "0", iniDrop, nTsteps )
@@ -276,13 +298,13 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
   #
 
   # close main MC report and open new one
-  repFile( repName, folder = folder, width = plotW, height = plotH,
+  repFile( repName, folder = folder, nCnt = nCnt, width = plotW, height = plotH,
            suffix = paste0( datFilSfx, "_", mcStat, fileTag, "_crisis" ),
            rows = plotRows, cols = plotCols, raster = raster, res = res )
 
   cat( "\nGenerating crisis-recovery report...\n" )
 
-  rec.stats <- crisis_recover( mcData, nExp, nSize, TmaskStat, warmUpPlot,
+  rec.stats <- crisis_recover( mcData, nExp, nCnt, nSize, TmaskStat, warmUpPlot,
                                warmUpStat, nTstat, crisisLen, crisisPre,
                                crisisTh, crisisRun, legends, expLeg, cntLeg,
                                allLeg, sDigits, smoothing, transMk, mCnt,
@@ -294,7 +316,7 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
   #
 
   # create the report file(s) in a daily output directory
-  repFile( repName, folder = folder, width = plotW, height = plotH,
+  repFile( repName, folder = folder, nCnt = nCnt, width = plotW, height = plotH,
            suffix = paste0( datFilSfx, "_", mcStat, fileTag, "_pool" ),
            rows = plotRows, cols = plotCols, raster = raster, res = res )
 
@@ -304,19 +326,15 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
   # ------ time plots ------
   #
 
-  time_plots( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata, DCdata,
-              mcStat, nExp, nSize, nTsteps, mCnt, TmaskPlot, CI, Ptag, Xtag,
-              plotLegends, cntLeg, colors, lTypes, smoothing, transMk, firmTypes )
+  time_plots( Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata, DCdata, mcStat,
+              nExp, nSize, mCnt, TmaskPlot, Ptag, Xtag, cntLeg, firmTypes )
 
   #
   # ------ comparison of experiments ------
   #
 
-  box_plots( mcData, rec.stats, mcStat, nExp, nSize, mCnt, TmaxStat, TmaskStat,
-             warmUpStat, nTstat, radarStat, radarZoom, legends, listLeg, cntLeg,
-             allLeg, colors, lTypes, sDigits, bPlotCoef, bPlotNotc, folder,
-             outDir, repName, datFilSfx )
-
+  box_plots( mcData, rec.stats, nExp, mCnt, nCnt, TmaxStat, TmaskStat,
+             warmUpStat, allLeg, folder, outDir, repName, datFilSfx )
 
   #
   # ====== Case-specific analysis ======
@@ -325,7 +343,7 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
   cat( "\nGenerating case-specific reports...\n" )
 
   # close previous report and open new one
-  repFile( repName, folder = folder, width = plotW, height = plotH,
+  repFile( repName, folder = folder, nCnt = nCnt, width = plotW, height = plotH,
            suffix = paste0( datFilSfx, "_", mcStat, fileTag, "_cases"),
            rows = plotRows, cols = plotCols, raster = raster, res = res )
 
@@ -439,8 +457,14 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
                             ( 1 - CI ) * 100, "% level )" ), sep ="\n" )
     title( main = title, sub = subTitle )
 
-    saveCSV( gdp.acf.stats, baseName = repName, num = k, baseFolder = folder,
-             subFolder = outDir, suffix = datFilSfx, type = "gdp_autocorr" )
+    if( nExp < 2 )
+      exper <- 0
+    else
+      exper <- k
+
+    saveCSV( gdp.acf.stats, baseName = repName, exper = exper, nCnt = nCnt,
+             baseFolder = folder, subFolder = outDir, suffix = datFilSfx,
+             type = "gdp_autocorr" )
 
     #
     # ---- GDP spectral analysis ----
@@ -464,8 +488,9 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
                                ( 1 - CI ) * 100, "% level )" ), sep ="\n" )
     title( main = title, sub = subTitle )
 
-    saveCSV( gdp.spec.stats, baseName = repName, num = k, baseFolder = folder,
-             subFolder = outDir, suffix = datFilSfx, type = "gdp_spectrum" )
+    saveCSV( gdp.spec.stats, baseName = repName, exper = exper, nCnt = nCnt,
+             baseFolder = folder, subFolder = outDir, suffix = datFilSfx,
+             type = "gdp_spectrum" )
 
     #
     # ---- A = f( K / L ) ----
@@ -564,9 +589,9 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
     title <- paste( "Correlation structure for GDP (2) (", legends[ k ], ")" )
     title( main = title, sub = subTitle )
 
-    saveCSV( rbind( corr.struct.1, corr.struct.2 ), baseName = repName, num = k,
-             baseFolder = folder, subFolder = outDir, suffix = datFilSfx,
-             type = "corr_struct" )
+    saveCSV( rbind( corr.struct.1, corr.struct.2 ), baseName = repName,
+             exper = exper, nCnt = nCnt, baseFolder = folder,
+             subFolder = outDir, suffix = datFilSfx, type = "corr_struct" )
 
     #
     # ---- MC growth statistics and unit root tests ----
@@ -591,8 +616,9 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
                        testMsg, sep = "\n" )
     title( main = title, sub = subTitle )
 
-    saveCSV( key.stats, baseName = repName, num = k, baseFolder = folder,
-             subFolder = outDir, suffix = datFilSfx, type = "key_stats" )
+    saveCSV( key.stats, baseName = repName, exper = exper, nCnt = nCnt,
+             baseFolder = folder, subFolder = outDir, suffix = datFilSfx,
+             type = "key_stats" )
 
     #
     # ------ Stationarity & ergodicity tests ------
@@ -621,13 +647,12 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
       testMsg, sep = "\n" )
     title( main = title, sub = subTitle )
 
-    saveCSV( statErgo, baseName = repName, num = k, baseFolder = folder,
-             subFolder = outDir, suffix = datFilSfx, type = "ergod" )
+    saveCSV( statErgo, baseName = repName, exper = exper, nCnt = nCnt,
+             baseFolder = folder, subFolder = outDir, suffix = datFilSfx,
+             type = "ergod" )
   }
 
-
-  clearTemp( savDat = savDat, files = files, nExp = nExp,
-             folder = folder, baseName = baseName, datFilSfx = datFilSfx )
+  clearTemp( savDat, files )
 
 
   # ------ End of report ------

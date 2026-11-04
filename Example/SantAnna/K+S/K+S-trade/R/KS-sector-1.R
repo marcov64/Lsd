@@ -42,9 +42,9 @@
 # data import parameters
 folder    <- "data"                 # data files folder
 baseName  <- "Sim"                  # data files base name (same as .lsd file)
-nExp      <- 2                      # number of experiments/countries
+nExp      <- 2                      # number of experiments/countries (0=named)
 mCnt      <- FALSE                  # experiments from multiple countries?
-nCnt      <- 1                      # country to use (mCnt = FALSE) (0=all)
+nCnt      <- 1                      # country to use (mCnt=FALSE) (0=all)
 iniDrop   <- 0                      # initial time steps to drop (0=none)
 nKeep     <- -1                     # number of time steps to keep (-1=all)
 coresExp  <- 0                      # max cores for experiments (0=all)
@@ -57,11 +57,12 @@ bootCI    <- NULL                   # bootstrap confidence interval method (SLOW
                                     # (NULL (no bootstrap), "basic", or "bca")
 
 # caption and file names
-expVal    <- c( "No shock", "Random shock" )              # experiment captions
-cntVal    <- c( "Country 1", "Country 2" )                # country captions
-caption   <- "K+S capital-good firm analysis"             # caption for logs
-sector    <- "Capital-goods sector"                       # caption for plots
-datFilSfx <- "firm1"                                      # data file suffix
+expVal    <- c( "No SOE", "SOE in S" )          # experiment captions
+cntVal    <- c( "North country", "South country" )# country captions
+expNames  <- c( )                               # exp. file base names (nExp=0)
+caption   <- "K+S capital-good firm analysis"   # caption for logs
+sector    <- "Capital-goods sector"             # caption for plots
+datFilSfx <- "firm1"                            # data file suffix
 
 # firm-level variables to import and add
 origVar   <- c( "_Btau", "_Q1e" )
@@ -72,6 +73,7 @@ addVar    <- c( "growth1", "normO1", "lnormO1", "lnormO1grow", "lnormO1match",
 # ==== Libraries, support functions and global options ====
 
 source( "KS-support-functions.R" )
+source( "KS-add-vars.R" )
 
 options( warn = 0 )           # -1=no warning/0:warnings at end/2:warnings stop
 
@@ -83,75 +85,7 @@ options( warn = 0 )           # -1=no warning/0:warnings at end/2:warnings stop
 # !diagnostics suppress = comp_MC_stats, startCores, stopCores, autoLapply
 # !diagnostics suppress = clearTemp, repFile, legends, expLeg, allLeg
 # !diagnostics suppress = mc, pool, nElem, nElemMC, nTsteps, nSize, outDir
-
-
-# ==== Define function to create new variables ====
-
-# function to add new variables to Monte Carlo sample (to be parallelized)
-addVarFn <- function( mc, nElemMC, nTsteps, nVar ) {
-
-  for( i in 1 : nTsteps ) {            # all time steps
-
-    Q1e         <- vector.clean( mc[ i, "Q1e", ], min = 1 )
-    mean.Q1e    <- mean.clean( Q1e )
-    mean.lsize1 <- mean.clean( log( Q1e ) )
-    mean.Btau   <- mean.clean( vector.clean( mc[ i, "Btau", ] ) )
-
-    for( j in 1 : nElemMC ) {             # and all element instances
-
-      # take care of entrants' first period and other data problems to avoid atifacts
-      if( is.na( mc[ i, "Q1e", j ] ) || mc[ i, "Q1e", j ] < 1 ||
-          is.na( mc[ i, "Btau", j ] ) || mc[ i, "Btau", j ] < 1 ) {
-        mc[ i, , j ] <- NA
-        next
-      }
-
-      # normalization of key variables using the period average size
-      if( mean.Q1e != 0 )
-        mc[ i, "normO1", j ] <- mc[ i,"Q1e", j ] / mean.Q1e
-      if( mean.lsize1 != 0 )
-        mc[ i, "lnormO1", j ] <- log( mc[ i, "Q1e", j ] ) - mean.lsize1
-      if( mean.Btau != 0 )
-        mc[ i, "normA1", j ] <- mc[ i, "Btau", j ] / mean.Btau
-
-      # growth rates are calculated only from 2nd period and for non-entrant firms
-      if( i > 1 ) {
-        if( ! is.na( mc[ i - 1, "Q1e", j ] ) ){
-
-          # Size, normalized sales and productivity growth
-          mc[ i, "growth1", j ] <- log( mc[ i, "Q1e", j ] ) -
-            log( mc[ i - 1, "Q1e", j ] )
-          mc[ i, "normO1grow", j ] <- log( mc[ i, "normO1", j ] ) -
-            log( mc[ i - 1, "normO1", j ] )
-          mc[ i, "normA1grow", j ] <- log( mc[ i, "normA1", j ] ) -
-            log( mc[ i - 1, "normA1", j ] )
-
-          if( is.infinite( mc[ i, "normO1grow", j ] ) )
-            mc[ i, "normO1grow", j ] <- NA
-          if( is.infinite( mc[ i, "normA1grow", j ] ) )
-            mc[ i, "normA1grow", j ] <- NA
-        }
-
-        if( is.finite( mc[ i, "lnormO1", j ] ) &&
-            is.finite( mc[ i - 1, "lnormO1", j ] ) ) {
-
-          mc[ i, "lnormO1match", j ] <- mc[ i, "lnormO1", j ]
-          mc[ i, "lnormO1matchLag", j ] <- mc[ i - 1, "lnormO1", j ]
-          mc[ i, "lnormO1grow", j ] <- mc[ i, "lnormO1", j ] -
-            mc[ i - 1, "lnormO1", j ]
-
-          if( ! is.finite( mc[ i, "lnormO1grow", j ] ) ) {
-            mc[ i, "lnormO1grow", j ] <- NA
-            mc[ i, "lnormO1match", j ] <- NA
-            mc[ i, "lnormO1matchLag", j ] <- NA
-          }
-        }
-      }
-    }
-  }
-
-  return( mc )
-}
+# !diagnostics suppress = addVar_firm1
 
 
 # ==== Process LSD result files ====
@@ -161,12 +95,12 @@ showStartMark( caption )  # log start mark
 setCmdLinePars( )         # read command line parameters (if any)
 
 # read LSD files or load existing temporary files according to the case
-files <- loadData( savDat = savDat, nExp = nExp, mCnt = mCnt, nCnt = nCnt,
-                   folder = folder, baseName = baseName, iniDrop = iniDrop,
-                   nKeep = nKeep, origVar = origVar, addVar = addVar,
-                   addVarFn = addVarFn, datFilSfx = datFilSfx, CI = CI,
-                   coresExp = coresExp, coresMC = coresMC, mcStat = mcStat,
-                   bootR = bootR, bootCI = bootCI )
+files <- loadData( savDat = savDat, mCnt = mCnt, nCnt = nCnt, folder = folder,
+                   baseName = baseName, iniDrop = iniDrop, nKeep = nKeep,
+                   origVar = origVar, addVar = addVar, addVarFn = addVar_firm1,
+                   datFilSfx = datFilSfx, CI = CI, coresExp = coresExp,
+                   coresMC = coresMC, mcStat = mcStat, bootR = bootR,
+                   bootCI = bootCI )
 
 
 #******************************************************************
@@ -391,8 +325,9 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
                        paste( "(", sector, ")" ), sep ="\n" )
     title( main = title, sub = subTitle )
 
-    saveCSV( key.stats, baseName = repName, num = k, baseFolder = folder,
-             subFolder = outDir, suffix = datFilSfx, type = "pool" )
+    saveCSV( key.stats, baseName = repName, exper = k, nCnt = nCnt,
+             baseFolder = folder, subFolder = outDir, suffix = datFilSfx,
+             type = "pool" )
 
     #
     # ====== experiment-specific plots ======
@@ -585,14 +520,14 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
                        paste( "(", sector, ")" ), sep ="\n" )
     title( main = title, sub = subTitle )
 
-    saveCSV( key.stats, baseName = repName, num = k, baseFolder = folder,
-             subFolder = outDir, suffix = datFilSfx, type = "MC" )
+    saveCSV( key.stats, baseName = repName, exper = k, nCnt = nCnt,
+             baseFolder = folder, subFolder = outDir, suffix = datFilSfx,
+             type = "MC" )
   }
 
   stopCores( cl )
 
-  clearTemp( savDat = savDat, files = files, nExp = nExp,
-             folder = folder, baseName = baseName, datFilSfx = datFilSfx )
+  clearTemp( savDat, files )
 
 
   # ------ End of report ------

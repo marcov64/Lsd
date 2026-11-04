@@ -42,9 +42,9 @@
 # data import parameters
 folder    <- "data"                 # data files folder
 baseName  <- "Sim"                  # data files base name (same as .lsd file)
-nExp      <- 2                      # number of experiments/countries
+nExp      <- 2                      # number of experiments/countries (0=named)
 mCnt      <- FALSE                  # experiments from multiple countries?
-nCnt      <- 1                      # country to use (mCnt = FALSE) (0=all)
+nCnt      <- 1                      # country to use (mCnt=FALSE) (0=all)
 iniDrop   <- 0                      # initial time steps to drop (0=none)
 nKeep     <- -1                     # number of time steps to keep (-1=all)
 coresExp  <- 0                      # max cores for experiments (0=all)
@@ -57,12 +57,13 @@ bootCI    <- NULL                   # bootstrap confidence interval method (SLOW
                                     # (NULL (no bootstrap), "basic", or "bca")
 
 # caption and file names
-expVal    <- c( "No shock", "Random shock" )              # experiment captions
-cntVal    <- c( "Country 1", "Country 2" )                # country captions
+expVal    <- c( "No SOE", "SOE in S" )          # experiment captions
+cntVal    <- c( "North country", "South country" )# country captions
 firmTypes <- c( "Pre-change firms", "Post-change firms" ) # firm-type captions
-caption   <- "K+S consumption-good firm analysis"         # caption for logs
-sector    <- "Consumption-goods sector"                   # caption for plots
-datFilSfx <- "firm2"                                      # data file suffix
+expNames  <- c( )                               # exp. file base names (nExp=0)
+caption   <- "K+S consumption-good firm analysis"# caption for logs
+sector    <- "Consumption-goods sector"         # caption for plots
+datFilSfx <- "firm2"                            # data file suffix
 
 # firm-level variables to import and add
 origVar   <- c( "_A2", "_L2", "_Q2e", "_f2", "_postChg", "_s2avg", "_w2realAvg" )
@@ -76,6 +77,7 @@ addVar    <- c( "A2d", "f2l", "growth2", "lA2", "lnormO2", "lnormO2grow",
 # ==== Libraries, support functions and global options ====
 
 source( "KS-support-functions.R" )
+source( "KS-add-vars.R" )
 source( "KS-FHK-decomposition.R" )
 source( "KS-DN-decomposition.R" )
 source( "KS-wage-prod-regression.R" )
@@ -87,129 +89,10 @@ options( warn = 0 )           # -1=no warning/0:warnings at end/2:warnings stop
 # !diagnostics suppress = catchError, startTime, mean.clean, vector.clean
 # !diagnostics suppress = logNA, textplot, plot_lognorm, plot_norm, setLabels
 # !diagnostics suppress = plot_laplace, plot_lin, comp_stats, saveCSV, legends
-# !diagnostics suppress = comp_MC_stats, size_bins, expLeg, allLeg
+# !diagnostics suppress = comp_MC_stats, size_bins, expLeg, allLeg, addVar_firm2
 # !diagnostics suppress = FHK_decomp, DN_decomp, wage_prod_regr, npreg, se
 # !diagnostics suppress = startCores, stopCores, autoLapply, clearTemp, repFile
 # !diagnostics suppress = mc, pool, nElem, nElemMC, nTsteps, nSize, outDir
-
-
-# ==== Define function to create new variables ====
-
-# function to add new variables to Monte Carlo sample (to be parallelized)
-addVarFn <- function( mc, nElemMC, nTsteps, nVar ) {
-
-  for( i in 1 : nTsteps ) {                # all time steps
-
-    Q2e <- vector.clean( mc[ i, "Q2e", ], min = 1 )
-    mean.Q2e <- mean.clean( Q2e )
-    mean.lsize2 <- mean.clean( log( Q2e ) )
-    mean.A2 <- mean.clean( vector.clean( mc[ i, "A2", ] ) )
-    mean.s2avg <- mean.clean( vector.clean( mc[ i, "s2avg", ] ) )
-    mean.w2realAvg <- mean.clean( vector.clean( mc[ i, "w2realAvg", ] ) )
-
-    tot2 <- vector.clean( mc[ i, "L2", ] )
-    sum.tot2 <- sum( tot2, na.rm = TRUE )
-    if( ! is.finite( sum.tot2 ) ) sum.tot2 <- 0
-
-    for( j in 1 : nElemMC ) {             # and all element instances
-
-      # take care of entrants' first period and other data problems to avoid artifacts
-      if( is.na( mc[ i, "Q2e", j ] ) || mc[ i, "Q2e", j ] < 1 ||
-          is.na( mc[ i, "A2", j ] ) || mc[ i, "A2", j ] <= 0 ||
-          is.na( mc[ i, "w2realAvg", j ] ) || mc[ i, "w2realAvg", j ] <= 0 ||
-          is.na( mc[ i, "s2avg", j ] ) || mc[ i, "s2avg", j ] <= 0 ||
-          is.na( mc[ i, "postChg", j ] ) || is.na( mc[ i, "L2", j ] ) ) {
-        mc[ i, , j ] <- NA
-        next
-      }
-
-      # normalization of key variables using the period average size
-      if( mean.Q2e != 0 )
-        mc[ i, "normO2", j ] <- mc[ i, "Q2e", j ] / mean.Q2e
-      if( mean.lsize2 != 0 )
-        mc[ i, "lnormO2", j ] <- log( mc[ i, "Q2e", j ] ) - mean.lsize2
-      if( mean.A2 != 0 ) {
-        mc[ i, "normA2", j ] <- mc[ i, "A2", j ] / mean.A2
-        # handle separate firms groups
-        if( ! is.na( mc[ i, "postChg", j ] ) ) {
-          if( mc[ i, "postChg", j ] == 0 )
-            mc[ i, "normApreChg2", j ] = mc[ i, "normA2", j ]
-          else
-            mc[ i, "normApostChg2", j ] = mc[ i, "normA2", j ]
-        }
-      }
-      if( mean.w2realAvg != 0 ) {
-        mc[ i, "normRW2", j ] <- mc[ i, "w2realAvg", j ] / mean.w2realAvg
-        # handle separate firms groups
-        if( ! is.na( mc[ i, "postChg", j ] ) ) {
-          if( mc[ i, "postChg", j ] == 0 )
-            mc[ i, "normRWpreChg2", j ] = mc[ i, "normRW2", j ]
-          else
-            mc[ i, "normRWpostChg2", j ] = mc[ i, "normRW2", j ]
-        }
-      }
-      if( mean.s2avg != 0 )
-        mc[ i, "normSK2", j ] <- mc[ i, "s2avg", j ] / mean.s2avg
-
-      # FHK decomposition variables
-      if( mc[ i, "Q2e", j ] > 0 && mc[ i, "L2", j ] > 0 ) {
-        mc[ i, "A2d", j ] <- mc[ i, "Q2e", j ] / mc[ i, "L2", j ]
-        mc[ i, "lA2", j ] <- log( mc[ i, "Q2e", j ] / mc[ i, "L2", j ] )
-
-        if( sum.tot2 > 0 )
-          mc[ i, "f2l", j ] <- mc[ i, "L2", j ] / sum.tot2
-      }
-
-      # wage x productivity regression extra variable
-      if( mc[ i, "w2realAvg", j ] > 0 )
-        mc[ i, "lrwAvg2", j ] <- log( mc[ i, "w2realAvg", j ] )
-
-      # growth rates and deltas calculated only from 2nd period for non-entrant
-      if( i > 1 ) {
-        if( is.finite( mc[ i - 1, "Q2e", j ] ) ) {
-
-          # Size, normalized sales and productivity growth
-          mc[ i, "growth2", j ] <- log( mc[ i, "Q2e", j ] ) -
-            log( mc[ i - 1, "Q2e", j ] )
-          mc[ i, "normO2grow", j ] <- log( mc[ i, "normO2", j ] ) -
-            log( mc[ i - 1, "normO2", j ] )
-          mc[ i, "normA2grow", j ] <- log( mc[ i, "normA2", j ] ) -
-            log( mc[ i - 1, "normA2", j ] )
-          mc[ i, "normRW2grow", j ] <- log( mc[ i, "normRW2", j ] ) -
-            log( mc[ i - 1, "normRW2", j ] )
-          mc[ i, "normSK2grow", j ] <- log( mc[ i, "normSK2", j ] ) -
-            log( mc[ i - 1, "normSK2", j ] )
-
-          if( ! is.finite( mc[ i, "normO2grow", j ] ) )
-            mc[ i, "normO2grow", j ] <- NA
-          if( ! is.finite( mc[ i, "normA2grow", j ] ) )
-            mc[ i, "normA2grow", j ] <- NA
-          if( ! is.finite( mc[ i, "normRW2grow", j ] ) )
-            mc[ i, "normRW2grow", j ] <- NA
-          if( ! is.finite( mc[ i, "normSK2grow", j ] ) )
-            mc[ i, "normSK2grow", j ] <- NA
-        }
-
-        if( is.finite( mc[ i, "lnormO2", j ] ) &&
-            is.finite( mc[ i - 1, "lnormO2", j ] ) ) {
-
-          mc[ i, "lnormO2match", j ] <- mc[ i, "lnormO2", j ]
-          mc[ i, "lnormO2matchLag", j ] <- mc[ i - 1, "lnormO2", j ]
-          mc[ i, "lnormO2grow", j ] <- mc[ i, "lnormO2", j ] -
-            mc[ i - 1, "lnormO2", j ]
-
-          if( ! is.finite( mc[ i, "lnormO2grow", j ] ) ) {
-            mc[ i, "lnormO2grow", j ] <- NA
-            mc[ i, "lnormO2match", j ] <- NA
-            mc[ i, "lnormO2matchLag", j ] <- NA
-          }
-        }
-      }
-    }
-  }
-
-  return( mc )
-}
 
 
 # ==== Process LSD result files ====
@@ -219,12 +102,12 @@ showStartMark( caption )  # log start mark
 setCmdLinePars( )         # read command line parameters (if any)
 
 # read LSD files or load existing temporary files according to the case
-files <- loadData( savDat = savDat, nExp = nExp, mCnt = mCnt, nCnt = nCnt,
-                   folder = folder, baseName = baseName, iniDrop = iniDrop,
-                   nKeep = nKeep, origVar = origVar, addVar = addVar,
-                   addVarFn = addVarFn, datFilSfx = datFilSfx, CI = CI,
-                   coresExp = coresExp, coresMC = coresMC, mcStat = mcStat,
-                   bootR = bootR, bootCI = bootCI )
+files <- loadData( savDat = savDat, mCnt = mCnt, nCnt = nCnt, folder = folder,
+                   baseName = baseName, iniDrop = iniDrop, nKeep = nKeep,
+                   origVar = origVar, addVar = addVar, addVarFn = addVar_firm2,
+                   datFilSfx = datFilSfx, CI = CI, coresExp = coresExp,
+                   coresMC = coresMC, mcStat = mcStat, bootR = bootR,
+                   bootCI = bootCI )
 
 
 #******************************************************************
@@ -510,8 +393,9 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
                        paste( "(", sector, ")" ), sep ="\n" )
     title( main = title, sub = subTitle )
 
-    saveCSV( key.stats, baseName = repName, num = k, baseFolder = folder,
-             subFolder = outDir, suffix = datFilSfx, type = "pool" )
+    saveCSV( key.stats, baseName = repName, exper = k, nCnt = nCnt,
+             baseFolder = folder, subFolder = outDir, suffix = datFilSfx,
+             type = "pool" )
 
     #
     # ====== experiment-specific plots ======
@@ -800,8 +684,9 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
                        paste( "(", sector, ")" ), sep ="\n" )
     title( main = title, sub = subTitle )
 
-    saveCSV( key.stats, baseName = repName, num = k, baseFolder = folder,
-             subFolder = outDir, suffix = datFilSfx, type = "MC" )
+    saveCSV( key.stats, baseName = repName, exper = k, nCnt = nCnt,
+             baseFolder = folder, subFolder = outDir, suffix = datFilSfx,
+             type = "MC" )
   }
 
 
@@ -815,14 +700,15 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
 
   cat( "\nPerforming FHK productivity decomposition...\n" )
 
-  FHK_decomp( nExp, nSize, nTstat, nElem, warmUp, prdWnd, fShare, files,
+  FHK_decomp( nExp, nCnt, nSize, nTstat, nElem, warmUp, prdWnd, fShare, files,
               sDigits, legends, expLeg, sector, folder, outDir, repName,
               datFilSfx, firmTypes )
 
   cat( "\nPerforming DN productivity decomposition...\n" )
 
-  DN_decomp( nExp, nSize, nElem, csBeg, csEnd, fShare, files, sDigits, legends,
-             expLeg, sector, folder, outDir, repName, datFilSfx, firmTypes )
+  DN_decomp( nExp, nCnt, nSize, nElem, csBeg, csEnd, fShare, files, sDigits,
+             legends, expLeg, sector, folder, outDir, repName, datFilSfx,
+             firmTypes )
 
   #
   # ------ Wage x productivity regressions ------
@@ -830,16 +716,15 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
 
   cat( "\nPerforming wage x productivity regressions...\n" )
 
-  wage_prod_regr( files, nExp, nSize, warmUp, nTstat, sDigits, legends, expLeg,
-                  sector, csBeg, csEnd, csJump, ekOrd, ekPlt, outLim, CI,
+  wage_prod_regr( files, nExp, nCnt, nSize, warmUp, nTstat, sDigits, legends,
+                  expLeg, sector, csBeg, csEnd, csJump, ekOrd, ekPlt, outLim, CI,
                   folder, outDir, repName, datFilSfx, raster, res, plotH, plotW,
                   plotRows, plotCols )
 
 
   stopCores( cl )
 
-  clearTemp( savDat = savDat, files = files, nExp = nExp,
-             folder = folder, baseName = baseName, datFilSfx = datFilSfx )
+  clearTemp( savDat, files )
 
 
   # ------ End of report ------

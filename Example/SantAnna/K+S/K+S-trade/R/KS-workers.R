@@ -42,9 +42,9 @@
 # data import parameters
 folder    <- "data"                 # data files folder
 baseName  <- "Sim"                  # data files base name (same as .lsd file)
-nExp      <- 2                      # number of experiments/countries
+nExp      <- 2                      # number of experiments/countries (0=named)
 mCnt      <- FALSE                  # experiments from multiple countries?
-nCnt      <- 1                      # country to use (mCnt = FALSE) (0=all)
+nCnt      <- 1                      # country to use (mCnt=FALSE) (0=all)
 iniDrop   <- 0                      # initial time steps to drop (0=none)
 nKeep     <- -1                     # number of time steps to keep (-1=all)
 coresExp  <- 0                      # max cores for experiments (0=all)
@@ -57,10 +57,11 @@ bootCI    <- NULL                   # bootstrap confidence interval method (SLOW
                                     # (NULL (no bootstrap), "basic", or "bca")
 
 # caption and file names
-expVal    <- c( "No shock", "Random shock" )              # experiment captions
-cntVal    <- c( "Country 1", "Country 2" )                # country captions
-caption   <- "K+S worker analysis"                        # caption for logs
-datFilSfx <- "worker"                                     # data file suffix
+expVal    <- c( "No SOE", "SOE in S" )          # experiment captions
+cntVal    <- c( "North country", "South country" )# country captions
+expNames  <- c( )                               # exp. file base names (nExp=0)
+caption   <- "K+S worker analysis"              # caption for logs
+datFilSfx <- "worker"                           # data file suffix
 
 # worker-level variables to import and add
 origVar   <- c( "_Tu", "_s", "_wReal" )
@@ -71,6 +72,7 @@ addVar    <- c( "normRW", "normRWgrow", "normSK", "normSKgrow", "normTU",
 # ==== Libraries, support functions and global options ====
 
 source( "KS-support-functions.R" )
+source( "KS-add-vars.R" )
 
 options( warn = 0 )         # -1=no warning/0:warnings at end/2:warnings stop
 
@@ -82,59 +84,7 @@ options( warn = 0 )         # -1=no warning/0:warnings at end/2:warnings stop
 # !diagnostics suppress = startCores, stopCores, autoLapply, clearTemp, repFile
 # !diagnostics suppress = mc, pool, nElem, nElemMC, nTsteps, nSize, legends
 # !diagnostics suppress = setLabels, outDir, expLeg, cntLeg, allLeg
-
-
-# ==== Define function to create new variables ====
-
-# function to add new variables to Monte Carlo sample (to be parallelized)
-addVarFn <- function( mc, nElemMC, nTsteps, nVar ) {
-
-  for( i in 1 : nTsteps ) {                # all time steps
-
-    mean.wReal <- mean.clean( vector.clean( mc[ i, "wReal", ] ) )
-    mean.s <- mean.clean( vector.clean( mc[ i, "s", ] ) )
-    mean.Tu <- mean.clean( vector.clean( mc[ i, "Tu", ] ) )
-
-    for( j in 1 : nElemMC ){             # and all element instances
-
-      # change zero values to NA to avoid artifacts in statistics
-      if( is.na( mc[ i, "wReal", j ] ) || mc[ i, "wReal", j ] <= 0 ||
-          is.na( mc[ i, "s", j ] ) || mc[ i, "s", j ] <= 0 ||
-          is.na( mc[ i, "Tu", j ] ) || mc[ i, "Tu", j ] < 0 )
-        mc[ i, , j ] <- NA
-
-      # normalization of variables using the period average size
-      if( mean.wReal != 0 )
-        mc[ i, "normRW", j ] <- mc[ i, "wReal", j ] / mean.wReal
-      if( mean.s != 0 )
-        mc[ i, "normSK", j ] <- mc[ i, "s", j ] / mean.s
-      if( mean.Tu != 0 )
-        mc[ i, "normTU", j ] <- mc[ i, "Tu", j ] / mean.Tu
-
-      # growth rates are calculated only from 2nd period
-      if( i > 1 ){
-        if( ! is.na( mc[ i - 1, "normRW", j ] ) && ! is.na( mc[ i, "normRW", j ] ) )
-          mc[ i, "normRWgrow", j ] <- log( mc[ i, "normRW", j ] ) -
-            log( mc[ i - 1, "normRW", j ] )
-        if( ! is.na( mc[ i - 1, "normSK", j ] ) && ! is.na( mc[ i, "normSK", j ] ) )
-          mc[ i, "normSKgrow", j ] <- log( mc[ i, "normSK", j ] ) -
-            log( mc[ i - 1, "normSK", j ] )
-        if( ! is.na( mc[ i - 1, "normTU", j ] ) && ! is.na( mc[ i, "normTU", j ] ) )
-          mc[ i, "normTUgrow", j ] <- log( mc[ i, "normTU", j ] ) -
-            log( mc[ i - 1, "normTU", j ] )
-
-        if( is.infinite( mc[ i, "normRWgrow", j ] ) )
-          mc[ i, "normRWgrow", j ] <- NA
-        if( is.infinite( mc[ i, "normSKgrow", j ] ) )
-          mc[ i, "normSKgrow", j ] <- NA
-        if( is.infinite( mc[ i, "normTUgrow", j ] ) )
-          mc[ i, "normTUgrow", j ] <- NA
-      }
-    }
-  }
-
-  return( mc )
-}
+# !diagnostics suppress = addVar_worker
 
 
 # ==== Process LSD result files ====
@@ -144,12 +94,12 @@ showStartMark( caption )  # log start mark
 setCmdLinePars( )         # read command line parameters (if any)
 
 # read LSD files or load existing temporary files according to the case
-files <- loadData( savDat = savDat, nExp = nExp, mCnt = mCnt, nCnt = nCnt,
-                   folder = folder, baseName = baseName, iniDrop = iniDrop,
-                   nKeep = nKeep, origVar = origVar, addVar = addVar,
-                   addVarFn = addVarFn, datFilSfx = datFilSfx, CI = CI,
-                   coresExp = coresExp, coresMC = coresMC, mcStat = mcStat,
-                   bootR = bootR, bootCI = bootCI )
+files <- loadData( savDat = savDat, mCnt = mCnt, nCnt = nCnt, folder = folder,
+                   baseName = baseName, iniDrop = iniDrop, nKeep = nKeep,
+                   origVar = origVar, addVar = addVar, addVarFn = addVar_worker,
+                   datFilSfx = datFilSfx, CI = CI, coresExp = coresExp,
+                   coresMC = coresMC, mcStat = mcStat, bootR = bootR,
+                   bootCI = bootCI )
 
 
 #******************************************************************
@@ -368,8 +318,9 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
                         cntLeg, " )" )
     title( main = title, sub = subTitle )
 
-    saveCSV( key.stats, baseName = repName, num = k, baseFolder = folder,
-             subFolder = outDir, suffix = datFilSfx, type = "pool" )
+    saveCSV( key.stats, baseName = repName, exper = k, nCnt = nCnt,
+             baseFolder = folder, subFolder = outDir, suffix = datFilSfx,
+             type = "pool" )
   }
 
 
@@ -561,15 +512,15 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
                         warmUp + 1, "-", nTstat, " ", cntLeg, " )" )
     title( main = title, sub = subTitle )
 
-    saveCSV( key.stats, baseName = repName, num = k, baseFolder = folder,
-             subFolder = outDir, suffix = datFilSfx, type = "MC" )
+    saveCSV( key.stats, baseName = repName, exper = k, nCnt = nCnt,
+             baseFolder = folder, subFolder = outDir, suffix = datFilSfx,
+             type = "MC" )
   }
 
 
   stopCores( cl )
 
-  clearTemp( savDat = savDat, files = files, nExp = nExp,
-             folder = folder, baseName = baseName, datFilSfx = datFilSfx )
+  clearTemp( savDat, files )
 
 
   # ------ End of report ------

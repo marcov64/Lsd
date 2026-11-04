@@ -15,7 +15,7 @@
 # remove RStudio warnings for support functions
 # !diagnostics suppress = mc, all.NA, se, count, textplot, saveCSV
 
-FHK_decomp <- function( nExp, nSize, nTstat, nElem, warmUp, prdWnd, fShare,
+FHK_decomp <- function( nExp, nCnt, nSize, nTstat, nElem, warmUp, prdWnd, fShare,
                         files, sDigits, legends, expLeg, sector, folder, outDir,
                         repName, datFilSfx, firmTypes ) {
 
@@ -349,8 +349,9 @@ FHK_decomp <- function( nExp, nSize, nTstat, nElem, warmUp, prdWnd, fShare,
                        paste( "(", sector, ")" ), sep ="\n" )
     title( main = title, sub = subTitle )
 
-    saveCSV( prdGrw.stats, baseName = repName, num = k, baseFolder = folder,
-             subFolder = outDir, suffix = datFilSfx, type = "prd_grw" )
+    saveCSV( prdGrw.stats, baseName = repName, exper = k, nCnt = nCnt,
+             baseFolder = folder, subFolder = outDir, suffix = datFilSfx,
+             type = "prd_grw" )
 
     # Productivity decomposition table
 
@@ -425,8 +426,8 @@ FHK_decomp <- function( nExp, nSize, nTstat, nElem, warmUp, prdWnd, fShare,
                        paste( "(", sector, ")" ), sep ="\n" )
     title( main = title, sub = subTitle )
 
-    saveCSV( prdDec.stats, baseName = repName, num = k, baseFolder = folder,
-             subFolder = outDir, suffix = datFilSfx, type = "FHK_dec" )
+    saveCSV( prdDec.stats, baseName = repName, exper = k, nCnt = nCnt,
+             baseFolder = folder, subFolder = outDir, suffix = datFilSfx, type = "FHK_dec" )
 
     # add data to global chart (as % of total productivity growth)
     bars.tot <- cbind( bars.tot, c( prdDec.stats[ 1, 2 : 6 ] ) )

@@ -15,7 +15,7 @@
 # remove warnings for support functions
 # !diagnostics suppress = hpfilter, textplot, saveCSV, plot_recovery
 
-crisis_recover <- function( mcData, nExp, nSize, TmaskStat, warmUpPlot,
+crisis_recover <- function( mcData, nExp, nCnt, nSize, TmaskStat, warmUpPlot,
                             warmUpStat, nTstat, crisisLen, crisisPre, crisisTh,
                             crisisRun, legends, expLeg, cntLeg, allLeg, sDigits,
                             smoothing, transMk, mCnt, folder, outDir, repName,
@@ -146,7 +146,7 @@ crisis_recover <- function( mcData, nExp, nSize, TmaskStat, warmUpPlot,
                      smoothing, "averaged for", crisisPre, "periods )" )
   title( main = title, sub = subTitle )
 
-  saveCSV( recovery, baseName = repName, num = k, baseFolder = folder,
+  saveCSV( recovery, baseName = repName, nCnt = nCnt, baseFolder = folder,
            subFolder = outDir, suffix = datFilSfx, type = "recovery" )
 
   #

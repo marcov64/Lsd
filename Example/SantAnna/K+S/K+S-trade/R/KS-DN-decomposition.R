@@ -15,7 +15,7 @@
 # remove RStudio warnings for support functions
 # !diagnostics suppress = mc, all.NA, se, textplot, saveCSV
 
-DN_decomp <- function( nExp, nSize, nElem, csBeg, csEnd, fShare, files,
+DN_decomp <- function( nExp, nCnt, nSize, nElem, csBeg, csEnd, fShare, files,
                        sDigits, legends, expLeg, sector, folder, outDir,
                        repName, datFilSfx, firmTypes ) {
 
@@ -351,8 +351,9 @@ DN_decomp <- function( nExp, nSize, nElem, csBeg, csEnd, fShare, files,
                        paste( "(", sector, ")" ), sep ="\n" )
     title( main = title, sub = subTitle )
 
-    saveCSV( prdDec.stats, baseName = repName, num = k, baseFolder = folder,
-             subFolder = outDir, suffix = datFilSfx, type = "DN_dec" )
+    saveCSV( prdDec.stats, baseName = repName, exper = k, nCnt = nCnt,
+             baseFolder = folder, subFolder = outDir, suffix = datFilSfx,
+             type = "DN_dec" )
 
     # add data to global chart (as % of total productivity growth)
     bars.tot <- cbind( bars.tot, c( prdDec.stats[ 1, 2 : 5 ] ) )
