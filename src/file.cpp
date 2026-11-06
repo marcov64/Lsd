@@ -615,9 +615,9 @@ bool gui::save_sensitivity( FILE *f )
 	for ( cs = sim.sens; cs != NULL; cs = cs->next )
 	{
 		if ( cs->param == 1 )
-			fprintf( f, "%s 0 %d %c:", cs->label, cs->num_val, cs->integer ? 'i' : 'f' );
+			fprintf( f, "%s 0 %d %c:", cs->label, cs->num_val, cs->rnd_int ? 'i' : 'f' );
 		else
-			fprintf( f, "%s -%d %d %c:", cs->label, cs->lag + 1, cs->num_val, cs->integer ? 'i' : 'f' );
+			fprintf( f, "%s -%d %d %c:", cs->label, cs->lag + 1, cs->num_val, cs->rnd_int ? 'i' : 'f' );
 
 		for ( i = 0; cs->val != NULL && i < cs->num_val; ++i )
 			fprintf( f," %g", cs->val[ i ] );

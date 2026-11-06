@@ -288,7 +288,7 @@ void lsd::simulation::unload_configuration( bool full )
  *************************************************************/
 int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 {
-	bool integer, obs, plot;
+	bool obs, plot, rnd_int;
 	char debug;
 	const char *str, *dsc, *init;
 	int i, type, lags;
@@ -378,14 +378,14 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 						if ( ! cn.child( "sensitivity" ).empty( ) )
 						{
 							x_nodeT cns = cn.child( "sensitivity" );
-							integer = cn.attribute( "integer" ).as_bool( );
+							rnd_int = cv->attr->integer ? true : cn.attribute( "round" ).as_bool( );
 
 							if ( type == 1 )
 							{
 								val = strtodsplit( cns.child( "values" ).text( ).get( ), ',' );
 
 								if ( val.size( ) > 1 )
-									new sensitivity( str, attr->cont->sim, type, 0, integer, val.size( ), &val );
+									new sensitivity( str, attr->cont->sim, type, 0, rnd_int, val.size( ), &val );
 							}
 							else
 								if ( type == 0 )
@@ -403,7 +403,7 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 										val = strtodsplit( sn.text( ).get( ), ',' );
 
 										if ( val.size( ) > 1 )
-											new sensitivity( str, attr->cont->sim, type, i - 1, integer, val.size( ), &val );
+											new sensitivity( str, attr->cont->sim, type, i - 1, rnd_int, val.size( ), &val );
 									}
 								}
 						}
@@ -1163,8 +1163,8 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 		for ( auto cs = attr->cont->sim->sens; cs != NULL; cs = cs->next )
 			if ( strcmp( cs->label, cv->attr->label ) == 0 )
 			{
-				if ( cs->integer )
-					cn.append_attribute( "integer" ) = true;
+				if ( cs->rnd_int )
+					cn.append_attribute( "round" ) = true;
 
 				x_nodeT cns;
 
@@ -2070,7 +2070,7 @@ void lsd::variable::save_single( void )
  SENSITIVITY CONSTRUCTOR
  Add or update sensitivity settings for a model element
  *************************************************************/
-lsd::sensitivity::sensitivity( const char *lab, simulation *_sim, int _param, int _lag, bool _integer, int _num_val, d_vecT *_val )
+lsd::sensitivity::sensitivity( const char *lab, simulation *_sim, int _param, int _lag, bool _rnd_int, int _num_val, d_vecT *_val )
 {
 	int i;
 	sensitivity *cs;
@@ -2078,7 +2078,7 @@ lsd::sensitivity::sensitivity( const char *lab, simulation *_sim, int _param, in
 	sim = _sim;
 	param = _param;
 	lag = _lag;
-	integer = _integer;
+	rnd_int = _rnd_int;
 
 	if ( lab != NULL )
 	{
@@ -2091,7 +2091,7 @@ lsd::sensitivity::sensitivity( const char *lab, simulation *_sim, int _param, in
 		num_val = _num_val;
 		val = new double [ _val->size( ) ];
 		for ( i = 0; i < num_val; ++i )
-			val[ i ] = integer ? std::round( ( *_val )[ i ] ) : ( *_val )[ i ];
+			val[ i ] = rnd_int ? std::round( ( *_val )[ i ] ) : ( *_val )[ i ];
 	}
 
 	if ( sim->sens == NULL )
@@ -2157,7 +2157,7 @@ void lsd::simulation::empty_sensitivity( sensitivity *cs )
  *************************************************************/
 int lsd::simulation::load_txt_sensitivity( FILE *f )
 {
-	bool integer;
+	bool rnd_int;
 	d_vecT val;
 	int i, lag, param, num_val, err = 0;
 	char cc, lab[ MAX_ELEM_LENGTH ];
@@ -2202,12 +2202,12 @@ int lsd::simulation::load_txt_sensitivity( FILE *f )
 
 		if ( cc == 'i' || cc == 'd' || cc == 'f' )
 		{
-			integer = ( cc == 'i' ) ? true : false;
+			rnd_int = ( cc == 'i' ) ? true : false;
 			fscanf( f, ": " );				// remove separator
 		}
 		else
 			if ( cc == ':' )
-				integer = false;
+				rnd_int = false;
 			else
 			{
 				err = 4;
@@ -2232,7 +2232,7 @@ int lsd::simulation::load_txt_sensitivity( FILE *f )
 		if ( ( cs = search_sensitivity( lab, lag ) ) != NULL )
 			delete cs;
 
-		new sensitivity( lab, this, param, lag, integer, num_val, & val );
+		new sensitivity( lab, this, param, lag, rnd_int, num_val, & val );
 	}
 
 	if ( err != 0 )

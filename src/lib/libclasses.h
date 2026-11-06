@@ -676,7 +676,7 @@ namespace lsd
 		friend class simulation;
 
 		public:
-			bool integer;					// variable must be rounded to integer
+			bool rnd_int;					// variable must be rounded to integer
 			char *label = NULL;				// variable name
 			double *val = NULL;				// values to test sensitivity
 			int cur_val = 0;				// index for value in use in combinations
@@ -685,7 +685,7 @@ namespace lsd
 			int param;						// element type
 			sensitivity *next = NULL;		// sensitivity analysis chain of elements
 
-			sensitivity( const char *lab, simulation *_sim, int _param, int _lag, bool _integer, int _num_val = 0, d_vecT *_val = NULL );	// constructor
+			sensitivity( const char *lab, simulation *_sim, int _param, int _lag, bool _rnd_int, int _num_val = 0, d_vecT *_val = NULL );	// constructor
 			~sensitivity( void );			// destructor
 			sensitivity( const sensitivity & s ) = delete;	// copy constructor
 			sensitivity & operator=( const sensitivity & s ) = delete;// assignment constructor

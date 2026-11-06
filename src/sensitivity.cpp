@@ -44,7 +44,7 @@ int lsd::sensitivity::dataentry( void )
 	if ( cv != NULL && cv->attr->integer )
 		int_var = true;
 
-	cmd( "set integer %d", int_var ? 1 : integer );
+	cmd( "set rnd_int %d", int_var ? 1 : rnd_int );
 
 	cmd( "set sens .sens" );
 	cmd( "newtop .sens \"Sensitivity Analysis\" { set choice 2 }" );
@@ -70,7 +70,7 @@ int lsd::sensitivity::dataentry( void )
 	cmd( "pack .sens.pad -pady $_5" );
 
 	cmd( "ttk::frame .sens.fb" );
-	cmd( "ttk::checkbutton .sens.fb.int -variable integer -text \"Round to integer\"" );
+	cmd( "ttk::checkbutton .sens.fb.int -variable rnd_int -text \"Round to integer\"" );
 	cmd( "ttk::button .sens.fb.paste -width $butWid -text Paste -command { tk_textPaste .sens.t.t }" );
 	cmd( "ttk::button .sens.fb.del -width $butWid -text Delete -command { .sens.t.t delete 0.0 end }" );
 	cmd( "ttk::button .sens.fb.rem -width $butWid -text Remove -command { set choice 3 }" );
@@ -129,7 +129,7 @@ int lsd::sensitivity::dataentry( void )
 			goto end;
 		}
 
-		integer = gui::get_bool( "integer" );
+		rnd_int = gui::get_bool( "rnd_int" );
 		app = gui::eval_str( "[ .sens.t.t get 0.0 end ]" );
 		sss = new char[ strlen( app ) + 1 ];
 		strcpy( sss, app );
@@ -188,11 +188,11 @@ int lsd::sensitivity::dataentry( void )
 			{
 				if ( toupper( type ) == 'L' && samples > 0 )// linear sampling
 				{
-					val[ i++ ] = integer ? std::round( std::fmin( start, end ) ) : std::fmin( start, end );
+					val[ i++ ] = rnd_int ? std::round( std::fmin( start, end ) ) : std::fmin( start, end );
 					for ( int j = 1; j < samples; ++j, ++i )
 					{
 						val[ i ] = val[ i - 1 ] + ( std::fmax( start, end ) - std::fmin( start, end ) ) / ( samples - 1 );
-						val[ i ] = integer ? std::round( val[ i ] ) : val[ i ];
+						val[ i ] = rnd_int ? std::round( val[ i ] ) : val[ i ];
 					}
 				}
 
@@ -200,14 +200,14 @@ int lsd::sensitivity::dataentry( void )
 					for ( int j = 0; j < samples; ++j, ++i )
 					{
 						val[ i ] = std::fmin( start, end ) + gui::ran1( ) * ( std::fmax( start, end ) - std::fmin( start, end ) );
-						val[ i ] = integer ? std::round( val[ i ] ) : val[ i ];
+						val[ i ] = rnd_int ? std::round( val[ i ] ) : val[ i ];
 					}
 			}
 			else							// no, read as regular double float
 			{
 				j = i;
 				i += sscanf( tok, "%lf", &( val[ i ] ) );// count valid doubles only
-				val[ j ] = integer ? std::round( val[ j ] ) : val[ j ];
+				val[ j ] = rnd_int ? std::round( val[ j ] ) : val[ j ];
 			}
 		}
 	}
@@ -1179,7 +1179,7 @@ void gui::design::load_design_data( lsd::sensitivity *rsens, int n )
 
 		par[ i ] = cs->param;		// set factor type
 		lag[ i ] = cs->lag;			// set number of lags
-		intg[ i ] = cs->integer;	// set factor format
+		intg[ i ] = cs->rnd_int;	// set factor format
 		lab[ i ] = new char [ strlen( cs->label ) + 1 ];
 		strcpy( lab[ i ], cs->label );// set factor name
 

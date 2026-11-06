@@ -4812,9 +4812,9 @@ lsd::object *gui::operate( lsd::object *r )
 			for ( cs = sim.sens; cs != NULL; cs = cs->next )
 			{
 				if ( cs->param == 1 )
-					plog( "Param: %s\\[%s\\]\t#%d:\t", cs->label, cs->integer ? "int" : "flt", cs->num_val );
+					plog( "Param: %s\\[%s\\]\t#%d:\t", cs->label, cs->rnd_int ? "int" : "flt", cs->num_val );
 				else
-					plog( "Var: %s(-%d)\\[%s\\]\t#%d:\t", cs->label, cs->lag + 1, cs->integer ? "int" : "flt", cs->num_val );
+					plog( "Var: %s(-%d)\\[%s\\]\t#%d:\t", cs->label, cs->lag + 1, cs->rnd_int ? "int" : "flt", cs->num_val );
 
 				for ( i = 0; i < cs->num_val; ++i )
 					plog_tag( "%g\t", "highlight", cs->val[ i ] );
