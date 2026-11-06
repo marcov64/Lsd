@@ -359,22 +359,25 @@ read.config <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
     config <- data.frame( stringsAsFactors = FALSE )
     lsd <- readLines( file )
     i <- 1
-    while( lsd[ i ] != "DATA" )
-      i <- i + 1                # jump lines until DATA section
 
-    while( lsd[ i ] != "DESCRIPTION" ) {
-      tok <- unlist( strsplit( lsd[ i ], split = " " ) )
-      if( length( tok ) > 0 && ( tok[ 1 ] == "Param:" || tok[ 1 ] == "Var:" ) ) {
-        endtok <- unlist( strsplit( tok[ length( tok ) ], split = "\t" ) )
-        if( length( endtok ) > 1 ) {    # there is a value
-          param <- as.data.frame( list( tok[2], as.numeric( endtok[ 2 ] ) ),
-                                  stringsAsFactors = FALSE )
-          colnames( param ) <- c( "Par", "Val" )
-          config <- rbind( config, param )
+    tryCatch( {
+      while( lsd[ i ] != "DATA" )
+        i <- i + 1                # jump lines until DATA section
+
+      while( lsd[ i ] != "DESCRIPTION" ) {
+        tok <- unlist( strsplit( lsd[ i ], split = " " ) )
+        if( length( tok ) > 0 && ( tok[ 1 ] == "Param:" || tok[ 1 ] == "Var:" ) ) {
+          endtok <- unlist( strsplit( tok[ length( tok ) ], split = "\t" ) )
+          if( length( endtok ) > 1 ) {    # there is a value
+            param <- as.data.frame( list( tok[2], as.numeric( endtok[ 2 ] ) ),
+                                    stringsAsFactors = FALSE )
+            colnames( param ) <- c( "Par", "Val" )
+            config <- rbind( config, param )
+          }
         }
+        i <- i + 1                # jump lines until DESCRIPTION section
       }
-      i <- i + 1                # jump lines until DESCRIPTION section
-    }
+    }, error = function( e ) { stop( "Invalid LSD configuration file" ) } )
   }
 
   return( config )
