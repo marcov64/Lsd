@@ -1760,122 +1760,24 @@ void lsd::object::show_rep_initial( FILE *f, int *begin, FILE *frep )
 
 
 /*************************************************************
- TEX_STRCPY
- *************************************************************/
-char *tex_strcpy( char *&out, char *in )
-{
-	int i, j;
-
-	// handle active underscores and other special chars in label references
-	for ( i = 0, j = 0; in[ j ] != '\0'; ++j )
-		if ( in[ j ] == '_' || in[ j ] == '^' || in[ j ] == '$' || in[ j ] == '&' )
-			++i;
-
-	if ( i > 0 )
-	{
-		delete [ ] out;
-		out = new char[ 2 * strlen( in ) + 1 + i * 6 ];
-	}
-
-	for ( i = 0, j = 0; in[ j ] != '\0'; ++i, ++j )
-		switch ( in[ j ] )
-		{
-			case '\n':
-			case '>':
-			case '<':
-			case '\\':
-			case '}':
-			case '{':
-			case '~':
-			case '%':
-			case '#':
-				--i;		// simply remove char
-				break;
-			case '_':
-			case '^':
-			case '$':
-			case '&':
-				memcpy( out + i, "\\string", 7 );
-				i += 7;
-			default:
-				out[ i ] = in[ j ];
-		}
-
-	out[ i ] = '\0';
-
-	return out;
-}
-
-
-/*************************************************************
- TEX_FPRINTF
- *************************************************************/
-void lsd::object::tex_fprintf( FILE *f, char* text )
-{
-	bool newline = false;
-
-	for ( int i = 0; text[ i ] != '\0'; ++i )
-		switch ( text[ i ] )
-		{
-			case '\n':
-				if ( ! newline )
-					fprintf( f, "\\newline " );
-				newline = true;
-				break;
-			case '>':
-				fprintf( f, "\\textgreater " );
-				newline = false;
-				break;
-			case '<':
-				fprintf( f, "\\textless " );
-				newline = false;
-				break;
-			case '\\':
-				fprintf( f, "/" );
-				newline = false;
-				break;
-			case '_':
-			case '^':
-			case '~':
-			case '}':
-			case '{':
-			case '%':
-			case '$':
-			case '#':
-			case '&':
-				fprintf( f, "\\" );
-			default:
-				fprintf( f, "%c", text[ i ] );
-				newline = false;
-		}
-}
-
-
-/*************************************************************
  ANCESTORS
  *************************************************************/
 void lsd::object::ancestors( FILE *f, bool html )
 {
-	char *ol;
-
 	if ( up != NULL )
 	{
 		up->ancestors( f, html );
-		ol = new char [ 2 * up->attr->label_size + 1 ];
-		tex_strcpy( ol, up->attr->label );
 
 		if ( up->up == NULL )
 			if ( html )
 				fprintf( f, "<TT><A HREF=\"#%s\">%s</A></TT>", up->attr->label, up->attr->label );
 			else
-				fprintf( f, "\\hrf{%s}{%s}", ol, up->attr->label );
+				fprintf( f, "\\hrf{%s}{%s}", up->attr->label, up->attr->label );
 		else
 			if ( html )
 				fprintf( f, "<TT>&mdash;&gt;<A HREF=\"#%s\">%s</A></TT>", up->attr->label, up->attr->label );
 			else
-				fprintf( f, "$\\rightarrow$\\hrf{%s}{%s}", ol, up->attr->label );
-
-		delete [ ] ol;
+				fprintf( f, "$\\rightarrow$\\hrf{%s}{%s}", up->attr->label, up->attr->label );
 	}
 }
 
@@ -1885,6 +1787,11 @@ void lsd::object::ancestors( FILE *f, bool html )
  *************************************************************/
 void lsd::object::tex_report_head( FILE *f, bool table )
 {
+	const char *il = strlen( gui::sim.conf_name ) > 0 ? gui::sim.conf_name : NO_CONF_NAME;
+	char *ol;
+
+	gui::tex_strcpy( ol, il );
+
 	fprintf( f, "\\documentclass{article}\n\n" );
 	fprintf( f, "\\usepackage[%s,left=%fcm,right=%fcm,top=%fcm,bottom=%fcm]{geometry}\n", TEX_PAPER, TEX_LEFT, TEX_RIGHT, TEX_TOP, TEX_BOTTOM );
 	fprintf( f, "\\usepackage{color}\n" );
@@ -1896,12 +1803,14 @@ void lsd::object::tex_report_head( FILE *f, bool table )
 	fprintf( f, "\\newcommand{\\hrf}[2] {\\hyperref[#1]{\\texttt{\\color{blue}{\\detokenize{#2}}}}}\n" );
 	fprintf( f, "\\setlength{\\parindent}{0cm}\n\n" );
 
-	fprintf( f, "\\title{Model: %s}\n", strlen( gui::sim.conf_name ) > 0 ? gui::sim.conf_name : NO_CONF_NAME );
+	fprintf( f, "\\title{Model: %s}\n", ol );
 	fprintf( f, "\\author{Automatically generated LSD report}\n" );
 	fprintf( f, "\\date{}\n\n" );
 
 	fprintf( f, "\\begin{document}\n\n" );
 	fprintf( f, "\\maketitle\n\n" );
+
+	delete [ ] ol;
 }
 
 
@@ -1915,9 +1824,8 @@ void lsd::object::tex_report_struct( FILE *f, bool table )
 	if ( up == NULL )
 		fprintf( f, "\\section{Model Structure}\n\n" );
 
-	ol = new char [ 2 * attr->label_size + 1 ];
-	tex_strcpy( ol, attr->label );
-	fprintf( f, "\\subsection{Object: %s} \\label{%s}\n\n", attr->label, ol );
+	gui::tex_strcpy( ol, attr->label );
+	fprintf( f, "\\subsection{Object: %s} \\label{%s}\n\n", ol, attr->label );
 	delete [ ] ol;
 
 	if ( up != NULL )
@@ -1929,18 +1837,10 @@ void lsd::object::tex_report_struct( FILE *f, bool table )
 
 	if ( b != NULL )
 	{
-		ol = new char [ 2 * b->attr->label_size + 1 ];
-		tex_strcpy( ol, b->attr->label );
-		fprintf( f,"\\emph{Containing:} \\hrf{%s}{%s}", ol, b->attr->label );
-		delete [ ] ol;
+		fprintf( f,"\\emph{Containing:} \\hrf{%s}{%s}", b->attr->label, b->attr->label );
 
 		for ( auto cb = b->next; cb != NULL; cb = cb->next )
-		{
-			ol = new char [ 2 * cb->attr->label_size + 1 ];
-			tex_strcpy( ol, cb->attr->label );
-			fprintf( f, ",	\\hrf{%s}{%s}", ol, cb->attr->label );
-			delete [ ] ol;
-		}
+			fprintf( f, ",	\\hrf{%s}{%s}", cb->attr->label, cb->attr->label );
 
 		fprintf( f, "\n\n" );
 	}
@@ -1959,12 +1859,11 @@ void lsd::object::tex_report_struct( FILE *f, bool table )
 
 	for ( auto cv = v; cv != NULL; cv = cv->next )
 	{
-		vl = new char [ 2 * cv->attr->label_size + 1 ];
-		tex_strcpy( vl, cv->attr->label );
-
 		if ( ! table )
 		{
-			fprintf( f, "  %s \\label{%s}", cv->attr->label, vl );
+			gui::tex_strcpy( vl, cv->attr->label );
+			fprintf( f, "  %s \\label{%s}", vl, cv->attr->label );
+			delete [ ] vl;
 
 			if ( cv->param == 0 )
 				fprintf( f, " (variable" );
@@ -1979,7 +1878,7 @@ void lsd::object::tex_report_struct( FILE *f, bool table )
 		}
 		else
 		{
-			fprintf( f, "  \\hrf{%s_init}{%s} \\label{%s}", vl, cv->attr->label, vl );
+			fprintf( f, "  \\hrf{%sInitTab}{%s} \\label{%s}", cv->attr->label, cv->attr->label, cv->attr->label );
 
 			if ( cv->param == 0 )
 				fprintf( f, " & Variable & " );
@@ -2006,7 +1905,6 @@ void lsd::object::tex_report_struct( FILE *f, bool table )
 			fprintf( f, "%s & %s & %s & ", cv->attr->integer ? "yes" : "", min_val, max_val );
 		}
 
-		delete [ ] vl;
 		bool desc_text = false;
 		cd = desc != NULL ? desc->search_descr( cv->attr->label ) : NULL;
 		if ( cd != NULL && cd->has_descr_text ( ) )
@@ -2014,14 +1912,14 @@ void lsd::object::tex_report_struct( FILE *f, bool table )
 			if ( ! table )
 				fprintf( f, ": " );
 			desc_text = true;
-			tex_fprintf( f, cd->text );
+			gui::tex_fprintf( f, cd->text );
 		}
 
 		if ( table && ( cv->param == 1 || cv->attr->num_lag > 0 ) && cd->init != NULL && strlen( cd->init ) > 0 )
 		{
 			if ( desc_text )
 				fprintf( f, "\\newline " );
-			tex_fprintf( f, cd->init );
+			gui::tex_fprintf( f, cd->init );
 		}
 
 		if ( ! table )
@@ -2048,8 +1946,6 @@ void lsd::object::tex_report_struct( FILE *f, bool table )
  *************************************************************/
 void lsd::object::tex_report_observe( FILE *f, bool table )
 {
-	char *ol, *vl;
-
 	if ( up == NULL )
 	{
 		fprintf( f, "\\section{Relevant elements to observe}\n\n" );
@@ -2058,22 +1954,16 @@ void lsd::object::tex_report_observe( FILE *f, bool table )
 			fprintf( f, "\\begin{longtable}{*{3}{|l}|p{9cm}|}\n	 \\hline\n	\\textbf{Element} & \\textbf{Object} & \\textbf{Type} & \\textbf{Description} \\\\ \n  \\hline \\endhead\n	\\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
 	}
 
-	ol = new char [ 2 * attr->label_size + 1 ];
-	tex_strcpy( ol, attr->label );
-
 	for ( auto cv = v; cv != NULL; cv = cv->next )
 	{
 		auto cd = desc != NULL ? desc->search_descr( cv->attr->label ) : NULL;
 		if ( cd != NULL && cd->observe )
 		{
-			vl = new char [ 2 * cv->attr->label_size + 1 ];
-			tex_strcpy( vl, cv->attr->label );
-
 			if ( ! table )
-				fprintf( f, "\\hrf{%s}{%s} (object \\hrf{%s}{%s}) \\newline \n", vl, cv->attr->label, ol, attr->label );
+				fprintf( f, "\\hrf{%s}{%s} (object \\hrf{%s}{%s}) \\newline \n", cv->attr->label, cv->attr->label, attr->label, attr->label );
 			else
 			{
-				fprintf( f, "  \\hrf{%s}{%s} & \\hrf{%s}{%s} & ", vl, cv->attr->label, ol, attr->label );
+				fprintf( f, "  \\hrf{%s}{%s} & \\hrf{%s}{%s} & ", cv->attr->label, cv->attr->label, attr->label, attr->label );
 				if ( cv->param == 0 )
 					fprintf( f, "Variable & " );
 				if ( cv->param == 1 )
@@ -2081,17 +1971,13 @@ void lsd::object::tex_report_observe( FILE *f, bool table )
 				if ( cv->param == 2 )
 					fprintf( f, "Function & " );
 				if ( cd->has_descr_text ( ) )
-					tex_fprintf( f, cd->text );
+					gui::tex_fprintf( f, cd->text );
 				fprintf( f, "\\\\ \n  \\hline \n" );
 			}
 
 			++tab_lines;
-
-			delete [ ] vl;
 		}
 	}
-
-	delete [ ] ol;
 
 	for ( auto cb = b; cb != NULL; cb = cb->next )
 		cb->head->tex_report_observe( f, table );
@@ -2118,8 +2004,6 @@ void lsd::object::tex_report_observe( FILE *f, bool table )
  *************************************************************/
 void lsd::object::tex_report_init( FILE *f, bool table )
 {
-	char *ol, *vl;
-
 	if ( up == NULL )
 	{
 		fprintf( f, "\\section{Relevant elements to initialize}\n\n" );
@@ -2128,22 +2012,16 @@ void lsd::object::tex_report_init( FILE *f, bool table )
 			fprintf( f, "\\begin{longtable}{*{3}{|l}|p{9cm}|}\n	 \\hline\n	\\textbf{Element} & \\textbf{Object} & \\textbf{Type} & \\textbf{Description and initial values comments} \\\\ \n  \\hline \\endhead\n	\\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
 	}
 
-	ol = new char [ 2 * attr->label_size + 1 ];
-	tex_strcpy( ol, attr->label );
-
 	for ( auto cv = v; cv != NULL; cv = cv->next )
 	{
 		auto cd = desc != NULL ? desc->search_descr( cv->attr->label ) : NULL;
 		if ( cd != NULL && cd->initial )
 		{
-			vl = new char [ 2 * cv->attr->label_size + 1 ];
-			tex_strcpy( vl, cv->attr->label );
-
 			if ( ! table )
-				fprintf( f, "\\hrf{%s}{%s} (object \\hrf{%s}{%s}) \\newline \n", vl, cv->attr->label, ol, attr->label );
+				fprintf( f, "\\hrf{%s}{%s} (object \\hrf{%s}{%s}) \\newline \n", cv->attr->label, cv->attr->label, attr->label, attr->label );
 			else
 			{
-				fprintf( f, "  \\hrf{%s_init}{%s} & \\hrf{%s}{%s} & ", vl, cv->attr->label, ol, attr->label );
+				fprintf( f, "  \\hrf{%sInitTab}{%s} & \\hrf{%s}{%s} & ", cv->attr->label, cv->attr->label, attr->label, attr->label );
 				if ( cv->param == 0 )
 					fprintf( f, "Variable & " );
 				if ( cv->param == 1 )
@@ -2155,25 +2033,21 @@ void lsd::object::tex_report_init( FILE *f, bool table )
 				if ( cd->has_descr_text ( ) )
 				{
 					desc_text = true;
-					tex_fprintf( f, cd->text );
+					gui::tex_fprintf( f, cd->text );
 				}
 
 				if ( ( cv->param == 1 || cv->attr->num_lag > 0 ) && cd->init != NULL && strlen( cd->init ) > 0 )
 				{
 					if ( desc_text )
 						fprintf( f, "\\newline " );
-					tex_fprintf( f, cd->init );
+					gui::tex_fprintf( f, cd->init );
 				}
 				fprintf( f, "\\\\ \n  \\hline \n" );
 			}
 
 			++tab_lines;
-
-			delete [ ] vl;
 		}
 	}
-
-	delete [ ] ol;
 
 	for ( auto cb = b; cb != NULL; cb = cb->next )
 		cb->head->tex_report_init( f, table );
@@ -2201,7 +2075,6 @@ void lsd::object::tex_report_init( FILE *f, bool table )
 void lsd::object::tex_report_initall( FILE *f, bool table )
 {
 	int i, j;
-	char *ol, *vl;
 	bridge *cb;
 	object *cur;
 	variable *cv, *cv1;
@@ -2215,17 +2088,11 @@ void lsd::object::tex_report_initall( FILE *f, bool table )
 		fprintf( f, "\\begin{longtable}{*{3}{|l}|p{9cm}|}\n	 \\hline\n	\\textbf{Object} & \\textbf{Element} & \\textbf{Lag} & \\textbf{Initial values (by instance)} \\\\ \n  \\hline \\endhead\n	\\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
 	}
 
-	ol = new char [ 2 * attr->label_size + 1 ];
-	tex_strcpy( ol, attr->label );
-
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
-		vl = new char [ 2 * cv->attr->label_size + 1 ];
-		tex_strcpy( vl, cv->attr->label );
-
 		if ( cv->param == 1 )
 		{
-			fprintf( f, "  \\hrf{%s}{%s} & \\hrf{%s}{%s} \\label{%s_init} & & %g", ol, attr->label, vl, cv->attr->label, vl, cv->val[ 0 ] );
+			fprintf( f, "  \\hrf{%s}{%s} & \\hrf{%s}{%s} \\label{%sInitTab} & & %g", attr->label, attr->label, cv->attr->label, cv->attr->label, cv->attr->label, cv->val[ 0 ] );
 			for ( j = 1, cur = hyper_next( attr->label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( ), ++j )
 			{
 				cv1 = cur->search_var( cur, cv->attr );
@@ -2240,7 +2107,7 @@ void lsd::object::tex_report_initall( FILE *f, bool table )
 		{
 			for ( i = 0; i < cv->attr->num_lag; ++i )
 			{
-				fprintf( f, "  \\hrf{%s}{%s} & \\hrf{%s}{%s} \\label{%s_init} & %d & %g", ol, attr->label, vl, cv->attr->label, vl, i + 1, cv->val[ i ] );
+				fprintf( f, "  \\hrf{%s}{%s} & \\hrf{%s}{%s} \\label{%sInitTab} & %d & %g", attr->label, attr->label, cv->attr->label, cv->attr->label, cv->attr->label, i + 1, cv->val[ i ] );
 				for ( j = 1, cur = hyper_next( ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( ), ++j )
 				{
 					cv1 = cur->search_var( cur, cv->attr );
@@ -2252,11 +2119,7 @@ void lsd::object::tex_report_initall( FILE *f, bool table )
 				fprintf( f, " \\\\ \n  \\hline \n" );
 			}
 		}
-
-		delete [ ] vl;
 	}
-
-	delete [ ] ol;
 
 	for ( cb = b; cb != NULL; cb = cb->next )
 		cb->head->tex_report_initall( f, table );
@@ -2272,4 +2135,85 @@ void lsd::object::tex_report_initall( FILE *f, bool table )
 void lsd::object::tex_report_end( FILE *f )
 {
 	fprintf( f, "\\end{document}\n" );
+}
+
+
+/*************************************************************
+ TEX_STRCPY
+ copy string removing Latex control characters
+ memory is allocated to the d (destination) pointer and
+ must be freed after usage
+ if keep_nl, the single new line characters are preserved
+ *************************************************************/
+char *gui::tex_strcpy( char * & d, const char *s, bool keep_nl )
+{
+	bool nl = false;
+	strT out;
+
+	if ( s == NULL || strlen( s ) == 0 )
+		return NULL;
+
+	for ( int i = 0; s[ i ] != '\0'; ++i )
+		switch( s[ i ] )
+		{
+			case '\n':
+				if ( keep_nl && ! nl )
+					out += "\\newline{}";
+				nl = true;
+				break;
+
+			case '\\':
+				out += "\\textbackslash{}";
+				nl = false;
+				break;
+
+			case '<':
+				out += "\\textless{}";
+				nl = false;
+				break;
+
+			case '>':
+				out += "\\textgreater{}";
+				nl = false;
+				break;
+
+			case '^':
+			case '~':
+				out += "\\";
+				out += s[ i ];
+				out += "{}";
+				nl = false;
+				break;
+
+			case '#':
+			case '%':
+			case '&':
+			case '$':
+			case '_':
+			case '}':
+			case '{':
+				out += "\\";
+			default:
+				out += s[ i ];
+				nl = false;
+		}
+
+	d = new char[ out.length( ) + 1 ];
+	lsd::strcpyn( d, out.c_str( ), out.length( ) + 1 );
+
+	return d;
+}
+
+
+/*************************************************************
+ TEX_FPRINTF
+ *************************************************************/
+void gui::tex_fprintf( FILE *f, char* text )
+{
+	char *out;
+
+	tex_strcpy( out, text, true );
+	fprintf( f, "%s", out );
+
+	delete [ ] out;
 }

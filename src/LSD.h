@@ -103,7 +103,6 @@
 	void show_rep_initial( FILE *f, int *begin, FILE *frep ); \
 	void show_rep_observe( FILE *f, int *begin, FILE *frep ); \
 	void show_tmp_vars( bool update ); \
-	void tex_fprintf( FILE *f, char* text ); \
 	void unlink_cells( const char *lab ); \
 	void write_list( FILE *frep, bool show_all, const char *prefix ); \
 	void write_obj( FILE *frep, int *elemDone ); \
@@ -452,6 +451,7 @@ namespace gui
 	char *load_eqfile( void );
 	char *search_lsdroot( char *buf, int bufSz );
 	char *strtcl( char *out, const char *text, int outSz );
+	char *tex_strcpy( char * & d, const char *s, bool keep_nl = false );
 	char *NOLH_valid_tables( int k, char *out, int sz );
 	const char *eval_str( const char *tcl_exp );
 	const char *get_eqfile_name( char *s, int sz );
@@ -616,6 +616,7 @@ namespace gui
 	void sort_cs_desc( char **s, char **t, double **v, int nv, int nt, int c );
 	void statistics( void );
 	void statistics_cross( void );
+	void tex_fprintf( FILE *f, char* text );
 	void uncover_browser( void );
 	void unload_configuration_gui( bool full );
 	void unset_shortcuts_run( const char *window );
