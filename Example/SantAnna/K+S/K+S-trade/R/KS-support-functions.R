@@ -587,10 +587,11 @@ autoLapply <- function( cl, list, fun, ... ) {
 #   set of changed variables in the caller environment
 #
 # Input:
+#   mCnt: TRUE if comparing multiple countries?
 #   sa: if TRUE use the alternative sensitivity analysis variable set
 #
 
-setCmdLinePars <- function( sa = FALSE ) {
+setCmdLinePars <- function( mCnt = FALSE, sa = FALSE ) {
 
   args <- commandArgs( trailingOnly = TRUE )
   cat( "Command line arguments: ", args, "\n" )
@@ -670,7 +671,7 @@ setCmdLinePars <- function( sa = FALSE ) {
     if( nCnt < 1 )
       c <- "none"
     else
-      if( length( cntVal ) >= nCnt )
+      if( exists( "cntVal" ) && length( cntVal ) >= nCnt )
         c <- cntVal[ nCnt ]
       else
         c <- paste( "Country", nCnt )

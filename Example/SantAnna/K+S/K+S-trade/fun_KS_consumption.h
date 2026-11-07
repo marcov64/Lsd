@@ -443,7 +443,8 @@ EQUATION( "D2lD" )
 /*
 Desired local demand (in product units) for firms in consumption-good sector
 */
-RESULT( VS( COUNTRL1, "Cd" ) / V( "CPI" ) )
+v[1] = VS( COUNTRL1, "Cd" ) / V( "CPI" );
+RESULT( is_finite( v[1] ) ? v[1] : CURRENT )
 
 
 EQUATION( "D2xD" )

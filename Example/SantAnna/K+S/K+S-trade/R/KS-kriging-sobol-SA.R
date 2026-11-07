@@ -133,6 +133,7 @@ phi3d     <- 30                     # vertical view angle
 # ==== Libraries, support functions and global options ====
 
 source( "KS-support-functions.R" )  # load libraries and K+S support functions
+source( "KS-add-vars.R" )           # functions to create new variables
 
 set.seed( 1, kind = "default" )     # set the random number generator
 options( warn = 0 )                 # -1=no warning/0:warnings at end/2:warnings stop
@@ -143,124 +144,8 @@ options( scipen = 5 )               # max 5 digits
 # !diagnostics suppress = rgl.snapshot, rgl.close, read.doe.lsd, model.pred.lsd
 # !diagnostics suppress = sobol.decomposition.lsd, kriging.model.lsd, persp3d
 # !diagnostics suppress = response.surface.lsd, model.limits.lsd, model.optim.lsd
-# !diagnostics suppress = showStartMark, showEndMark, catchError
+# !diagnostics suppress = showStartMark, showEndMark, catchError, addVar_sa
 # !diagnostics suppress = startTime, repFile, outDir, setCmdLinePars, saveCSV
-
-
-# ==== Define function to create new variables ====
-
-ma.length <- 51
-ma.sides <- 2
-
-# function to evaluate the selected variables to 2D dataset (pool = TRUE)
-eval.vars <- function( data, vars ) {
-
-  if( length( notIn( vars, colnames( data ) ) ) > 0 )
-    cat( "Missing variables in data:", notIn( vars, colnames( data ) ), "\n" )
-
-  # ---- general variables ----
-  tsteps <- nrow( data )
-
-  # ---- recompute values for existing and create new variables ----
-
-  for( var in vars ) {
-
-    if( var %in% logVar ) {   # consider the log values of fast growing variables
-
-      data[ , var ] <- log0( data[ , var ] )
-
-    } else if( var == "Y_sd" ) {   # GDP std. dev.
-
-      data[ , var ] <- sd( data[ , "dY" ], na.rm = TRUE )
-
-    } else if( var == "cris_llh" ) {   # crises likelihood
-
-      data[ , var ] <- sum( data[ , "dY" ] < -0.03, na.rm = TRUE ) /
-                       sum( ! is.na( data[ , "dY" ] ) )
-
-    } else if( var == "freq_FE" ) {   # frequency of crises
-
-      data[ , var ] <- sum( data[ , "U" ] == 0, na.rm = TRUE ) /
-                       sum( ! is.na( data[ , "U" ] ) )
-
-    } else if( var == "vu" && useStats ) {   # V/U (log)
-
-      data[ , var ] <- log( data[ , "V" ] * data[ , "Ls" ] + 1 ) -
-                       log( data[ , "U" ] * data[ , "Ls" ] + 1 )
-
-    } else if( var == "rec_num" ) {   # crisis recovery number, duration & losses
-
-      # calculate long-term ex post growth rate trend
-      growthTrend <- hpfilter( data[ , "dY" ], smoothing )$trend[ , 1 ]
-
-      # Calculate recovery statistics for GDP to the pre-crisis trend
-      recovery <- FALSE
-      recTime <- recCost <- vector( mode = "numeric" )
-      preCrisisY <- gTrend <- timeCrisis <- costCrisis <- NA
-      for( i in 2 : tsteps ) {
-        if( recovery ) {                                        # in a recovery?
-          preCrisisY <- preCrisisY + gTrend                     # update pre crisis trend
-          if( data[ i, "Yreal" ] >= preCrisisY ) {              # recovery is over?
-            recovery <- FALSE
-            if( i - timeCrisis > crisisLen ) { # record crisis longer than x periods
-              recTime <- append( recTime, i - timeCrisis )
-              recCost <- append( recCost, costCrisis )
-            }
-          } else {                                              # recovery not over
-            gap <- preCrisisY - data[ i, "Yreal" ]              # update statistics
-            costCrisis <- costCrisis + gap
-          }
-        }
-        if( ! recovery && data[ i, "dY" ] < crisisTh && i > crisisPre ) {
-          recovery <- TRUE
-          timeCrisis <- i
-          costCrisis <- 0
-          preCrisisY <- mean( data[ ( i - crisisPre ) : ( i - 1 ), "Yreal" ] )
-          gTrend <- mean( growthTrend[ ( i - crisisPre ) : ( i - 1 ) ], na.rm = TRUE )
-        }
-      }
-
-      # consolidate results (same values for all time steps)
-      if( length( recTime ) > 0 ) {
-        data[ , "rec_num" ] <- length( recTime )
-        data[ , "rec_dur" ] <- mean( recTime )
-        data[ , "rec_loss" ] <- mean( recCost )
-      } else {
-        data[ , "rec_num" ] <- 0
-        data[ , "rec_dur" ] <- 0
-        data[ , "rec_loss" ] <- 0
-      }
-    } else if( var == "XkNetY" ) {
-      vals <- data[ , "Xk" ] - data[ , "Mk" ] / data[ , "Y" ]
-      data[ , var ] <- ifelse( is.finite( vals ), vals, 0 )
-    } else if( var == "XcNetY" ) {
-      vals <- data[ , "Xc" ] - data[ , "Mc" ] / data[ , "Y" ]
-      data[ , var ] <- ifelse( is.finite( vals ), vals, 0 )
-    } else if( var == "tXk" ) {
-      XkNetSign <- sign( mavg( data[ , "XkNetY" ], len = ma.length, sides = ma.sides ) )
-      data[ , var ] <- as.numeric( row.names( data )[ 1 ] ) + length( XkNetSign )
-      for( t in 2 : length( XkNetSign ) ) {
-        if( ! is.na( XkNetSign[ t - 1 ] ) && ! is.na( XkNetSign[ t ] ) &&
-            XkNetSign[ t ] != XkNetSign[ t - 1 ] ) {
-          data[ , var ] <- as.numeric( row.names( data )[ 1 ] ) - 1 + t
-          break
-        }
-      }
-    } else if( var == "tXc" ) {
-      XcNetSign <- sign( mavg( data[ , "XcNetY" ], len = ma.length, sides = ma.sides ) )
-      data[ , var ] <- as.numeric( row.names( data )[ 1 ] ) + length( XcNetSign ) + 1
-      for( t in 2 : length( XcNetSign ) ) {
-        if( ! is.na( XcNetSign[ t - 1 ] ) && ! is.na( XcNetSign[ t ] ) &&
-            XcNetSign[ t ] != XcNetSign[ t - 1 ] ) {
-          data[ , var ] <- as.numeric( row.names( data )[ 1 ] ) - 1 + t
-          break
-        }
-      }
-    }
-  }
-
-  return( data )
-}
 
 
 # ==== Process LSD result files ====
@@ -294,7 +179,7 @@ if( onlyCross ) doeNum <- 1 else doeNum <- 2
 
 data <- read.doe.lsd( folder, baseName, varName, does = doeNum,
                       iniDrop = iniDrop, nKeep = nKeep, saveVars = origVar,
-                      addVars = addVar, eval.vars = eval.vars, nnodes = coresExp,
+                      addVars = addVar, eval.vars = addVar_sa, nnodes = coresExp,
                       posit = posit, posit.match = "regex", rm.outl = remOutl,
                       lim.outl = limOutl, rm.temp = ! savDat )
 

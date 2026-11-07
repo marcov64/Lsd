@@ -338,9 +338,9 @@ EQUATION( "A2posChg" )
 Machine-level weighted-average labor productivity of post-change firms in
 consumption-good sector
 */
-v[1] = SUM_CNDS( CONSECL2, "_Q2", "_postChg", "!=", 0 );
-RESULT( v[1] > 0 ? WHTAVE_CNDS( CONSECL2, "_A2", "_Q2", "_postChg", "!=", 0 ) /
-				   v[1] : 0 )
+v[1] = WHTAVE_CNDS( CONSECL2, "_A2", "_Q2", "_postChg", "!=", 0 ) /
+	   SUM_CNDS( CONSECL2, "_Q2", "_postChg", "!=", 0 );
+RESULT( is_finite( v[1] ) ? v[1] : 0 )
 
 
 EQUATION( "A2preChg" )

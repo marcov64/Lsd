@@ -76,9 +76,9 @@ addVar    <- c( "A2d", "f2l", "growth2", "lA2", "lnormO2", "lnormO2grow",
 
 # ==== Libraries, support functions and global options ====
 
-source( "KS-support-functions.R" )
-source( "KS-add-vars.R" )
-source( "KS-FHK-decomposition.R" )
+source( "KS-support-functions.R" )  # load libraries and K+S support functions
+source( "KS-add-vars.R" )           # functions to create new variables
+source( "KS-FHK-decomposition.R" )  # other support functions
 source( "KS-DN-decomposition.R" )
 source( "KS-wage-prod-regression.R" )
 
@@ -99,7 +99,7 @@ options( warn = 0 )           # -1=no warning/0:warnings at end/2:warnings stop
 
 showStartMark( caption )  # log start mark
 
-setCmdLinePars( )         # read command line parameters (if any)
+setCmdLinePars( mCnt )    # read command line parameters (if any)
 
 # read LSD files or load existing temporary files according to the case
 files <- loadData( savDat = savDat, mCnt = mCnt, nCnt = nCnt, folder = folder,
